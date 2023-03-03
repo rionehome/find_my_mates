@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import rospy
 import time
-import angles
+
 from geometry_msgs.msg import Twist
 
 class Sample():
@@ -30,8 +30,7 @@ class Sample():
         while end_time - start_time <= target_time:  #repeat for as long as needed
             self.pub.publish(t)
             end_time = time.time()  #get the current time
-            angles = angles.normalize_angle() # get angle
-            print(angles)
+            
             rate.sleep()
 
 if __name__ == '__main__':
