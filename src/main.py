@@ -11,16 +11,10 @@ import sys
 from math import pi
 import os
 import numpy as np
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-#from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech
 
 # from hand_detect.finger_direction import get_direction
 
 
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# 音声認識の関数 (vosk)
-#from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech 
-#from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.20 # m/s
@@ -37,9 +31,17 @@ class FindMyMates():
         #回転用
         self.moveturn_pub = rospy.Publisher("/moveturn", MoveAction, queue_size=1)
         # for audio
-        #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         #for realtime_Bios
         self.realtime_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
+
+        # for speechToText
+
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        # for isMeaning
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
     
     def main(self):
         # wait for nodes
