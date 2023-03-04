@@ -26,7 +26,7 @@ class Audio():
     def calbkSTT(self, msg):
         return recognize_speech(msg.print_partial, msg.use_break, msg.return_extract_person_name, msg.remove_space, msg.voskLogLevel, msg.path)
     
-    #
+    
     def callback(self, msg):
         textToSpeech(msg.data, verbose=True)
 

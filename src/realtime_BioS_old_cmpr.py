@@ -18,6 +18,7 @@ from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, Feature, RealTime
 from carry_my_luggage.srv import SpeechToText
 
+
 class RtBioSOldComp():
 
 
@@ -452,10 +453,13 @@ class RtBioSOldComp():
                                     else:
                                         S = "女"
 
-                                    Str = String()                                                
-                                    sentence = str(target) + "番目のゲスト" + ftr_list[target]["名前"] + "は、"                        
-                                    Str.data = sentence
-                                    self.audio_pub.publish(Str)
+                                    # Str = String()
+
+                                    sentence = str(target) + "番目のゲストである" + ftr_list[target]["名前"] + "は、" + str(ftr_list[target]["年齢"]) + "代の" + S + "性で" +"服の色は" + ftr_list[target]["服の色"] + "色です"
+                                    print(sentence)
+                                    ftr_list[target][""]                       
+                                    #Str.data = sentence
+                                    self.audio_pub.publish(sentence)
                                     
 
                                     state = 2
