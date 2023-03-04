@@ -23,8 +23,8 @@ import numpy as np
 #from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
 STOP_DISTANCE = 1.0 + 0.15 # m
-LINEAR_SPEED = 0.20 # m/s
-ANGULAR_SPEED = 0.75 # m/s
+LINEAR_SPEED = 0.05 # m/s
+ANGULAR_SPEED = 0.5 # m/s
 
 #recognize_speech()
 
@@ -35,15 +35,15 @@ class FindMyMates():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         #回転用
-        self.moveturn_pub = rospy.Publisher("/moveturn", MoveAction, queue_size=1)
+        #self.moveturn_pub = rospy.Publisher("/moveturn", MoveAction, queue_size=1)
         # for audio
         #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         #for realtime_Bios
-        self.realtime_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
+        #self.realtime_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
     
     def main(self):
         # wait for nodes
-        time.sleep(3)
+        time.sleep(1)
 
         #self.move360_sub = rospy.wait_for_message(/move360, MoveTest)
 
@@ -73,6 +73,10 @@ class FindMyMates():
             detectData = rospy.wait_for_message('/realtime', RealTime)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
+
+            print("p_direction=" + str(p_direction))
+            print("p_distance=" + str(p_distance))
+            print("\n")
             
             #command select^
             c = MoveAction()
@@ -84,8 +88,14 @@ class FindMyMates():
             c.angle_speed = 0.0
             c.direction = "normal"
             
-            #回転指示が画像側から送られたら
-            if p_direction == 3 and p_distance == 3:
+            #回転指示が画像側から送られたら見つかるまで左に回転し続ける。
+            if p_direction == 3 and p_distance == 3:  
+                if global_direction != "left":
+                    print("you are left side so I turn left")
+                    #self.audio_pub.publish("たーんれふと")
+                    global_direction = "left"
+                c.direction = "left"
+                c.angle_speed = ANGULAR_SPEED / 2
                 """
                 move_test.pyにより回転動作を行う
                 """
@@ -94,7 +104,7 @@ class FindMyMates():
                 if mn < 0.35:#止まる（Turtlebotからの距離が近い）
                     if global_direction != "stop":
                         print("I can get close here")
-                        self.audio_pub.publish("これ以上近づけません")
+                        #self.audio_pub.publish("これ以上近づけません")
                         global_direction = "stop" 
                     c.direction = "stop"
                     c.angle_speed = 0.0
@@ -108,7 +118,7 @@ class FindMyMates():
                 elif p_direction == 0:
                     if global_direction != "left":
                         print("you are left side so I turn left")
-                        self.audio_pub.publish("たーんれふと")
+                        #self.audio_pub.publish("たーんれふと")
                         global_direction = "left"
                     c.direction = "left"
                     c.angle_speed = ANGULAR_SPEED
@@ -117,19 +127,20 @@ class FindMyMates():
                 elif p_direction== 1:
                     if global_direction != "forward":
                         print("you are good")
-                        self.audio_pub.publish("いいね")
+                        #self.audio_pub.publish("いいね")
                         global_direction = "forward"
                     c.direction = "forward"
+                    c.angle_speed = 0
+                    
 
                 #右にいるとき
                 elif p_direction == 2:
                     if global_direction != "right":
                         print("you are right side so I turn right")
-                        self.audio_pub.publish("たーんらいと")
+                        #self.audio_pub.publish("たーんらいと")
                         global_direction = "right"
                     c.direction = "right"
                     c.angle_speed = ANGULAR_SPEED
-
 
 
 
@@ -139,34 +150,35 @@ class FindMyMates():
                 #遠いとき
                 elif p_distance == 0:
                     if global_distance != "long":
-                        self.audio_pub.publish("かくどはいいが、きょりがとおい")
+                        #self.audio_pub.publish("かくどはいいが、きょりがとおい")
                         print("angle but you have long distance.")
                         global_distance = "long"
                     c.distance = "long"
-                    global_linear_speed = global_linear_speed * 1.25
-                    c.linear_speed = global_linear_speed
+                    global_linear_speed = global_linear_speed 
+                    c.linear_speed = global_linear_speed * 2
 
                 #中距離のとき
                 elif p_distance == 1:
                     if global_distance != "normal":
-                        self.audio_pub.publish("かくどもきょりもいいかんじ")
+                        #self.audio_pub.publish("かくどもきょりもいいかんじ")
                         print("angle and distance.")
                         global_distance = "normal"
                     c.distance = "normal"
-                    c.linear_speed = global_linear_speed
+                    c.linear_speed = global_linear_speed 
 
                 #近いのとき
                 elif p_distance == 2:
                     if global_distance != "short":
-                        self.audio_pub.publish("かくどはいいが、きょりがちかい")
+                        #self.audio_pub.publish("かくどはいいが、きょりがちかい")
                         print("angle but you have short distance.")
                         global_distance = "short"
                     c.distance = "short"
-                    global_linear_speed = global_linear_speed * 1.25
-                    c.linear_speed = global_linear_speed
-                    
+                    global_linear_speed = global_linear_speed 
+                    c.linear_speed = 0
+
+
                 
-                self.move_pub.publish(c) #通常の顔への位置調整
+            self.move_pub.publish(c) #通常の顔への位置調整
 
             
             #聞こえた名前を文字列に
