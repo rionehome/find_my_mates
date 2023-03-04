@@ -4,13 +4,15 @@
 import rospy
 from std_msgs.msg import String, Float32
 #from find_my_mates.msg import ArmAction, MoveAction, LidarData, RealTime
-from find_my_mates.msg import MoveAction, RealTime
+from find_my_mates.msg import MoveAction, RealTime, LidarData
 from geometry_msgs.msg import Twist
 import time
 import sys
 from math import pi
 import os
 import numpy as np
+from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
+from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
 #sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 #from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech
 
@@ -34,42 +36,44 @@ class FindMyMates():
         # for robot movement
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
-        #回転用
-        self.moveturn_pub = rospy.Publisher("/moveturn", MoveAction, queue_size=1)
         # for audio
-        #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         #for realtime_Bios
         self.realtime_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
+        # for camera
+        self.camera_ser = rospy.ServiceProxy("/camera", Camera_msg)
+        # for speechToText
+
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        # for isMeaning
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
     
-    def main(self):
-        # wait for nodes
-        time.sleep(3)
-
-        #self.move360_sub = rospy.wait_for_message(/move360, MoveTest)
-
+    def go_near(self, move_mode="front", approach_distance=1.0):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         # global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
+        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
+        #Yolo information
         while True:
+            print("go_near Function is runnning")
             
-            """
-            lidar information
+            
+            #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
+            print(lidarData)
             print(distance)
             mn = min(distance)
             mn_index = distance.index(mn)
             mx = max(distance)
+
             mx_index = distance.index(mx)
             print("min:", mn, mn_index)
             print("max", mx, mx_index)
-            self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
-            """
-
-            mn = 0.4
-            #Face information
             detectData = rospy.wait_for_message('/realtime', RealTime)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
@@ -83,96 +87,97 @@ class FindMyMates():
             c.linear_speed = 0.0
             c.angle_speed = 0.0
             c.direction = "normal"
+            if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
+                if global_direction != "stop":
+                    print("I can get close here")
+                    self.audio_pub.publish("これ以上近づけません")
+                    time.sleep(2)
+                    global_direction = "stop" 
+                    break
+                c.direction = "stop"
+                c.angle_speed = 0.0
+                c.linear_speed = 0.0
+                c.distance = "long"
+                
+                
+                #止まることを最優先するため、初期値で設定している
+            elif p_direction == 0:
+                if global_direction != "left":
+                    print("you are left side so I turn left")
+                    self.audio_pub.publish("たーんれふと")
+                    global_direction = "left"
+                c.direction = "left"
+                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+            elif p_direction == 2:
+                if global_direction != "right":
+                    print("you are right side so I turn right")
+                    self.audio_pub.publish("たーんらいと")
+                    global_direction = "right"
+                c.direction = "right"
+                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+            elif p_direction== 1:
+                if global_direction != "forward":
+                    print("you are good")
+                    self.audio_pub.publish("かくどいいね")
+                    global_direction = "forward"
+                c.direction = "forward"
+
+            if mn < approach_distance:
+                c.linear_speed = 0.0
+
+            elif p_distance == 0:
+                if global_distance != "long":
+                    self.audio_pub.publish("かくどはいいが、きょりがとおい")
+                    print("angle but you have long distance.")
+                    global_distance = "long"
+                c.distance = "long"
+                if global_linear_speed < 0.5:
+                    global_linear_speed += 0.07
+                if global_linear_speed < 1:
+                    global_linear_speed += 0.02
+                c.linear_speed = global_linear_speed
+                print(c.linear_speed)
+
+            elif p_distance == 2:
+                if global_distance != "short":
+                    self.audio_pub.publish("かくどはいいが、きょりがちかい")
+                    print("angle but you have short distance.")
+                    global_distance = "short"
+                c.distance = "short"
+                global_linear_speed = 0.1
+                # if global_linear_speed >= 0.1:
+                    # global_linear_speed -= 0.7
+                c.linear_speed = 0.05
+                print(c.linear_speed)
+                self.audio_pub.publish("あああああああ")
+
+            elif p_distance == 1:
+                if global_distance != "normal":
+                    self.audio_pub.publish("かくどもきょりもいいかんじ")
+                    print("angle and distance.")
+                    global_distance = "normal"
+                c.distance = "normal"
+                if global_linear_speed >= LINEAR_SPEED:
+                    global_linear_speed -= 0.05
+                c.linear_speed = global_linear_speed
+                print(c.linear_speed)
+
+            print("GLOBAL LINEAR : " + str(global_linear_speed))
             
-            #回転指示が画像側から送られたら
-            if p_direction == 3 and p_distance == 3:
-                """
-                move_test.pyにより回転動作を行う
-                """
-
-            else:
-                if mn < 0.35:#止まる（Turtlebotからの距離が近い）
-                    if global_direction != "stop":
-                        print("I can get close here")
-                        self.audio_pub.publish("これ以上近づけません")
-                        global_direction = "stop" 
-                    c.direction = "stop"
-                    c.angle_speed = 0.0
-                    
-                    pass
-                    #止まることを最優先するため、初期値で設定している
-                
-
-
-                #左にいるとき
-                elif p_direction == 0:
-                    if global_direction != "left":
-                        print("you are left side so I turn left")
-                        self.audio_pub.publish("たーんれふと")
-                        global_direction = "left"
-                    c.direction = "left"
-                    c.angle_speed = ANGULAR_SPEED
-
-                #中央にいるとき
-                elif p_direction== 1:
-                    if global_direction != "forward":
-                        print("you are good")
-                        self.audio_pub.publish("いいね")
-                        global_direction = "forward"
-                    c.direction = "forward"
-
-                #右にいるとき
-                elif p_direction == 2:
-                    if global_direction != "right":
-                        print("you are right side so I turn right")
-                        self.audio_pub.publish("たーんらいと")
-                        global_direction = "right"
-                    c.direction = "right"
-                    c.angle_speed = ANGULAR_SPEED
-
-
-
-
-                if mn < 0.35:
-                    c.linear_speed = 0.0
-
-                #遠いとき
-                elif p_distance == 0:
-                    if global_distance != "long":
-                        self.audio_pub.publish("かくどはいいが、きょりがとおい")
-                        print("angle but you have long distance.")
-                        global_distance = "long"
-                    c.distance = "long"
-                    global_linear_speed = global_linear_speed * 1.25
-                    c.linear_speed = global_linear_speed
-
-                #中距離のとき
-                elif p_distance == 1:
-                    if global_distance != "normal":
-                        self.audio_pub.publish("かくどもきょりもいいかんじ")
-                        print("angle and distance.")
-                        global_distance = "normal"
-                    c.distance = "normal"
-                    c.linear_speed = global_linear_speed
-
-                #近いのとき
-                elif p_distance == 2:
-                    if global_distance != "short":
-                        self.audio_pub.publish("かくどはいいが、きょりがちかい")
-                        print("angle but you have short distance.")
-                        global_distance = "short"
-                    c.distance = "short"
-                    global_linear_speed = global_linear_speed * 1.25
-                    c.linear_speed = global_linear_speed
-                    
-                
-                self.move_pub.publish(c) #通常の顔への位置調整
+            if move_mode == "back":
+                c.linear_speed *= -1
+                c.angle_speed *= -1
+            self.move_pub.publish(c)
 
             
             #聞こえた名前を文字列に
             #recognize_speech(return_extract_person_name=True)
             
-            
+    def main(self):
+        time.sleep(3)
+        self.audio_pub.publish("")
+        
+                
 
                 
 
@@ -211,7 +216,37 @@ class FindMyMates():
         time.sleep(3)
         sys.exit(0)
 
+# 回転して、ゲストを見つける
+    #@(制御)だいきが作った回転する部分を実装する
+    #@(画像)ゲストを認識したときに、何か値をmain.pyに送る
 
+
+# ゲストの前まで移動する
+    #@(制御)person_detect.pyをOP以外の人間に対して動くようにする必要がある
+    
+    
+# ゲストの特徴を取得する
+    #@(制御)ゲストに名前を聞き、情報として取得する
+    
+    
+# 回転して、OPの位置まで移動する
+    #@(制御)だいきが作った回転する部分を実装する
+
+
+# OPに、ゲストの名前、特徴を知らせる
+
+    #forループ終了
+
+
+#プログラムを終了する
+    m = MoveAction()
+    m.time = 0.1
+    m.angle_speed = 0.0
+    m.angle_speed = 0.0
+    m.direction = "forward"
+    m.distance = "normal"
+    self.move_pub.publish(m)
+    self.audio_pub.publish("実行終了しました")
 
             
 

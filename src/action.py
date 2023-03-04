@@ -1,3 +1,4 @@
+from find_my_mates.msg import MoveAction 
 def main(self):
     people = [1,2,3]
 #@(画像)オペレーターを識別するために、この人の情報を取得しておく
@@ -34,7 +35,7 @@ def main(self):
 
 
 #プログラムを終了する
-    m = MoveAcion()
+    m = MoveAction()
     m.time = 0.1
     m.angle_speed = 0.0
     m.angle_speed = 0.0
