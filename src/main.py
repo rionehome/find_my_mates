@@ -174,7 +174,7 @@ class FindMyMates():
             
     def main(self):
         time.sleep(3)
-        self.audio_pub.publish("")
+        self.audio_pub.publish("てｗｔ")
         
                 
 

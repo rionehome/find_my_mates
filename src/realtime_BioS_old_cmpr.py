@@ -13,11 +13,10 @@ import torch
 import detect_color_realtime
 from scipy import stats
 import rospy
-#from std_msgs.msg import String
 from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, Feature, RealTime
 from carry_my_luggage.srv import SpeechToText, isMeaning
-
+import time
 
 class RtBioSOldComp():
 
@@ -34,10 +33,10 @@ class RtBioSOldComp():
         音声への出版者を作成する (ターゲットが未発見の状態 誰かの顔が見つかったときに静止し、名前を聞くため)
         制御への出版者を作成する (ターゲットが未発見、発見、または報告状態において、その人に接近し距離を調節するため)
         """
-        rospy.init_node("raltimebio")
+        rospy.init_node("realtime")
 
-        #self.realtime_sub = rospy.wait_for_message('/realtime', RealTime)
-        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+        # self.realtime_sub = rospy.wait_for_message('/realtime', RealTime)
+        # self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         self.main_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
 
         # for audio
@@ -581,18 +580,21 @@ class RtBioSOldComp():
 
     def speech_test(self):
         # 音声を喋るにはここに文字列を渡す
+        # rospy.wait_for_message("/audio", String)
+        
         self.audio_pub.publish("あなたの名前は何ですか。")#名前を聞く。
 
         # 音声を聞き取るには下の二行で取得する。
         # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 
-        rospy.wait_for_service("/speechToText")
-        voice_res = self.speechToText(True, 3, True, True, -1)
-        name = voice_res.res
-        print(name) 
+        # rospy.wait_for_service("/speechToText")
+        # voice_res = self.speechToText(True, 3, True, True, -1)
+        # name = voice_res.res
+        # print(name) 
 
 if __name__ == '__main__':
     rtbioscmp = RtBioSOldComp()
-    #tbioscmp.main()
-    
+    #rtbioscmp.main()
+    time.sleep(2)
     rtbioscmp.speech_test()
+    time.sleep(3)
