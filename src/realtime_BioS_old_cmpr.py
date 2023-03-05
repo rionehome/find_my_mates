@@ -15,6 +15,7 @@ from scipy import stats
 import rospy
 #from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, RealTime
+import Levenshtein
 
 class RtBioSOldComp():
 
@@ -40,6 +41,28 @@ class RtBioSOldComp():
         #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         self.main_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
         print("初期化")
+
+
+    
+    #文字列の類似度からどのゲストの名前なのかを推測する関数
+    def sim_name(name_list, get_str):
+
+        jaro_dist_list = [0] #文字列の類似度を保持する変数
+
+        #マスタでなくゲスト同士のみの名前を比較する
+        for i in range(1, 4):
+            jaro_dist = Levenshtein.jaro_winkler(get_str, name_list[i])
+            jaro_dist_list.append(jaro_dist)
+            #print("文字列1=" + str1 + "、文字列2=" + str2_list[i] + "、文同士の距離=" + str(jaro_dist))
+
+        #print("文字列の類似度のリスト=" + str(jaro_dist_list))
+        #print("文字列の類似度のリストの最大値=" + str(max(jaro_dist_list)))
+        #print("文字列の類似度のリストの最大値の添字=" + str(jaro_dist_list.index(max(jaro_dist_list))))
+
+        get_name = name_list[jaro_dist_list.index(max(jaro_dist_list))]
+        #print(name)
+
+        return get_name
 
 
 
@@ -413,6 +436,7 @@ class RtBioSOldComp():
                                             ftr_list[j]["服の色"] = mode_Cmemo #服の色を取得する
                                             ftr_list[j]["抽出"] = 1 #目標ではない人の特徴を抽出した印として1を代入する
 
+                                get_name = "" #音声から取得した名前を初期化する
 
 
                             #発見特徴抽出完了状態のときオペレータのもとへ戻る必要性がある
@@ -440,6 +464,10 @@ class RtBioSOldComp():
             
                                         target += 1 #ターゲットを更新する
                                         state = 0 #未発見状態へ遷移する
+                                        get_name = "" #音声から取得した名前の初期化
+
+                                        #偶然、そのターゲットに接近できたという前提で、
+                                        get_name = names[target]
 
                                 #マスタの特徴を全て満たさないときはマスタでないと考え回転
                                 else:
@@ -497,6 +525,7 @@ class RtBioSOldComp():
 
             print("ターゲット=" + str(target))
             print("状態=" + str(state))
+            print("音声から取得した名前=" + str(get_name))
             print("\n")
             print("マスターの特徴")
             print(ftr_list[0])
