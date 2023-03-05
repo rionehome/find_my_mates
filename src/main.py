@@ -13,22 +13,11 @@ import os
 import numpy as np
 from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
 from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-#from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech
-
-# from hand_detect.finger_direction import get_direction
-
-
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# 音声認識の関数 (vosk)
-#from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech 
-#from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.20 # m/s
 ANGULAR_SPEED = 0.75 # m/s
 
-#recognize_speech()
 
 class FindMyMates():
     def __init__(self):
@@ -170,8 +159,6 @@ class FindMyMates():
             self.move_pub.publish(c)
 
             
-            #聞こえた名前を文字列に
-            #recognize_speech(return_extract_person_name=True)
             
     def main(self):
         time.sleep(3)

@@ -167,7 +167,7 @@ class RtBioSOldComp():
 
 
                         #方向を仕分ける
-                        if c_x < frame_w/3:
+                        if c_x < frame_w / 3:
                             #print(str(i) + "番目の人が左にいる")
                             robo_face_drct = 0 #ロボットは人が中央に来るまで左回りする
 
@@ -189,6 +189,9 @@ class RtBioSOldComp():
 
                     #回転し続けている間に視界に入った場合
                     if robo_face_dis == 0 and robo_face_drct == 1:
+                        m = MoveAction()
+                        m.angular_speed = 0
+                        m.linear_speed = 0
 
                         acsess_count = 0 #接近したか判定するために使用する
 
@@ -265,10 +268,15 @@ class RtBioSOldComp():
                             if state == 0:
                                 #接近するための条件は 未発見 or 目的でないゲストを発見したときの特徴があった
                                 if (acsess_count == 0) or ((acsess_count == 1) and (ftr_list[j]["抽出"] == 1)):
+                                    m = MoveAction()
+                                    m.linear_speed = 1.0
+                                    m.angular_speed = 0.5
+                                    m.direction = "normal"                                  
                                     """
                                     制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
                                     
                                     """
+                                    self.main_pub.publish(m)
                                 else:
                                     """
                                     制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
@@ -276,6 +284,7 @@ class RtBioSOldComp():
                                     """
                                     robo_face_dis = 3 
                                     robo_face_drct = 3
+                                    self.main_pub.publish(m)
 
 
                             #発見特徴抽出完了状態のとき、マスタに報告するために見つける
@@ -286,6 +295,7 @@ class RtBioSOldComp():
                                     制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
                                     
                                     """
+
                                 else:
                                     """
                                     制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
@@ -484,8 +494,7 @@ class RtBioSOldComp():
                 cv2.rectangle(frame, (int(left), int(top)), (int(right), int(bottom)), (255, 0, 0))
 
                 if top < bottom and left < right:
-                    cv2.rectangle(frame, (clt_left, clt_top), (clt_right, clt_bottom), (0, 255, 0))
-             
+                    cv2.rectangle(frame, (clt_left, clt_top), (clt_right, clt_bottom), (0, 255, 0))             
 
                 """
                 音声へ、距離、方向を出版する (音声側で購読したとき:ターゲット未発見状態かつ中央と中距離のときに名前を聞く または 報告状態かつ中央と中距離のときに名前や特徴を報告する)
@@ -517,6 +526,7 @@ class RtBioSOldComp():
             print(type(p.robo_p_dis))
             p.robo_p_drct = robo_face_drct #改良してから変更する
             self.main_pub.publish(p)
+            print(robo_face_drct, robo_face_dis)
 
 
             #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
