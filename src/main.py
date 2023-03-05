@@ -33,6 +33,18 @@ class FindMyMates():
         self.camera_ser = rospy.ServiceProxy("/camera", Camera_msg)
         # for speechToText
 
+        # for speechToText
+
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        # for isMeaning
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
+    
+    def main(self):
+        # wait for nodes
+        time.sleep(3)
+
         self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
 
         # for isMeaning
@@ -232,8 +244,8 @@ class FindMyMates():
     m.angle_speed = 0.0
     m.direction = "forward"
     m.distance = "normal"
-    self.move_pub.publish(m)
-    self.audio_pub.publish("実行終了しました")
+        # self.move_pub.publish(m)
+        # self.audio_pub.publish("実行終了しました")
 
             
 

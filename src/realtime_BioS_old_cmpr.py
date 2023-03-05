@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
@@ -8,7 +8,7 @@
 
 import numpy as np
 import cv2
-from insightface.app import FaceAnalysis
+#from insightface.app import FaceAnalysis
 import torch
 import detect_color_realtime
 from scipy import stats
@@ -16,7 +16,7 @@ import rospy
 #from std_msgs.msg import String
 from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, Feature, RealTime
-from carry_my_luggage.srv import SpeechToText
+from carry_my_luggage.srv import SpeechToText, isMeaning
 
 
 class RtBioSOldComp():
@@ -39,21 +39,39 @@ class RtBioSOldComp():
         #self.realtime_sub = rospy.wait_for_message('/realtime', RealTime)
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         self.main_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
+
+        # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+
         # for speechToText
 
         self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
+
         print("初期化")
 
 
 
 
     def main(self):
-        self.audio_pub.publish("")
+        # 音声を喋るにはここに文字列を渡す
+        self.audio_pub.publish("あなたの名前は何ですか。")#名前を聞く。
+
+        # 音声を聞き取るには下の二行で取得する。
+        # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 
         rospy.wait_for_service("/speechToText")
-        text = self.speechToText(True, 3, True, True, -1, "")
-        print(text.res)
+        voice_res = self.speechToText(True, 3, True, True, -1)
+        name = voice_res.res
+        print(name) 
+
+        # rospy.wait_for_service("/isMeaning")
+        # res = self.isMeaning("検出したい文章",["検出","したい","単語","をかく"])
+        # res.res に booleanが返される
+
+        res = self.isMeaning("ためす文字列", ["a","a"])
+        response = res.res
         #0:未発見、1発見抽出済、2報告完了
         state = 0
 
@@ -189,9 +207,9 @@ class RtBioSOldComp():
 
                     #回転し続けている間に視界に入った場合
                     if robo_face_dis == 0 and robo_face_drct == 1:
-                        m = MoveAction()
-                        m.angular_speed = 0
-                        m.linear_speed = 0
+                        #m = MoveAction()
+                        #m.angular_speed = 0
+                        #m.linear_speed = 0
 
                         acsess_count = 0 #接近したか判定するために使用する
 
@@ -268,15 +286,15 @@ class RtBioSOldComp():
                             if state == 0:
                                 #接近するための条件は 未発見 or 目的でないゲストを発見したときの特徴があった
                                 if (acsess_count == 0) or ((acsess_count == 1) and (ftr_list[j]["抽出"] == 1)):
-                                    m = MoveAction()
-                                    m.linear_speed = 1.0
-                                    m.angular_speed = 0.5
-                                    m.direction = "normal"                                  
+                                    #m = MoveAction()
+                                    #m.linear_speed = 1.0
+                                    #m.angular_speed = 0.5
+                                    #m.direction = "normal"                                  
                                     """
                                     制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
                                     
                                     """
-                                    self.main_pub.publish(m)
+                                    #self.main_pub.publish(m)
                                 else:
                                     """
                                     制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
@@ -303,6 +321,7 @@ class RtBioSOldComp():
                                     """
                                     robo_face_dis = 3 
                                     robo_face_drct = 3
+                                    self.main_pub.publish(m)
 
 
 
@@ -384,6 +403,10 @@ class RtBioSOldComp():
         
                             #特徴のリストへの追加は未発見状態のときのみ
                             if state == 0:
+
+                                """
+                                
+                                """
 
                                 #現在中央に映るゲストがターゲットのゲストであるときに、目標ゲストのための特徴抽出する
                                 if ftr_list[target]["名前"] == get_name:
@@ -556,7 +579,20 @@ class RtBioSOldComp():
         cap.release()
         cv2.destroyAllWindows()
 
+    def speech_test(self):
+        # 音声を喋るにはここに文字列を渡す
+        self.audio_pub.publish("あなたの名前は何ですか。")#名前を聞く。
+
+        # 音声を聞き取るには下の二行で取得する。
+        # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
+
+        rospy.wait_for_service("/speechToText")
+        voice_res = self.speechToText(True, 3, True, True, -1)
+        name = voice_res.res
+        print(name) 
 
 if __name__ == '__main__':
     rtbioscmp = RtBioSOldComp()
-    rtbioscmp.main()
+    #tbioscmp.main()
+    
+    rtbioscmp.speech_test()
