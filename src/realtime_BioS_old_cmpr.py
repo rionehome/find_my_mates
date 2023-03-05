@@ -17,6 +17,14 @@ import rospy
 from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, Feature, RealTime
 from carry_my_luggage.srv import SpeechToText, isMeaning
+import time
+
+
+STOP_DISTANCE = 1.0 + 0.15 # m
+LINEAR_SPEED = 0.05 # m/s
+ANGULAR_SPEED = 0.75  # m/s
+
+
 
 
 class RtBioSOldComp():
@@ -51,7 +59,120 @@ class RtBioSOldComp():
 
         print("初期化")
 
+    
+        
+    def go_near(self, p_direction, p_distance):
+        global_direction = "forward"
+        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+        global_distance = "normal"
+        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
+        
+        #Yolo information
+        while True:
+            print("go_near Function is runnning")
+        
+            #(制御)車の前についたタイミングの話
+            #車の前についたらgo_near()を終了させる
+            # rospy.wait_for_service("/speechToText")
+            # text = self.speechToText(True, 4, False, True, -1, "")
+            # if reach_near_car == True: #Trueのとき、この関数を終了する
+            #     return
 
+            p_direction = detectData.robo_p_drct
+            p_distance = detectData.robo_p_dis
+            
+            #command select
+            c = MoveAction()
+            c.distance = "forward"
+            c.direction = "stop"
+            c.distance = "normal"
+            c.time = 0.1
+            c.linear_speed = 0.0
+            c.angle_speed = 0.0
+            c.direction = "normal"
+            if p_distance < 2: #止まる（Turtlebotからの距離が近い）
+                if global_direction != "stop":
+                    print("I can get close here")
+                    self.audio_pub.publish("これ以上近づけません")
+                    time.sleep(2)
+                    global_direction = "stop" 
+                    c.direction = "stop"
+                    c.angle_speed = 0.0
+                    c.linear_speed = 0.0
+                    c.distance = "long"
+                    self.move_pub.publish(c)
+                    break
+                
+                #止まることを最優先するため、初期値で設定している
+            elif p_direction == 0:
+                if global_direction != "left":
+                    print("you are left side so I turn left")
+                    # self.audio_pub.publish("たーんれふと")
+                    global_direction = "left"
+                c.direction = "left"
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
+            elif p_direction == 2:
+                if global_direction != "right":
+                    print("you are right side so I turn right")
+                    # self.audio_pub.publish("たーんらいと")
+                    global_direction = "right"
+                c.direction = "right"
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
+            elif p_direction== 1:
+                if global_direction != "forward":
+                    print("you are good")
+                    # self.audio_pub.publish("かくどいいね")
+                    global_direction = "forward"
+                c.direction = "forward"
+
+            if p_distance < 2:
+                c.linear_speed = 0.0
+
+            elif p_distance == 0:
+                if global_distance != "long":
+                    self.audio_pub.publish("とおい")
+                    print("angle but you have long distance.")
+                    global_distance = "long"
+                c.distance = "long"
+                if global_linear_speed < 0.5:
+                    global_linear_speed += 0.02
+                # if global_linear_speed < 1:
+                #     global_linear_speed += 0.02
+                c.linear_speed = global_linear_speed
+                print(c.linear_speed)
+
+            elif p_distance == 2:
+                if global_distance != "short":
+                    self.audio_pub.publish("ちかい")
+                    print("angle but you have short distance.")
+                    global_distance = "short"
+                c.distance = "short"
+                global_linear_speed = 0.1
+                # if global_linear_speed >= 0.1:
+                    # global_linear_speed -= 0.7
+                c.linear_speed = 0.05
+                print(c.linear_speed)
+
+            elif p_distance == 1:
+                if global_distance != "normal":
+                    self.audio_pub.publish("よい")
+                    print("angle and distance.")
+                    global_distance = "normal"
+                c.distance = "normal"
+                if global_linear_speed >= LINEAR_SPEED:
+                    global_linear_speed -= 0.05
+                c.linear_speed = global_linear_speed
+                print(c.linear_speed)
+
+            print("GLOBAL LINEAR : " + str(global_linear_speed))
+            
+            if move_mode == "back":
+                c.linear_speed *= -1
+                c.angle_speed *= -1
+            self.move_pub.publish(c)
 
 
     def main(self):
@@ -207,9 +328,9 @@ class RtBioSOldComp():
 
                     #回転し続けている間に視界に入った場合
                     if robo_face_dis == 0 and robo_face_drct == 1:
-                        #m = MoveAction()
-                        #m.angular_speed = 0
-                        #m.linear_speed = 0
+                        m = MoveAction()
+                        m.angular_speed = 0
+                        m.linear_speed = 0
 
                         acsess_count = 0 #接近したか判定するために使用する
 
@@ -286,15 +407,15 @@ class RtBioSOldComp():
                             if state == 0:
                                 #接近するための条件は 未発見 or 目的でないゲストを発見したときの特徴があった
                                 if (acsess_count == 0) or ((acsess_count == 1) and (ftr_list[j]["抽出"] == 1)):
-                                    #m = MoveAction()
-                                    #m.linear_speed = 1.0
-                                    #m.angular_speed = 0.5
-                                    #m.direction = "normal"                                  
+                                    m = MoveAction()
+                                    m.linear_speed = 1.0
+                                    m.angular_speed = 0.5
+                                    m.direction = "normal"                                  
                                     """
                                     制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
                                     
                                     """
-                                    #self.main_pub.publish(m)
+                                    self.main_pub.publish(m)
                                 else:
                                     """
                                     制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
@@ -541,15 +662,7 @@ class RtBioSOldComp():
 
                 print("\n\n")
 
-
-            #距離と方向をPublishしてほしい。
-            p = RealTime()
-            print(type(p))
-            p.robo_p_dis = robo_face_dis
-            print(type(p.robo_p_dis))
-            p.robo_p_drct = robo_face_drct #改良してから変更する
-            self.main_pub.publish(p)
-            print(robo_face_drct, robo_face_dis)
+            self.go_near(robo_face_dis, robo_face_drct) #人に対して動く
 
 
             #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)

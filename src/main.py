@@ -51,35 +51,29 @@ class FindMyMates():
 
         self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
     
-    def go_near(self, move_mode="front", approach_distance=1.0):
+
+    def go_near(self, p_direction, p_distance):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        # global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
         #Yolo information
         while True:
             print("go_near Function is runnning")
+        
+            #(制御)車の前についたタイミングの話
+            #車の前についたらgo_near()を終了させる
+            # rospy.wait_for_service("/speechToText")
+            # text = self.speechToText(True, 4, False, True, -1, "")
+            # if reach_near_car == True: #Trueのとき、この関数を終了する
+            #     return
             
-            
-            #lidar information
-            lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
-            distance = lidarData.distance
-            print(lidarData)
-            print(distance)
-            mn = min(distance)
-            mn_index = distance.index(mn)
-            mx = max(distance)
-
-            mx_index = distance.index(mx)
-            print("min:", mn, mn_index)
-            print("max", mx, mx_index)
-            detectData = rospy.wait_for_message('/realtime', RealTime)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
             
-            #command select^
+            #command select
             c = MoveAction()
             c.distance = "forward"
             c.direction = "stop"
@@ -94,32 +88,34 @@ class FindMyMates():
                     self.audio_pub.publish("これ以上近づけません")
                     time.sleep(2)
                     global_direction = "stop" 
+                    c.direction = "stop"
+                    c.angle_speed = 0.0
+                    c.linear_speed = 0.0
+                    c.distance = "long"
+                    self.move_pub.publish(c)
                     break
-                c.direction = "stop"
-                c.angle_speed = 0.0
-                c.linear_speed = 0.0
-                c.distance = "long"
-                
                 
                 #止まることを最優先するため、初期値で設定している
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
-                    self.audio_pub.publish("たーんれふと")
+                    # self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
                 c.direction = "left"
-                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
-                    self.audio_pub.publish("たーんらいと")
+                    # self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
                 c.direction = "right"
-                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
-                    self.audio_pub.publish("かくどいいね")
+                    # self.audio_pub.publish("かくどいいね")
                     global_direction = "forward"
                 c.direction = "forward"
 
@@ -128,20 +124,20 @@ class FindMyMates():
 
             elif p_distance == 0:
                 if global_distance != "long":
-                    self.audio_pub.publish("かくどはいいが、きょりがとおい")
+                    self.audio_pub.publish("とおい")
                     print("angle but you have long distance.")
                     global_distance = "long"
                 c.distance = "long"
                 if global_linear_speed < 0.5:
-                    global_linear_speed += 0.07
-                if global_linear_speed < 1:
                     global_linear_speed += 0.02
+                # if global_linear_speed < 1:
+                #     global_linear_speed += 0.02
                 c.linear_speed = global_linear_speed
                 print(c.linear_speed)
 
             elif p_distance == 2:
                 if global_distance != "short":
-                    self.audio_pub.publish("かくどはいいが、きょりがちかい")
+                    self.audio_pub.publish("ちかい")
                     print("angle but you have short distance.")
                     global_distance = "short"
                 c.distance = "short"
@@ -150,11 +146,10 @@ class FindMyMates():
                     # global_linear_speed -= 0.7
                 c.linear_speed = 0.05
                 print(c.linear_speed)
-                self.audio_pub.publish("あああああああ")
 
             elif p_distance == 1:
                 if global_distance != "normal":
-                    self.audio_pub.publish("かくどもきょりもいいかんじ")
+                    self.audio_pub.publish("よい")
                     print("angle and distance.")
                     global_distance = "normal"
                 c.distance = "normal"
@@ -168,9 +163,7 @@ class FindMyMates():
             if move_mode == "back":
                 c.linear_speed *= -1
                 c.angle_speed *= -1
-            self.move_pub.publish(c)
-
-            
+            self.move_pub.publish(c)            
             
     def main(self):
         time.sleep(3)
