@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 
@@ -8,16 +8,26 @@
 
 import numpy as np
 import cv2
-#from insightface.app import FaceAnalysis
+from insightface.app import FaceAnalysis
 import torch
 import detect_color_realtime
 from scipy import stats
 import rospy
-#from std_msgs.msg import String
 from std_msgs.msg import String
 from find_my_mates.msg import MoveAction, Feature, RealTime
-from carry_my_luggage.srv import SpeechToText, isMeaning
+from find_my_mates.srv import SpeechToText, isMeaning
 import time
+import sys
+import os
+
+"""
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# 音声認識の関数 (vosk)
+"""
+#sfrom speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech #音声認識
+#from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
+#from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech #発話
+#from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
 
 
 STOP_DISTANCE = 1.0 + 0.15 # m
@@ -45,11 +55,12 @@ class RtBioSOldComp():
         rospy.init_node("raltimebio")
 
         #self.realtime_sub = rospy.wait_for_message('/realtime', RealTime)
-        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+        selfaudio_pub = rospy.Publisher("/audio", String, queue_size=1)
         self.main_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
 
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+        self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for speechToText
 
@@ -62,6 +73,8 @@ class RtBioSOldComp():
     
         
     def go_near(self, p_direction, p_distance):
+        
+        
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
@@ -70,7 +83,7 @@ class RtBioSOldComp():
         
         #Yolo information
         while True:
-            print("go_near Function is runnning")
+            # print("go_near Function is runnning")
         
             #(制御)車の前についたタイミングの話
             #車の前についたらgo_near()を終了させる
@@ -78,9 +91,10 @@ class RtBioSOldComp():
             # text = self.speechToText(True, 4, False, True, -1, "")
             # if reach_near_car == True: #Trueのとき、この関数を終了する
             #     return
+            #detectData = rospy.wait_for_message("/person", PERSON)
 
-            p_direction = detectData.robo_p_drct
-            p_distance = detectData.robo_p_dis
+            # p_direction = detectData.robo_p_drct
+            # p_distance = detectData.robo_p_dis
             
             #command select
             c = MoveAction()
@@ -142,7 +156,7 @@ class RtBioSOldComp():
                 # if global_linear_speed < 1:
                 #     global_linear_speed += 0.02
                 c.linear_speed = global_linear_speed
-                print(c.linear_speed)
+                # print(c.linear_speed)
 
             elif p_distance == 2:
                 if global_distance != "short":
@@ -154,7 +168,7 @@ class RtBioSOldComp():
                 # if global_linear_speed >= 0.1:
                     # global_linear_speed -= 0.7
                 c.linear_speed = 0.05
-                print(c.linear_speed)
+                # print(c.linear_speed)
 
             elif p_distance == 1:
                 if global_distance != "normal":
@@ -164,18 +178,76 @@ class RtBioSOldComp():
                 c.distance = "normal"
                 if global_linear_speed >= LINEAR_SPEED:
                     global_linear_speed -= 0.05
-                c.linear_speed = global_linear_speed
-                print(c.linear_speed)
+                c.linear_speed = LINEAR_SPEED
+                peed = global_linear_speed
+                # print(c.linear_speed)
 
-            print("GLOBAL LINEAR : " + str(global_linear_speed))
+            # print("GLOBAL LINEAR : " + str(global_linear_speed))
             
-            if move_mode == "back":
-                c.linear_speed *= -1
-                c.angle_speed *= -1
+            # if move_mode == "back":
+            #     c.linear_speed *= -1
+            #     c.angle_speed *= -1
             self.move_pub.publish(c)
+
+        
+
+            #音声部分とやり取りを行い、名前のようなものを取得する関数
+    #def speech_test(self, question):
+
+        #Str = String()
+
+        #Str.data
+
+        # 音声を喋るにはここに文字列を渡す
+        
+        #is_meaning()
+        #textToSpeech(question,verbose=True) #文字列を渡すとしゃベル
+        #time.sleep(2) #待つ
+        #rcspc = recognize_speech(return_extract_person_name="array") #arrayと渡すと人名と文字おこし両方できる。0番目=名前、1番目テキストすべて
+        
+        #recognize_speech()
+
+        # 音声を聞き取るには下の二行で取得する。
+        # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
+
+        #rospy.wait_for_service("/speechToText")
+        #voice_res = self.speechToText(True, 3, True, True, -1)
+        #name_like = rcspc
+
+        #return name_like
 
 
     def main(self):
+
+        #---------メイン関数内の関数-------------
+
+        #ゲストの特徴を報告する文章を作る関数
+        #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
+        def make_ftr_sentence(gst_vlu, s_vlu, name, year_field, cloth_clr):
+
+            S = ""
+
+            #1のときに男性
+            if s_vlu:
+                S = "男"
+            #0のときに女性
+            else:
+                S = "女"
+
+
+            if year_field == 0:
+                year_fld_str = "10代未満"
+
+            elif year_field >= 10:
+                year_fld_str = str(year_field) + "代"
+
+            sentence = str(gst_vlu) + "番目のゲストである" + name + "は、" + year_fld_str + "の" + S + "性で" +"服の色は" + cloth_clr + "色です"
+
+            return sentence
+
+        
+
+        """
         # 音声を喋るにはここに文字列を渡す
         self.audio_pub.publish("あなたの名前は何ですか。")#名前を聞く。
 
@@ -188,20 +260,28 @@ class RtBioSOldComp():
         print(name) 
 
         # rospy.wait_for_service("/isMeaning")
-        # res = self.isMeaning("検出したい文章",["検出","したい","単語","をかく"])
+  ros      # res = self.isMeaning("検出したい文章",["検出","したい","単語","をかく"])
         # res.res に booleanが返される
 
         res = self.isMeaning("ためす文字列", ["a","a"])
         response = res.res
+        """
+
+        #上記の関数化
+        question = "あなたの名前は何ですか。"
+        #self.speech_test(question)
+
         #0:未発見、1発見抽出済、2報告完了
         state = 0
 
         get_name = "ゲスト1" #音声から取得した名前を保持する
 
         #マスターとゲストの特徴を保持する
+        #Guest name is Charie, Parker, Thomas 
+        #ゲストのなまえは　チャーリー　パーカー　トーマス
         names = ["マスター", "ゲスト1", "ゲスト2", "ゲスト3"]
 
-        MSTftrs = [20, 1, "黒"] #マスターの特徴を保持 (マスターのみ抽出を3とする)
+        MSTftrs = [20, 1, "灰"] #マスターの特徴を保持 (マスターのみ抽出を3とする)
 
         ftr_list = [{"名前":names[0],"年齢":MSTftrs[0], "性別":MSTftrs[1], "服の色":MSTftrs[2], "抽出":3},
                     {"名前":names[1],"年齢":0, "性別":0, "服の色":"", "抽出":0},
@@ -329,7 +409,7 @@ class RtBioSOldComp():
                     #回転し続けている間に視界に入った場合
                     if robo_face_dis == 0 and robo_face_drct == 1:
                         m = MoveAction()
-                        m.angular_speed = 0
+                        m.angle_speed = 0
                         m.linear_speed = 0
 
                         acsess_count = 0 #接近したか判定するために使用する
@@ -409,7 +489,7 @@ class RtBioSOldComp():
                                 if (acsess_count == 0) or ((acsess_count == 1) and (ftr_list[j]["抽出"] == 1)):
                                     m = MoveAction()
                                     m.linear_speed = 1.0
-                                    m.angular_speed = 0.5
+                                    m.angle_speed = 0.5
                                     m.direction = "normal"                                  
                                     """
                                     制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
@@ -526,6 +606,7 @@ class RtBioSOldComp():
                             if state == 0:
 
                                 """
+                                ゲストを探索する
                                 
                                 """
 
@@ -543,7 +624,7 @@ class RtBioSOldComp():
                                     #print((np.array(Ymemo)))
                                     #print(ftr_list[target]["年齢"])
 
-
+                                    
                                     if year_field == 0:
                                         print("年齢:10代未満")
                                     else:
@@ -596,7 +677,7 @@ class RtBioSOldComp():
                                     音声から購読する 報告済であるかどうか True:報告済、False未報告
                                     """
                                     
-                                
+                                    """
                                     S = ""
 
                                     #1のときに男性
@@ -614,7 +695,23 @@ class RtBioSOldComp():
                                     ftr_list[target][""]                       
                                     #Str.data = sentence
                                     self.audio_pub.publish(sentence)
+                                    """
+                                    gst_vlu = target
+                                    s_vlu = ftr_list[target]["性別"]
+                                    name = ftr_list[target]["名前"]
+                                    yearold = ftr_list[target]["年齢"]
+                                    cloth_clr = ftr_list[target]["服の色"]
+
+                                    rpt_sentence = make_ftr_sentence(gst_vlu, s_vlu, name, yearold, cloth_clr)
                                     
+                                    """
+                                    報告用の文章を出版する
+                                    """
+                                    Str = String()
+                                    Str.data = rpt_sentence
+                                    self.audio_pub.publish(Str)
+
+
 
                                     state = 2
 
@@ -680,7 +777,7 @@ class RtBioSOldComp():
                 print(ftr_list[l])
                 
 
-            cv2.imshow('camera' , frame)
+            #cv2.imshow('camera' , frame)
 
             #繰り返し文から抜けるためのif文
             key =cv2.waitKey(10)
@@ -692,20 +789,67 @@ class RtBioSOldComp():
         cap.release()
         cv2.destroyAllWindows()
 
-    def speech_test(self):
-        # 音声を喋るにはここに文字列を渡す
-        self.audio_pub.publish("あなたの名前は何ですか。")#名前を聞く。
+        #print(name) 
 
-        # 音声を聞き取るには下の二行で取得する。
-        # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 
-        rospy.wait_for_service("/speechToText")
-        voice_res = self.speechToText(True, 3, True, True, -1)
-        name = voice_res.res
-        print(name) 
+#デバッグ用の関数
+def func_test():
+
+    def make_ftr_sentence(gst_vlu, s_vlu, name, year_field, cloth_clr):
+
+        S = ""
+
+        #1のときに男性
+        if s_vlu:
+            S = "男"
+        #0のときに女性
+        else:
+            S = "女"
+
+
+        if year_field == 0:
+            year_fld_str = "10代未満"
+
+        elif year_field >= 10:
+            year_fld_str = str(year_field) + "代"
+
+        sentence = str(gst_vlu) + "番目のゲストである" + name + "は、" + year_fld_str + "の" + S + "性で" +"服の色は" + cloth_clr + "色です"
+
+        return sentence
+
+
+    #マスターとゲストの特徴を保持する
+    names = ["マスター", "ゲスト1", "ゲスト2", "ゲスト3"]
+
+    MSTftrs = [0, 1, "黒"] #マスターの特徴を保持 (マスターのみ抽出を3とする)
+
+    ftr_list = [{"名前":names[0],"年齢":MSTftrs[0], "性別":MSTftrs[1], "服の色":MSTftrs[2], "抽出":3},
+                {"名前":names[1],"年齢":0, "性別":0, "服の色":"", "抽出":0},
+                {"名前":names[2],"年齢":0, "性別":0, "服の色":"", "抽出":0},
+                {"名前":names[3],"年齢":0, "性別":0, "服の色":"", "抽出":0}]
+    
+    target = 0
+
+
+    gst_vlu = target
+    s_vlu = ftr_list[target]["性別"]
+    name = ftr_list[target]["名前"]
+    yearold = ftr_list[target]["年齢"]
+    cloth_clr = ftr_list[target]["服の色"]
+
+    name_like = make_ftr_sentence(gst_vlu, s_vlu, name, yearold, cloth_clr)
+    print(name_like)
 
 if __name__ == '__main__':
     rtbioscmp = RtBioSOldComp()
-    #tbioscmp.main()
+    rtbioscmp.main()
+    #question = "あなたのなまえなんですか。"
+    #name_like = rtbioscmp.speech_test(question)
+    #print(name_like)
+
     
-    rtbioscmp.speech_test()
+    #rtbioscmp.speech_test("あなたの名前は何ですか。")
+
+     #ゲストの特徴を報告する文章を作る関数
+    #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
+    #func_test()
