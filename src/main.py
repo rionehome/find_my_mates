@@ -3,7 +3,8 @@
 
 import rospy
 from std_msgs.msg import String, Float32
-#from find_my_mates.msg import ArmAction, MoveAction, LidarData, RealTime
+
+# from find_my_mates.msg import ArmAction, MoveAction, LidarData, RealTime
 from find_my_mates.msg import MoveAction, RealTime
 from geometry_msgs.msg import Twist
 import time
@@ -15,47 +16,46 @@ import numpy as np
 # from hand_detect.finger_direction import get_direction
 
 
+STOP_DISTANCE = 1.0 + 0.15  # m
+LINEAR_SPEED = 0.20  # m/s
+ANGULAR_SPEED = 0.75  # m/s
 
-STOP_DISTANCE = 1.0 + 0.15 # m
-LINEAR_SPEED = 0.20 # m/s
-ANGULAR_SPEED = 0.75 # m/s
+# recognize_speech()
 
-#recognize_speech()
 
-class FindMyMates():
+class FindMyMates:
     def __init__(self):
         rospy.init_node("main")
         # for robot movement
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
-        #回転用
+        # 回転用
         self.moveturn_pub = rospy.Publisher("/moveturn", MoveAction, queue_size=1)
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
-        #for realtime_Bios
+        # for realtime_Bios
         self.realtime_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
 
         # for speechToText
 
-        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText)
 
         # for isMeaning
 
-        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
-    
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning)
+
     def main(self):
         # wait for nodes
         time.sleep(3)
 
-        #self.move360_sub = rospy.wait_for_message(/move360, MoveTest)
+        # self.move360_sub = rospy.wait_for_message(/move360, MoveTest)
 
         global_direction = "forward"
-        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+        global_linear_speed = LINEAR_SPEED  # 対象に合わせて、速度を変える
         # global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
-        
+
         while True:
-            
             """
             lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
@@ -71,12 +71,12 @@ class FindMyMates():
             """
 
             mn = 0.4
-            #Face information
-            detectData = rospy.wait_for_message('/realtime', RealTime)
+            # Face information
+            detectData = rospy.wait_for_message("/realtime", RealTime)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
-            
-            #command select^
+
+            # command select^
             c = MoveAction()
             c.distance = "forward"
             c.direction = "stop"
@@ -85,28 +85,26 @@ class FindMyMates():
             c.linear_speed = 0.0
             c.angle_speed = 0.0
             c.direction = "normal"
-            
-            #回転指示が画像側から送られたら
+
+            # 回転指示が画像側から送られたら
             if p_direction == 3 and p_distance == 3:
                 """
                 move_test.pyにより回転動作を行う
                 """
 
             else:
-                if mn < 0.35:#止まる（Turtlebotからの距離が近い）
+                if mn < 0.35:  # 止まる（Turtlebotからの距離が近い）
                     if global_direction != "stop":
                         print("I can get close here")
                         self.audio_pub.publish("これ以上近づけません")
-                        global_direction = "stop" 
+                        global_direction = "stop"
                     c.direction = "stop"
                     c.angle_speed = 0.0
-                    
+
                     pass
-                    #止まることを最優先するため、初期値で設定している
-                
+                    # 止まることを最優先するため、初期値で設定している
 
-
-                #左にいるとき
+                # 左にいるとき
                 elif p_direction == 0:
                     if global_direction != "left":
                         print("you are left side so I turn left")
@@ -115,15 +113,15 @@ class FindMyMates():
                     c.direction = "left"
                     c.angle_speed = ANGULAR_SPEED
 
-                #中央にいるとき
-                elif p_direction== 1:
+                # 中央にいるとき
+                elif p_direction == 1:
                     if global_direction != "forward":
                         print("you are good")
                         self.audio_pub.publish("いいね")
                         global_direction = "forward"
                     c.direction = "forward"
 
-                #右にいるとき
+                # 右にいるとき
                 elif p_direction == 2:
                     if global_direction != "right":
                         print("you are right side so I turn right")
@@ -132,13 +130,10 @@ class FindMyMates():
                     c.direction = "right"
                     c.angle_speed = ANGULAR_SPEED
 
-
-
-
                 if mn < 0.35:
                     c.linear_speed = 0.0
 
-                #遠いとき
+                # 遠いとき
                 elif p_distance == 0:
                     if global_distance != "long":
                         self.audio_pub.publish("かくどはいいが、きょりがとおい")
@@ -148,7 +143,7 @@ class FindMyMates():
                     global_linear_speed = global_linear_speed * 1.25
                     c.linear_speed = global_linear_speed
 
-                #中距離のとき
+                # 中距離のとき
                 elif p_distance == 1:
                     if global_distance != "normal":
                         self.audio_pub.publish("かくどもきょりもいいかんじ")
@@ -157,7 +152,7 @@ class FindMyMates():
                     c.distance = "normal"
                     c.linear_speed = global_linear_speed
 
-                #近いのとき
+                # 近いのとき
                 elif p_distance == 2:
                     if global_distance != "short":
                         self.audio_pub.publish("かくどはいいが、きょりがちかい")
@@ -166,22 +161,15 @@ class FindMyMates():
                     c.distance = "short"
                     global_linear_speed = global_linear_speed * 1.25
                     c.linear_speed = global_linear_speed
-                    
-                
-                self.move_pub.publish(c) #通常の顔への位置調整
 
-            
-            #聞こえた名前を文字列に
-            #recognize_speech(return_extract_person_name=True)
-            
-            
+                self.move_pub.publish(c)  # 通常の顔への位置調整
 
-                
+            # 聞こえた名前を文字列に
+            # recognize_speech(return_extract_person_name=True)
 
-            
         exit(0)
         while True:
-            distance = rospy.wait_for_message('/lidar', Float32)
+            distance = rospy.wait_for_message("/lidar", Float32)
 
             if distance.data > STOP_DISTANCE and distance.data < STOP_DISTANCE * 1.5:
                 m = MoveAction()
@@ -214,17 +202,11 @@ class FindMyMates():
         sys.exit(0)
 
 
-
-            
-
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     findmymates = FindMyMates()
     findmymates.main()
 
-#左右の方向が与えられるので、それに対応して、回転するような動きをするもの
-'''
+# 左右の方向が与えられるので、それに対応して、回転するような動きをするもの
+"""
 
-'''
+"""
