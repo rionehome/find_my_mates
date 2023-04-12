@@ -13,21 +13,19 @@ import torch
 import detect_color_realtime
 from scipy import stats
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 from find_my_mates.msg import MoveAction, Feature, RealTime
 from find_my_mates.srv import SpeechToText, isMeaning
 import time
-import sys
 import os
-
-"""
+import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# 音声認識の関数 (vosk)
-"""
-#sfrom speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech #音声認識
-#from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
-#from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech #発話
-#from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
+# 13:08 speech_and_NLP 動作確認済み
+from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech #音声認識
+from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
+from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech #発話
+from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
+
 
 
 STOP_DISTANCE = 1.0 + 0.15 # m
@@ -60,7 +58,6 @@ class RtBioSOldComp():
 
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
-        self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for speechToText
 
@@ -71,155 +68,52 @@ class RtBioSOldComp():
         print("初期化")
 
     
-        
-    def go_near(self, p_direction, p_distance):
-        
-        
-        global_direction = "forward"
-        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
-        global_distance = "normal"
-        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
-        
-        #Yolo information
-        while True:
-            # print("go_near Function is runnning")
-        
-            #(制御)車の前についたタイミングの話
-            #車の前についたらgo_near()を終了させる
-            # rospy.wait_for_service("/speechToText")
-            # text = self.speechToText(True, 4, False, True, -1, "")
-            # if reach_near_car == True: #Trueのとき、この関数を終了する
-            #     return
-            #detectData = rospy.wait_for_message("/person", PERSON)
-
-            # p_direction = detectData.robo_p_drct
-            # p_distance = detectData.robo_p_dis
-            
-            #command select
-            c = MoveAction()
-            c.distance = "forward"
-            c.direction = "stop"
-            c.distance = "normal"
-            c.time = 0.1
-            c.linear_speed = 0.0
-            c.angle_speed = 0.0
-            c.direction = "normal"
-            if p_distance < 2: #止まる（Turtlebotからの距離が近い）
-                if global_direction != "stop":
-                    print("I can get close here")
-                    self.audio_pub.publish("これ以上近づけません")
-                    time.sleep(2)
-                    global_direction = "stop" 
-                    c.direction = "stop"
-                    c.angle_speed = 0.0
-                    c.linear_speed = 0.0
-                    c.distance = "long"
-                    self.move_pub.publish(c)
-                    break
-                
-                #止まることを最優先するため、初期値で設定している
-            elif p_direction == 0:
-                if global_direction != "left":
-                    print("you are left side so I turn left")
-                    # self.audio_pub.publish("たーんれふと")
-                    global_direction = "left"
-                c.direction = "left"
-                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
-                c.angle_speed = ANGULAR_SPEED
-            elif p_direction == 2:
-                if global_direction != "right":
-                    print("you are right side so I turn right")
-                    # self.audio_pub.publish("たーんらいと")
-                    global_direction = "right"
-                c.direction = "right"
-                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
-                c.angle_speed = ANGULAR_SPEED
-            elif p_direction== 1:
-                if global_direction != "forward":
-                    print("you are good")
-                    # self.audio_pub.publish("かくどいいね")
-                    global_direction = "forward"
-                c.direction = "forward"
-
-            if p_distance < 2:
-                c.linear_speed = 0.0
-
-            elif p_distance == 0:
-                if global_distance != "long":
-                    self.audio_pub.publish("とおい")
-                    print("angle but you have long distance.")
-                    global_distance = "long"
-                c.distance = "long"
-                if global_linear_speed < 0.5:
-                    global_linear_speed += 0.02
-                # if global_linear_speed < 1:
-                #     global_linear_speed += 0.02
-                c.linear_speed = global_linear_speed
-                # print(c.linear_speed)
-
-            elif p_distance == 2:
-                if global_distance != "short":
-                    self.audio_pub.publish("ちかい")
-                    print("angle but you have short distance.")
-                    global_distance = "short"
-                c.distance = "short"
-                global_linear_speed = 0.1
-                # if global_linear_speed >= 0.1:
-                    # global_linear_speed -= 0.7
-                c.linear_speed = 0.05
-                # print(c.linear_speed)
-
-            elif p_distance == 1:
-                if global_distance != "normal":
-                    self.audio_pub.publish("よい")
-                    print("angle and distance.")
-                    global_distance = "normal"
-                c.distance = "normal"
-                if global_linear_speed >= LINEAR_SPEED:
-                    global_linear_speed -= 0.05
-                c.linear_speed = LINEAR_SPEED
-                peed = global_linear_speed
-                # print(c.linear_speed)
-
-            # print("GLOBAL LINEAR : " + str(global_linear_speed))
-            
-            # if move_mode == "back":
-            #     c.linear_speed *= -1
-            #     c.angle_speed *= -1
-            self.move_pub.publish(c)
-
-        
-
-            #音声部分とやり取りを行い、名前のようなものを取得する関数
-    #def speech_test(self, question):
+    def speech_test(self, question):
 
         #Str = String()
 
         #Str.data
 
-        # 音声を喋るにはここに文字列を渡す
+        #音声を喋るにはここに文字列を渡す
         
         #is_meaning()
-        #textToSpeech(question,verbose=True) #文字列を渡すとしゃベル
-        #time.sleep(2) #待つ
-        #rcspc = recognize_speech(return_extract_person_name="array") #arrayと渡すと人名と文字おこし両方できる。0番目=名前、1番目テキストすべて
+        textToSpeech(question,verbose=True) #文字列を渡すとしゃベル
+        time.sleep(2) #待つ
+        rcspc = recognize_speech(return_extract_person_name="array") #arrayと渡すと人名と文字おこし両方できる。0番目=名前、1番目テキストすべて
         
-        #recognize_speech()
+        recognize_speech()
 
         # 音声を聞き取るには下の二行で取得する。
-        # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
+        #self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 
-        #rospy.wait_for_service("/speechToText")
-        #voice_res = self.speechToText(True, 3, True, True, -1)
-        #name_like = rcspc
+        rospy.wait_for_service("/speechToText")
+        voice_res = self.speechToText(True, 3, True, True, -1)
+        name_like = extractPersonName("わたしのなまえは" + voice_res)
 
-        #return name_like
+        return name_like
 
-
-    def main(self):
-
+    def main(self, front_person):
+        rtbioscmp = RtBioSOldComp()
+        time.sleep(10)
+        #rtbioscmp.speech_test("あなたの名前は何ですか。")
         #---------メイン関数内の関数-------------
+
+        #音声部分とやり取りを行い、名前のようなものを取得する関数
+        """
+        def speech_test(self, question):
+            # 音声を喋るにはここに文字列を渡す
+            self.audio_pub.publish(question)#名前を聞く。
+
+            # 音声を聞き取るには下の二行で取得する。
+            # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
+
+            rospy.wait_for_service("/speechToText")
+            voice_res = self.speechToText(True, 3, True, True, -1)
+            name_like = voice_res.res
+
+            return 
+        """
+    
 
         #ゲストの特徴を報告する文章を作る関数
         #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
@@ -260,7 +154,7 @@ class RtBioSOldComp():
         print(name) 
 
         # rospy.wait_for_service("/isMeaning")
-  ros      # res = self.isMeaning("検出したい文章",["検出","したい","単語","をかく"])
+        # res = self.isMeaning("検出したい文章",["検出","したい","単語","をかく"])
         # res.res に booleanが返される
 
         res = self.isMeaning("ためす文字列", ["a","a"])
@@ -269,7 +163,7 @@ class RtBioSOldComp():
 
         #上記の関数化
         question = "あなたの名前は何ですか。"
-        #self.speech_test(question)
+        #speech_test(question)
 
         #0:未発見、1発見抽出済、2報告完了
         state = 0
@@ -277,11 +171,9 @@ class RtBioSOldComp():
         get_name = "ゲスト1" #音声から取得した名前を保持する
 
         #マスターとゲストの特徴を保持する
-        #Guest name is Charie, Parker, Thomas 
-        #ゲストのなまえは　チャーリー　パーカー　トーマス
-        names = ["マスター", "ゲスト1", "ゲスト2", "ゲスト3"]
+        names = ["マスター", "チャーリー", "パーカー", "トーマス"]
 
-        MSTftrs = [20, 1, "灰"] #マスターの特徴を保持 (マスターのみ抽出を3とする)
+        MSTftrs = [20, 1, "黒"] #マスターの特徴を保持 (マスターのみ抽出を3とする)
 
         ftr_list = [{"名前":names[0],"年齢":MSTftrs[0], "性別":MSTftrs[1], "服の色":MSTftrs[2], "抽出":3},
                     {"名前":names[1],"年齢":0, "性別":0, "服の色":"", "抽出":0},
@@ -327,7 +219,7 @@ class RtBioSOldComp():
         clt_right = 0
         clt_bottom = 0
         
-
+        #front_person = True #顔の前に来たときはTrue
 
         for i in range(len(color_list)):  
             color_dic[color_list[i]] = 0
@@ -349,388 +241,162 @@ class RtBioSOldComp():
             faces = app.get(np.asarray(frame))
             print("faces:" + str(len(faces)))
 
+             #人の顔から遠ざかったら終了する
+            if front_person == False:
+                print("キャプチャの終了")
+                break
 
+          
+            #カメラの起動中は顔を検出し、特徴抽出する
+            if len(faces) == 0:
+                print("この位置の方向に人はいない")
+                break
 
-            #なんか人が写ってるとき
-            if len(faces) != 0:
+            else: #顔が写っていたとき
+                        
+                #0番目のみ対象が画面に映る顔の添字 
 
-                #iが画面に映る顔の添字 
-                for i in range(len(faces)):
+                top = faces[0]['bbox'][1]
+                bottom = faces[0]['bbox'][3]
+                left = faces[0]['bbox'][0]
+                right = faces[0]['bbox'][2]
 
-                    #0番目の添字のみ対象とする
-                    if i == 0:
-
-                        top = faces[i]['bbox'][1]
-                        bottom = faces[i]['bbox'][3]
-                        left = faces[i]['bbox'][0]
-                        right = faces[i]['bbox'][2]
-
-                        w = int(right - bottom)
-                        h = int(bottom - top)
-                        c_x = int((right + left)/2)
-                        c_y = int((bottom + top)/2)
-                
-                    
-                        #距離を仕分ける 
-                        if w < thrd_min:
-                            #print(str(i) + "番目の人が遠い")
-                            robo_face_dis = 0 #ロボットは人が中央に来るまで前に進む
-
-                        elif w >= thrd_min and w <= thrd_max:
-                            #print(str(i) + "番目の人が中央の距離")
-                            robo_face_dis = 1 #ロボットはそのまま
-
-                        elif w > thrd_max:
-                            #print(str(i) + "番目の人が近い")
-                            robo_face_dis = 2 #ロボットは人が中央に来るまで後ろに下がる
-
-
-                        #方向を仕分ける
-                        if c_x < frame_w / 3:
-                            #print(str(i) + "番目の人が左にいる")
-                            robo_face_drct = 0 #ロボットは人が中央に来るまで左回りする
-
-                        elif c_x > frame_w/3 and c_x < frame_w * 2/3:
-                            #print(str(i) + "番目の人が中央の方向")
-                            robo_face_drct = 1 #ロボットはそのまま
-
-                        elif c_x > frame_w * 2/3:
-                            #print(str(i) + "番目の人が右にいる")
-                            robo_face_drct = 2 #ロボットは人が中央に来るまで右回りする
-                            
+                w = int(right - bottom)
+                h = int(bottom - top)
+                c_x = int((right + left)/2)
+                c_y = int((bottom + top)/2)
         
-                        print(str(i+1) + "番目の顔の距離:" + str(robo_face_dis) + "、方向:" + str(robo_face_drct))
-                        #print("\n")
+            
+                #距離を仕分ける 
+                if w < thrd_min:
+                    #print(str(i) + "番目の人が遠い")
+                    robo_face_dis = 0 #ロボットは人が中央に来るまで前に進む
+
+                elif w >= thrd_min and w <= thrd_max:
+                    #print(str(i) + "番目の人が中央の距離")
+                    robo_face_dis = 1 #ロボットはそのまま
+
+                elif w > thrd_max:
+                    #print(str(i) + "番目の人が近い")
+                    robo_face_dis = 2 #ロボットは人が中央に来るまで後ろに下がる
 
 
+                #方向を仕分ける
+                if c_x < frame_w / 3:
+                    #print(str(i) + "番目の人が左にいる")
+                    robo_face_drct = 0 #ロボットは人が中央に来るまで左回りする
+
+                elif c_x > frame_w/3 and c_x < frame_w * 2/3:
+                    #print(str(i) + "番目の人が中央の方向")
+                    robo_face_drct = 1 #ロボットはそのまま
+
+                elif c_x > frame_w * 2/3:
+                    #print(str(i) + "番目の人が右にいる")
+                    robo_face_drct = 2 #ロボットは人が中央に来るまで右回りする
+                    
+
+                print("顔の距離:" + str(robo_face_dis) + "、方向:" + str(robo_face_drct))
+                #print("\n")
+
+                #中央で中距離のときのみ特徴抽出する
+                if robo_face_dis == 1 and robo_face_drct == 1:
+
+                    #10回のさいひんち
+                    for k in range(10):
+                        clt_top = int(bottom+h/2)
+                        clt_bottom = int(bottom+h*(5/2))
+                        clt_left = int(left-w/2)
+                        clt_right = int(right+w/2)
+
+                        #服のtopを画像内に収める
+                        if clt_top < 0:
+                            clt_top = 0
+                        elif clt_top >= frame_h:
+                            clt_top = frame_h-1
+
+                        #服のbottomを画像内に収める
+                        if clt_bottom < 0:
+                            clt_bottom = 0
+                        elif clt_bottom >= frame_h:
+                            clt_bottom = frame_h-1
+
+                        #服のleftを画像内に収める
+                        if clt_left < 0:
+                            clt_left = 0
+                        elif clt_left >= frame_w:
+                            clt_left = frame_w-1
+
+                        #服のrightを画像内に収める
+                        if clt_right < 0:
+                            clt_right = 0
+                        elif clt_right >= frame_w:
+                            clt_right = frame_w-1
 
 
-
-                    #回転し続けている間に視界に入った場合
-                    if robo_face_dis == 0 and robo_face_drct == 1:
-                        m = MoveAction()
-                        m.angle_speed = 0
-                        m.linear_speed = 0
-
-                        acsess_count = 0 #接近したか判定するために使用する
-
-                        for k in range(10):
-                            clt_top = int(bottom+h/2)
-                            clt_bottom = int(bottom+h*(5/2))
-                            clt_left = int(left-w/2)
-                            clt_right = int(right+w/2)
-
-                            #服のtopを画像内に収める
-                            if clt_top < 0:
-                                clt_top = 0
-                            elif clt_top >= frame_h:
-                                clt_top = frame_h-1
-
-                            #服のbottomを画像内に収める
-                            if clt_bottom < 0:
-                                clt_bottom = 0
-                            elif clt_bottom >= frame_h:
-                                clt_bottom = frame_h-1
-
-                            #服のleftを画像内に収める
-                            if clt_left < 0:
-                                clt_left = 0
-                            elif clt_left >= frame_w:
-                                clt_left = frame_w-1
-
-                            #服のrightを画像内に収める
-                            if clt_right < 0:
-                                clt_right = 0
-                            elif clt_right >= frame_w:
-                                clt_right = frame_w-1
-
-
-                            if clt_bottom > clt_top and clt_right > clt_left: 
-                                color_dic = detect_color_realtime.get_colors(frame[clt_top:clt_bottom, clt_left:clt_right], color_dic, color_list)
+                        if clt_bottom > clt_top and clt_right > clt_left: 
+                            color_dic = detect_color_realtime.get_colors(frame[clt_top:clt_bottom, clt_left:clt_right], color_dic, color_list)
 
                             #print(color_dic)
                             #辞書の値が最大・最小となるキーを取得
                             #最大値が0でないとき
 
                             #年代を保持する 年齢を10で割ったときの商かける10 
-                            year_field = (faces[i]['age'] // 10) * 10
+                            year_field = (faces[0]['age'] // 10) * 10
 
                             if (max(color_dic.values())):
                                 max_k = max(color_dic, key=color_dic.get)
                                 print(color_dic)
 
                                 Ymemo.append(year_field)
-                                Smemo.append(faces[i]['gender'])
+                                Smemo.append(faces[0]['gender'])
                                 Cmemo.append(max_k)
 
 
-                        #配列が空のときに最頻値を求めるとエラーが出る
-                        if len(Ymemo) != 0 and len(Smemo) != 0 and len(Cmemo) != 0:
-                            mode_Ymemo = int(stats.mode(Ymemo).mode)
-                            mode_Smemo = int(stats.mode(Smemo).mode)
-                            mode_Cmemo = str(stats.mode(Cmemo).mode).strip("['").strip("']")
+                    #配列が空のときに最頻値を求めるとエラーが出る
+                    if len(Ymemo) != 0 and len(Smemo) != 0 and len(Cmemo) != 0:
+                        mode_Ymemo = int(stats.mode(Ymemo).mode)
+                        mode_Smemo = int(stats.mode(Smemo).mode)
+                        mode_Cmemo = str(stats.mode(Cmemo).mode).strip("['").strip("']")
 
-                            #print(mode_Ymemo)
+                            #print(mode_Ymemo)s
                             #print(mode_Smemo)
                             #print(mode_Cmemo)
 
+                        #{"名前":names[0],"年齢":2, "性別":1, "服の色":"黒", "抽出":1}
+                        ftr_list[target]["名前"] == get_name
 
-                            #ここで見た特徴が、今までに見たことがないものか確かめる
-                            for j in range(1, len(ftr_list)):
+                        #それぞれの特徴に10回の標本の最頻値を渡す
+                        ftr_list[target]["年齢"] = mode_Ymemo #年代を抽出 0:10代未満 以降 ~代
+                        ftr_list[target]["性別"] = mode_Smemo #性別を取得する 0:女、1:男
+                        ftr_list[target]["服の色"] = mode_Cmemo #服の色を取得する
+                        ftr_list[target]["抽出"] = 2 #目標ゲストを抽出した印として2を代入する
 
-                                #それぞれの特徴を10回の標本の最頻値で比較する　
-                                if ftr_list[j]["年齢"] == mode_Ymemo and ftr_list[j]["性別"] == mode_Smemo and ftr_list[j]["服の色"] == mode_Cmemo:
-                                    acsess_count += 1 #接近したことがある印
-                                    break
-
-                            #未発見状態のとき、目標のゲストを見つけるために
-                            if state == 0:
-                                #接近するための条件は 未発見 or 目的でないゲストを発見したときの特徴があった
-                                if (acsess_count == 0) or ((acsess_count == 1) and (ftr_list[j]["抽出"] == 1)):
-                                    m = MoveAction()
-                                    m.linear_speed = 1.0
-                                    m.angle_speed = 0.5
-                                    m.direction = "normal"                                  
-                                    """
-                                    制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
-                                    
-                                    """
-                                    self.main_pub.publish(m)
-                                else:
-                                    """
-                                    制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
-                                    
-                                    """
-                                    robo_face_dis = 3 
-                                    robo_face_drct = 3
-                                    self.main_pub.publish(m)
-
-
-                            #発見特徴抽出完了状態のとき、マスタに報告するために見つける
-                            elif state == 1:
-                                #マスタの特徴を全て満たすときに現在画面中央に写っている人物はマスタだと考える
-                                if (MSTftrs[0] == mode_Ymemo) and (MSTftrs[1] == mode_Smemo) and (MSTftrs[2] == mode_Cmemo):
-                                    """
-                                    制御では、現在写っている顔に接近する操作を行う (現在の位置を出版するためそのまま)
-                                    
-                                    """
-
-                                else:
-                                    """
-                                    制御では、別の顔を探す操作を行う (距離と方向の両方を3にする)
-                                    
-                                    """
-                                    robo_face_dis = 3 
-                                    robo_face_drct = 3
-                                    self.main_pub.publish(m)
-
-
-
-                        #リストを空にする
-                        Ymemo = []
-                        Smemo = []
-                        Cmemo = []
-
-
-
-
-
-                    #名前を知らないというような理由で近づいた場合
-                    #距離と角度がちょうど良いときに、特徴抽出を行う。
-                    #ifで分岐することで、近づいたとき(精度の良い特徴で識別できる)
-                    elif (robo_face_dis == 1 or robo_face_dis == 2) and robo_face_drct == 1:
-
-                        print(color_dic)
-
-                        mode_Ymemo = 0
-                        mode_Smemo = 0
-                        mode_Cmemo = ""
-
-                        for k in range(10):
-                            clt_top = int(bottom+h/2)
-                            clt_bottom = int(bottom+h*(5/2))
-                            clt_left = int(left-w/2)
-                            clt_right = int(right+w/2)
-
-                            #服のtopを画像内に収める
-                            if clt_top < 0:
-                                clt_top = 0
-                            elif clt_top >= frame_h:
-                                clt_top = frame_h-1
-
-                            #服のbottomを画像内に収める
-                            if clt_bottom < 0:
-                                clt_bottom = 0
-                            elif clt_bottom >= frame_h:
-                                clt_bottom = frame_h-1
-
-                            #服のleftを画像内に収める
-                            if clt_left < 0:
-                                clt_left = 0
-                            elif clt_left >= frame_w:
-                                clt_left = frame_w-1
-
-                            #服のrightを画像内に収める
-                            if clt_right < 0:
-                                clt_right = 0
-                            elif clt_right >= frame_w:
-                                clt_right = frame_w-1
-
-
-                            if clt_bottom > clt_top and clt_right > clt_left: 
-                                color_dic = detect_color_realtime.get_colors(frame[clt_top:clt_bottom, clt_left:clt_right], color_dic, color_list)
-
-                            #print(color_dic)
-                            #辞書の値が最大・最小となるキーを取得
-                            #最大値が0でないとき
-
-                            #年代を保持する 年齢を10で割ったときの商かける10 
-                            year_field = (faces[i]['age'] // 10) * 10
-
-                            #色の面積の最大値が0でないとき
-                            if (max(color_dic.values())):
-                                max_k = max(color_dic, key=color_dic.get)
-
-                                Ymemo.append(year_field)
-                                Smemo.append(faces[i]['gender'])
-                                Cmemo.append(max_k)
-
-                        #配列が空のときに最頻値を求めるとエラーが出る
-                        if len(Ymemo) != 0 and len(Smemo) != 0 and len(Cmemo) != 0:
-                            mode_Ymemo = int(stats.mode(Ymemo).mode)
-                            mode_Smemo = int(stats.mode(Smemo).mode)
-                            mode_Cmemo = str(stats.mode(Cmemo).mode).strip("['").strip("']")
-
-        
-                            #特徴のリストへの追加は未発見状態のときのみ
-                            if state == 0:
-
-                                """
-                                ゲストを探索する
-                                
-                                """
-
-                                #現在中央に映るゲストがターゲットのゲストであるときに、目標ゲストのための特徴抽出する
-                                if ftr_list[target]["名前"] == get_name:
-                                    #{"名前":names[0],"年齢":2, "性別":1, "服の色":"黒", "抽出":1}
-
-                                    #それぞれの特徴に10回の標本の最頻値を渡す
-                                    ftr_list[target]["年齢"] = mode_Ymemo #年代を抽出 0:10代未満 以降 ~代
-                                    ftr_list[target]["性別"] = mode_Smemo #性別を取得する 0:女、1:男
-                                    ftr_list[target]["服の色"] = mode_Cmemo #服の色を取得する
-                                    ftr_list[target]["抽出"] = 2 #目標ゲストを抽出した印として2を代入する
-
-                                    #print(int(stats.mode(Ymemo).mode))
-                                    #print((np.array(Ymemo)))
-                                    #print(ftr_list[target]["年齢"])
 
                                     
-                                    if year_field == 0:
-                                        print("年齢:10代未満")
-                                    else:
-                                        print("年齢:" + str(ftr_list[target]["年齢"]) + "代")
+                        if Ymemo == 0:
+                            print("年齢:10代未満")
+                        else:
+                            print("年齢:" + str(ftr_list[target]["年齢"]) + "代")
 
 
 
-                                    print("幅:" + str(w) + "、高さ:" + str(h))
-                                    print("中心: x=" + str(c_x) + ", y=" + str(c_y)) 
-                                    print("性別:" + str(gender[ftr_list[target]["性別"]]))
-                                    print(ftr_list[target]["服の色"] + "色の服を着ている")
+                        print("幅:" + str(w) + "、高さ:" + str(h))
+                        print("中心: x=" + str(c_x) + ", y=" + str(c_y)) 
+                        print("性別:" + str(gender[ftr_list[target]["性別"]]))
+                        print(ftr_list[target]["服の色"] + "色の服を着ている")
 
 
-                                    #現在のゲストの特徴を抽出したあとに
-                                    state = 1  #発見特徴抽出完了になる
+                        gst_vlu = target
+                        s_vlu = ftr_list[target]["性別"]
+                        name = ftr_list[target]["名前"]
+                        yearold = ftr_list[target]["年齢"]
+                        cloth_clr = ftr_list[target]["服の色"]
+
+                        rpt_sentence = make_ftr_sentence(gst_vlu, s_vlu, name, yearold, cloth_clr)
+                        print(rpt_sentence)
+                        
 
 
-
-                                #ターゲットではない場合でも、識別のため特徴を抽出する
-                                else:
-                                    #特徴のリストから現在中央に写っているゲストの名前を見つけ比較用に特徴を追加する
-                                    #jはゲストの添字
-                                    for j in range(1, len(ftr_list)):
-                                        #それぞれの特徴に10回の標本の最頻値を渡す
-                                        #見たことがなく、音声から取得した名前と等しいゲストに特徴を追加
-                                        if ftr_list[j]["名前"] == get_name and ftr_list[j]["抽出"] == 0: 
-                                            ftr_list[j]["年齢"] = mode_Ymemo #年代を抽出 0:10代未満 以降 ~代
-                                            ftr_list[j]["性別"] = mode_Smemo #性別を取得する 0:女、1:男
-                                            ftr_list[j]["服の色"] = mode_Cmemo #服の色を取得する
-                                            ftr_list[j]["抽出"] = 1 #目標ではない人の特徴を抽出した印として1を代入する
-
-
-
-                            #発見特徴抽出完了状態のときオペレータのもとへ戻る必要性がある
-                            #オペレータを特徴で認識する
-                            elif state == 1:
-                                print(mode_Ymemo)
-                                print(mode_Smemo)
-                                print(mode_Cmemo)
-
-                                #マスタの特徴を全て満たすときに現在画面中央に写っている人物はマスタだと考える
-                                if (MSTftrs[0] == mode_Ymemo) and (MSTftrs[1] == mode_Smemo) and (MSTftrs[2] == mode_Cmemo):
-
-
-                                    """
-                                    
-                                    ここで報告する流れを作る
-                                    
-                                    音声へ出版する 名前:文字列、年齢:(0~10)程度の整数、 性別:(0, 1)の整数、 服の色:(文字列)色の名前
-                                    音声から購読する 報告済であるかどうか True:報告済、False未報告
-                                    """
-                                    
-                                    """
-                                    S = ""
-
-                                    #1のときに男性
-                                    if ftr_list[target]["性別"]:
-                                        S = "男"
-
-                                    #0のときに女性
-                                    else:
-                                        S = "女"
-
-                                    # Str = String()
-
-                                    sentence = str(target) + "番目のゲストである" + ftr_list[target]["名前"] + "は、" + str(ftr_list[target]["年齢"]) + "代の" + S + "性で" +"服の色は" + ftr_list[target]["服の色"] + "色です"
-                                    print(sentence)
-                                    ftr_list[target][""]                       
-                                    #Str.data = sentence
-                                    self.audio_pub.publish(sentence)
-                                    """
-                                    gst_vlu = target
-                                    s_vlu = ftr_list[target]["性別"]
-                                    name = ftr_list[target]["名前"]
-                                    yearold = ftr_list[target]["年齢"]
-                                    cloth_clr = ftr_list[target]["服の色"]
-
-                                    rpt_sentence = make_ftr_sentence(gst_vlu, s_vlu, name, yearold, cloth_clr)
-                                    
-                                    """
-                                    報告用の文章を出版する
-                                    """
-                                    Str = String()
-                                    Str.data = rpt_sentence
-                                    self.audio_pub.publish(Str)
-
-
-
-                                    state = 2
-
-                                    #報告完了状態のときに以下を実行する
-                                    if state == 2:
-            
-                                        target += 1 #ターゲットを更新する
-                                        state = 0 #未発見状態へ遷移する
-
-                                #マスタの特徴を全て満たさないときはマスタでないと考え回転
-                                else:
-                                    robo_face_dis = 3
-                                    robo_face_dis = 3
-
-
-                        #リストを空にする
-                        Ymemo = []
-                        Smemo = []
-                        Cmemo = []
 
                 cv2.rectangle(frame, (int(left), int(top)), (int(right), int(bottom)), (255, 0, 0))
 
@@ -742,55 +408,19 @@ class RtBioSOldComp():
                 制御へ、距離、方向を出版する (制御側で購読したとき:人に近づく必要性のある未発見、報告状態で位置を調整するために使う)
                 """
 
+                cv2.imshow("capture", frame)
+
 
                 clt_left = 0
                 clt_top = 0
                 clt_right = 0
                 clt_bottom = 0
 
-            #人すら見つかっていないとき
-            else:
-
-                #2つの値が3のとき
-                robo_face_dis = 3 
-                robo_face_drct = 3
-
-
-
-                print("\n\n")
-
-            self.go_near(robo_face_dis, robo_face_drct) #人に対して動く
-
-
-            #self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
-            #self.audio_sub = rospy.Subscriber("/audio", String, queue_size=1)
-            #self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
-
-
-            print("ターゲット=" + str(target))
-            print("状態=" + str(state))
-            print("\n")
-            print("マスターの特徴")
-            print(ftr_list[0])
-            print("ゲストの特徴リスト")
-            for l in range(1, target+1):
-                print(ftr_list[l])
-                
-
-            #cv2.imshow('camera' , frame)
-
-            #繰り返し文から抜けるためのif文
-            key =cv2.waitKey(10)
-            if key == 27:
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-
-        #メモリを解放して終了するためのコマンド
         cap.release()
         cv2.destroyAllWindows()
-
-        #print(name) 
-
 
 #デバッグ用の関数
 def func_test():
@@ -841,14 +471,13 @@ def func_test():
     print(name_like)
 
 if __name__ == '__main__':
-    rtbioscmp = RtBioSOldComp()
-    rtbioscmp.main()
-    #question = "あなたのなまえなんですか。"
-    #name_like = rtbioscmp.speech_test(question)
-    #print(name_like)
 
+
+    rtbioscmp = RtBioSOldComp()
+    #k = rospy.wait_for_message("/real", Bool)
+    rtbioscmp.main(True)
     
-    #rtbioscmp.speech_test("あなたの名前は何ですか。")
+
 
      #ゲストの特徴を報告する文章を作る関数
     #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
