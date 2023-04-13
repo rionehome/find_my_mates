@@ -8,10 +8,11 @@ import math
 
 PIZZA = 24
 
-class Lidar():
+
+class Lidar:
     def __init__(self):
-        self.pub = rospy.Publisher('/lidar', LidarData, queue_size=1)
-    
+        self.pub = rospy.Publisher("/lidar", LidarData, queue_size=1)
+
     def remove_inf(self, ranges):
         f_ranges = []
 
@@ -20,12 +21,12 @@ class Lidar():
                 f_ranges.append(i)
 
         return f_ranges
-    
+
     def average_ranges(self, ranges):
         return sum(ranges) / len(ranges)
-    
+
     def get_distance(self):
-        scan = rospy.wait_for_message('/scan', LaserScan)
+        scan = rospy.wait_for_message("/scan", LaserScan)
         # rospy.loginfo(scan)
 
         distance = []
@@ -44,7 +45,8 @@ class Lidar():
 
         return distance
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     rospy.init_node("lidar")
     lidar = Lidar()
     while not rospy.is_shutdown():
