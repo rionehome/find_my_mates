@@ -10,30 +10,14 @@ import numpy as np
 import cv2
 from insightface.app import FaceAnalysis
 import torch
-import detect_color_realtime
+import image_system.detect_color_realtime as detect_color_realtime
 from scipy import stats
 import rospy
 from std_msgs.msg import String, Bool
-from find_my_mates.msg import MoveAction, Feature, RealTime
-from find_my_mates.srv import SpeechToText, isMeaning
 import time
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# 13:08 speech_and_NLP 動作確認済み
-from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech #音声認識
-from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
-from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech #発話
-from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
-
-
-
-STOP_DISTANCE = 1.0 + 0.15 # m
-LINEAR_SPEED = 0.05 # m/s
-ANGULAR_SPEED = 0.75  # m/s
-
-
-
 
 class RtBioSOldComp():
 
@@ -52,67 +36,9 @@ class RtBioSOldComp():
         """
         rospy.init_node("raltimebio")
 
-        #self.realtime_sub = rospy.wait_for_message('/realtime', RealTime)
-        selfaudio_pub = rospy.Publisher("/audio", String, queue_size=1)
-        self.main_pub = rospy.Publisher("/realtime", RealTime, queue_size=1)
-
-        # for audio
-        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
-
-        # for speechToText
-
-        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
-
-        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
-
-        print("初期化")
-
-    
-    def speech_test(self, question):
-
-        #Str = String()
-
-        #Str.data
-
-        #音声を喋るにはここに文字列を渡す
-        
-        #is_meaning()
-        textToSpeech(question,verbose=True) #文字列を渡すとしゃベル
-        time.sleep(2) #待つ
-        rcspc = recognize_speech(return_extract_person_name="array") #arrayと渡すと人名と文字おこし両方できる。0番目=名前、1番目テキストすべて
-        
-        recognize_speech()
-
-        # 音声を聞き取るには下の二行で取得する。
-        #self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
-
-        rospy.wait_for_service("/speechToText")
-        voice_res = self.speechToText(True, 3, True, True, -1)
-        name_like = extractPersonName("わたしのなまえは" + voice_res)
-
-        return name_like
-
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
         time.sleep(10)
-        #rtbioscmp.speech_test("あなたの名前は何ですか。")
-        #---------メイン関数内の関数-------------
-
-        #音声部分とやり取りを行い、名前のようなものを取得する関数
-        """
-        def speech_test(self, question):
-            # 音声を喋るにはここに文字列を渡す
-            self.audio_pub.publish(question)#名前を聞く。
-
-            # 音声を聞き取るには下の二行で取得する。
-            # self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
-
-            rospy.wait_for_service("/speechToText")
-            voice_res = self.speechToText(True, 3, True, True, -1)
-            name_like = voice_res.res
-
-            return 
-        """
     
 
         #ゲストの特徴を報告する文章を作る関数
