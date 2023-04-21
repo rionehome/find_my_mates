@@ -16,11 +16,9 @@ add_service_files(
 
 add_message_files(
   FILES
-  ArmAction.msg
-  MoveAction.msg
+  Feature.msg
   LidarData.msg
   RealTime.msg
-  Feature.msg
 )
 
 add_service_files(
