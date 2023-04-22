@@ -3,6 +3,7 @@
 
 
 #control
+from control import control_system
 
 #image
 
@@ -15,10 +16,11 @@ from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPer
 
 class CIC():
     def __init__(self):
+        self
         
-
     def main(self):
-        
+        control_system.move_to_next_room()
+        control_system.move_near_guest()
 
 if __name__=="__main__":
     cic = CIC()
