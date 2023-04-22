@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from geographic_msgs.msg import Twist
+from geometry_msgs.msg import Twist
 from find_my_mates.msg import LidarData
 import rospy
 import time
