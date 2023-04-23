@@ -6,6 +6,7 @@
   <!--control-->
   <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
   <node pkg="find_my_mates" name="lidar" type="lidar.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="control" type="control_system.py" required="true" output="screen" />
   <node pkg="find_my_mates" name="cic" type="fmm_CIC.py" required="true" output="screen" />
 
   <!--image-->

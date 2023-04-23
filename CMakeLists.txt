@@ -19,13 +19,13 @@ add_message_files(
   Feature.msg
   LidarData.msg
   RealTime.msg
-  cp.msg
-  gngt.msg
+  Cp.msg
+  Gngt.msg
   Ksntl.msg
-  mng.msg
+  Mng.msg
   Mtfsl.msg
-  rp.msg
-  rsp.msg
+  Rp.msg
+  Rsp.msg
 )
 
 add_service_files(
