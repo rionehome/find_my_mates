@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #control
-from control import control_system
+import rospy
 
 #image
 
@@ -15,11 +15,19 @@ from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPer
 
 class CIC():
     def __init__(self):
+        #control
+        rospy.init_node("cic")
+        self.control_
+
+        #image
+
+        #sound
+
         
     def main(self):
-        current_position #現在地点
-        next_to_location #次に人がいるかもしれない場所
-        start_position #スタート地点
+        current_position = 1#現在地点
+        next_to_location = 1#次に人がいるかもしれない場所
+        start_position = 1#スタート地点
 
         for i in range(3):
             control_system.move_to_first_serch_location(next_to_location)
@@ -27,13 +35,13 @@ class CIC():
             #画像認識で人間が要るかを検知
             discover_person = True#仮
             while discover_person:
-                current_position = keep_serch_next_to_location(current_position, next_to_location)
+                current_position = control_system.keep_serch_next_to_location(current_position, next_to_location)
                 next_to_location += 1
                 #画像認識で人間が要るかを検知
                 if True:#人間がいる
                     discover_person = False#人がいる場合Falseにしてループを抜ける
 
-            go_near_guest_time = control_system.move_near_guest
+            go_near_guest_time = control_system.move_near_guest()
 
             #画像で特徴量を取得する
 

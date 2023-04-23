@@ -3,6 +3,7 @@
 from geometry_msgs.msg import Twist
 from find_my_mates.msg import LidarData
 import move_to_only_position as mtop
+import turn
 import rospy
 import time
 
@@ -53,13 +54,13 @@ class ControlSystem():
             turn.turn_180("left")
 
         elif current_position == 3 and next_to_location == 4:
-            turn_90("left")
+            turn.turn_90("left")
             mtop.move_34()
             turn.turn_90("right")
             current_position = 4
 
         elif current_position == 4 and next_to_location == 5:
-            turn_180("left")
+            turn.turn_180("left")
 
         return current_position
 
@@ -92,21 +93,21 @@ class ControlSystem():
 
         move_function_num = 10 * now_place + serching_place
 
-        if move_function_num = 12:
+        if move_function_num == 12:
             mtop.move_12()
-        elif move_function_num = 21:
+        elif move_function_num == 21:
             mtop.move_21()
-        elif move_function_num = 23:
+        elif move_function_num == 23:
             mtop.move_23()
-        elif move_function_num = 32:
+        elif move_function_num == 32:
             mtop.move_32()
-        elif move_function_num = 34:
+        elif move_function_num == 34:
             mtop.move_34()
-        elif move_function_num = 43:
+        elif move_function_num == 43:
             mtop.move_43()
-        elif move_function_num = 24:
+        elif move_function_num == 24:
             mtop.move_24()
-        elif move_function_num = 42:
+        elif move_function_num == 42:
             mtop.move_42()
 
 

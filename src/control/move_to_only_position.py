@@ -22,7 +22,7 @@ def move_12():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_21():
     twist.linear.x = -1 * LINEAR_SPEED
@@ -32,7 +32,7 @@ def move_21():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_23():
     turn.turn_90("right")
@@ -43,7 +43,7 @@ def move_23():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_32():
     twist.linear.x = -1 * LINEAR_SPEED
@@ -53,7 +53,7 @@ def move_32():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_34():
     twist.linear.x = LINEAR_SPEED
@@ -63,7 +63,7 @@ def move_34():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_43():
     twist.linear.x =  -1 * LINEAR_SPEED
@@ -73,7 +73,7 @@ def move_43():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_24():
     twist.linear.x = LINEAR_SPEED
@@ -83,7 +83,7 @@ def move_24():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
 def move_42():
     twist.linear.x = -1 * LINEAR_SPEED
@@ -93,5 +93,5 @@ def move_42():
     start_time = time.time()
 
     while time.time() - start_time < move_time:
-        self.twist_pub.publish(twist)
+        twist.twist_pub.publish(twist)
 
