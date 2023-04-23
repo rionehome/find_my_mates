@@ -3,7 +3,7 @@
 
 #control
 import rospy
-from find_my_mates.msg import Ksntl, mng, Mtfsl, rp, rsp
+from find_my_mates.msg import cp, gngt, Ksntl, mng, Mtfsl, rp, rsp
 
 #image
 
@@ -33,9 +33,9 @@ class CIC():
         current_position = 1#現在地点
         next_to_location = 1#次に人がいるかもしれない場所
         start_position = 1#スタート地点
-        msntl = Msntl()
-        ksntl = ksntl()
+        ksntl = Ksntl()
         mng = mng()
+        mtfsl = Mtfsl()
         rp = rp()
         rsp = rsp()
 

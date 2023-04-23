@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from geometry_msgs.msg import Twist
-from find_my_mates.msg import LidarData, cp, gngt
+from find_my_mates.msg import LidarData, cp, gngt, Mtfsl, Ksntl, mng, rp, rsp
 import move_to_only_position as mtop
 import turn
 import rospy
@@ -16,7 +16,7 @@ gngt = gngt()
 class ControlSystem():
     def __init__(self):
         self.twist_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
-        self.cp_pub = rospu.Publisher("/cp", cp, queue_size=1)
+        self.cp_pub = rospy.Publisher("/cp", cp, queue_size=1)
         self.gngt_pub = rospy.Publisher("/gngt", gngt, queue_size=1)
         self.mtfsl_sub = rospy.Subscriber("/mtfsl", Mtfsl, self.move_to_first_serch_location)
         self.ksntl_sub = rospy.Subscriber("/ksntl", Ksntl, self.keep_serch_next_to_location)
@@ -100,7 +100,7 @@ class ControlSystem():
         twist.linear.x = NEAR_GEST_SPEED
         twist.angular.z = 0
         start_time = time.time()
-        while time.time() - start_time < go_near_gest_time:
+        while time.time() - start_time < go_near_guest_time:
             self.twist_pub.publish(twist)
 
     def return_start_position(self, msg):
