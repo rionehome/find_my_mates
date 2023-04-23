@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 #control
-from control import control_system
+import rospy
+from find_my_mates.msg import Ksntl, mng, Mtfsl, rp, rsp
 
 #image
 
@@ -15,31 +16,60 @@ from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPer
 
 class CIC():
     def __init__(self):
+        #control
+        rospy.init_node("cic")
+        self.mtfsl_pub = rospy.Publisher("/Mtfsl", Mtfsl, queue_size=1)
+        self.ksntl_pub = rospy.Publisher("/Ksntl", Ksntl, queue_size=1)
+        self.mng_pub = rospy.Publisher("/mng", mng, queue_size=1)
+        self.rp_pub = rospy.Publisher("/rp", rp, queue_size=1)
+        self.rsp_pub = rospy.Publisher("/rsp", rsp, queue_size=1)
+
+        #image
+
+        #sound
+
         
     def main(self):
-        current_position #現在地点
-        next_to_location #次に人がいるかもしれない場所
-        start_position #スタート地点
+        current_position = 1#現在地点
+        next_to_location = 1#次に人がいるかもしれない場所
+        start_position = 1#スタート地点
+        msntl = Msntl()
+        ksntl = ksntl()
+        mng = mng()
+        rp = rp()
+        rsp = rsp()
+
 
         for i in range(3):
-            control_system.move_to_first_serch_location(next_to_location)
+            mtfsl.next_to_location = next_to_location
+            self.mtfsl_pub(mtfsl)
 
             #画像認識で人間が要るかを検知
             discover_person = True#仮
             while discover_person:
-                current_position = keep_serch_next_to_location(current_position, next_to_location)
+                ksntl.current_position = current_position
+                ksntl.next_to_location = next_to_location
+                self.ksntl_pub(ksntl)
+
+                current_position = rospy.wait_for_message("/cp", cp)
+
                 next_to_location += 1
                 #画像認識で人間が要るかを検知
                 if True:#人間がいる
                     discover_person = False#人がいる場合Falseにしてループを抜ける
 
-            go_near_guest_time = control_system.move_near_guest
+            mng.tekitou = 1
+            self.mng_pub(mng)
+
+            go_near_guest_time = rospy.wait_for_message("/gngt", gngt)
 
             #画像で特徴量を取得する
 
-            control_system.return_position(go_near_guest_time)
+            rp.go_near_guest_time = go_near_guest_time
+            self.rp_pub(rp)
 
-            control_system.return_start_position(current_position)
+            rsp.current_position =  current_position
+            self.rsp_pub(rsp)
 
 if __name__=="__main__":
     cic = CIC()
