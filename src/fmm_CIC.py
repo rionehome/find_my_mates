@@ -3,9 +3,6 @@
 
 #control
 import rospy
-# from find_my_mates.msg import Place
-from std_msgs.msg import Float32
-from find_my_mates.msg import Cp, Gngt, Ksntl, Mng, Mtfsl, Rp, Rsp
 from control_system import ControlSystem
 import time
 
