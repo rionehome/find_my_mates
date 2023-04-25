@@ -1,100 +1,94 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from geometry_msgs.msg import Twist
 import rospy
 import time
-import turn
 
-LINEAR_SPEED = 0.20
-TIME12 = 2.0
-TIME23 = 2.0
-TIME34 = 2.0
-TIME24 = TIME23 + TIME34
-
-turn = turn.Turn()
-
+#環境に合わせて変更する
+LINEAR_SPEED = 0.20 #速すぎず遅すぎず
+TIME12 = 2.0 #1~2の間を進む時間にする
+TIME23 = 2.0 #2~3の間を進む時間にする
+TIME34 = 2.0 #3~4の間を進む時間にする
+TIME24 = 2.0 #2~4の間を進む時間にする
 
 twist = Twist()
-turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+twist.angular.z = 0
 
-def move_12():
-    twist.linear.x = LINEAR_SPEED
-    twist.angular.z = 0
+#pos_~~の~~の部分はmemo.txtのpositionを参照
+class Position():
+    def __init__(self):
+        self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
 
-    move_time = TIME12
-    start_time = time.time()
+    def pos_12(self):
+        twist.linear.x = LINEAR_SPEED
+        move_time = TIME12
 
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-def move_21():
-    twist.linear.x = -1 * LINEAR_SPEED
-    twist.angular.z = 0
+    def pos_21(self):
+        twist.linear.x = -1 * LINEAR_SPEED
+        move_time = TIME12
 
-    move_time = TIME12
-    start_time = time.time()
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+    def pos_23(self):
+        twist.linear.x = LINEAR_SPEED
+        move_time = TIME23
 
-def move_23():
-    turn.turn_90("right")
-    twist.linear.x = LINEAR_SPEED
-    twist.angular.z = 0
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-    move_time = TIME23
-    start_time = time.time()
+    def pos_32(self):
+        twist.linear.x = -1 * LINEAR_SPEED
+        move_time = TIME23
 
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-def move_32():
-    twist.linear.x = -1 * LINEAR_SPEED
-    twist.angular.z = 0
+    def pos_34(self):
+        twist.linear.x = LINEAR_SPEED
+        move_time = TIME34
 
-    move_time = TIME23
-    start_time = time.time()
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+    def pos_43(self):
+        twist.linear.x =  -1 * LINEAR_SPEED
+        move_time = TIME34
 
-def move_34():
-    twist.linear.x = LINEAR_SPEED
-    twist.angular.z = 0
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-    move_time = TIME34
-    start_time = time.time()
+    def pos_24(self):
+        twist.linear.x = LINEAR_SPEED
+        move_time = TIME24
 
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 
-def move_43():
-    twist.linear.x =  -1 * LINEAR_SPEED
-    twist.angular.z = 0
+    def pos_42(self):
+        twist.linear.x = -1 * LINEAR_SPEED
+        move_time = TIME24
 
-    move_time = TIME34
-    start_time = time.time()
-
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
-
-def move_24():
-    twist.linear.x = LINEAR_SPEED
-    twist.angular.z = 0
-
-    move_time = TIME24
-    start_time = time.time()
-
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
-
-def move_42():
-    twist.linear.x = -1 * LINEAR_SPEED
-    twist.angular.z = 0
-
-    move_time = TIME24
-    start_time = time.time()
-
-    while time.time() - start_time < move_time:
-        turtle_pub.publish(twist)
+        start_time = time.time()
+        while time.time() - start_time < move_time:
+            self.turtle_pub.publish(twist)
+            rospy.Rate(30).sleep()
 

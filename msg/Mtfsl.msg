@@ -1,1 +1,0 @@
-int16 next_to_location

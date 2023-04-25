@@ -1,1 +1,0 @@
-float32 go_near_guest_time

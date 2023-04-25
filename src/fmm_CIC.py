@@ -1,9 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #control
 import rospy
+# from find_my_mates.msg import Place
+from std_msgs.msg import Float32
 from find_my_mates.msg import Cp, Gngt, Ksntl, Mng, Mtfsl, Rp, Rsp
+from control_system import ControlSystem
 import time
 
 #image
@@ -19,11 +22,7 @@ class CIC():
     def __init__(self):
         #control
         rospy.init_node("cic")
-        self.mtfsl_pub = rospy.Publisher("/mtfsl", Mtfsl, queue_size=1)
-        self.ksntl_pub = rospy.Publisher("/ksntl", Ksntl, queue_size=1)
-        self.mng_pub = rospy.Publisher("/mng", Mng, queue_size=1)
-        self.rp_pub = rospy.Publisher("/rp", Rp, queue_size=1)
-        self.rsp_pub = rospy.Publisher("/rsp", Rsp, queue_size=1)
+        self.control = ControlSystem()
 
         #image
 
@@ -33,19 +32,18 @@ class CIC():
     def main(self):
         time.sleep(3)
 
-        current_position = 1#現在地点
-        next_to_location = 1#次に人がいるかもしれない場所
-        start_position = 1#スタート地点
+        # position:移動するする場所の中継地
+        # location:人がいる可能性のある場所
+        
+        current_position = 1#現在position
+        next_position = 2#次のposition
+        next_location = 1#次に人がいるかもしれないlocation
+        
         ksntl = Ksntl()
         mng = Mng()
         mtfsl = Mtfsl()
         rp = Rp()
         rsp = Rsp()
-
-        print("hi")
-        mtfsl.next_to_location = next_to_location
-        self.mtfsl_pub.publish(mtfsl)
-        print("good bye")
 
         for i in range(3):
             mtfsl.next_to_location = next_to_location
@@ -54,6 +52,7 @@ class CIC():
 
             #画像認識で人間が要るかを検知
             discover_person = True#仮
+            
             while discover_person:
                 next_to_location += 1
                 print(next_to_location)

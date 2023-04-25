@@ -1,2 +1,0 @@
-int16 current_position
-int16 next_to_location
