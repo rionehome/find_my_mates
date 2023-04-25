@@ -6,7 +6,7 @@ import time
 
 twist = Twist()
 
-ANGULAR_SPEED = 0.20
+ANGULAR_SPEED = 4
 
 TIME90 = 2.0
 TIME180 = 4.0
@@ -27,6 +27,7 @@ class Turn():
         
         start_time = time.time()
         while time.time() - start_time < move_time:
+            print(twist)
             self.turn_pub.publish(twist)
             rospy.Rate(30).sleep()
 
@@ -45,4 +46,5 @@ class Turn():
             rospy.Rate(30).sleep()
 
 if __name__=="__main__":
+    rospy.init_node("aaaaaaaa")
     turn = Turn()

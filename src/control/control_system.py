@@ -16,8 +16,8 @@ turn = turn.Turn()
 
 class ControlSystem():
     def __init__(self):
-        rospy.init_node("control")
-        self.twist_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        #rospy.init_node("control")
+        #self.twist_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.cp_pub = rospy.Publisher("/cp", Cp, queue_size=1)
         self.gngt_pub = rospy.Publisher("/gngt", Gngt, queue_size=1)
         self.mtfsl_sub = rospy.Subscriber("/mtfsl", Mtfsl, self.move_to_first_serch_location)
