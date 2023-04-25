@@ -61,18 +61,24 @@ class CIC():
                 ksntl.next_to_location = next_to_location
                 self.ksntl_pub.publish(ksntl)
 
-                current_position = rospy.wait_for_message("/cp", Cp)
+                cp_sub = rospy.wait_for_message("/cp", Cp)
+                current_position = cp_sub.current_position
 
+                print("current_positionを出力")
+                print(current_position)
 
                 #画像認識で人間が要るかを検知
                 # if True:#人間がいる
                     # discover_person = False#人がいる場合Falseにしてループを抜ける
                 time.sleep(1)
+                if current_position == 5:
+                    break
 
             mng.tekitou = 1
             self.mng_pub.publish(mng)
 
-            go_near_guest_time = rospy.wait_for_message("/gngt", Gngt)
+            gngt_sub = rospy.wait_for_message("/gngt", Gngt)
+            go_near_guest_time = gngt_sub.go_near_guest_time
 
             #画像で特徴量を取得する
 

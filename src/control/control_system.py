@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from geometry_msgs.msg import Twist
 from find_my_mates.msg import LidarData, Cp, Gngt, Mtfsl, Ksntl, Mng, Rp, Rsp
@@ -57,21 +58,33 @@ class ControlSystem():
         next_to_location = msg.next_to_location
         if current_position == 1 and next_to_location == 2:
             turn.turn_90("right")
+            time.sleep(0.5)
             mtop.move_23()
+            time.sleep(0.5)
             turn.turn_90("left")
+            time.sleep(0.5)
             current_position = 2
+            print("いち")
 
         elif current_position == 2 and next_to_location == 3:
             turn.turn_180("left")
+            time.sleep(0.5)
+            print("に")
 
         elif current_position == 3 and next_to_location == 4:
             turn.turn_90("left")
+            time.sleep(0.5)
             mtop.move_34()
+            time.sleep(0.5)
             turn.turn_90("right")
+            time.sleep(0.5)
             current_position = 4
+            print("さん")
 
         elif current_position == 4 and next_to_location == 5:
             turn.turn_180("left")
+            time.sleep(0.5)
+            print("よん")
 
         cp.current_position = current_position
         self.cp_pub.publish(cp)

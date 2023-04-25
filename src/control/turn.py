@@ -6,9 +6,9 @@ import time
 
 twist = Twist()
 
-ANGULAR_SPEED = 4
+ANGULAR_SPEED = 0.8
 
-TIME90 = 2.0
+TIME90 = 2.1
 TIME180 = 4.0
 
 class Turn():
@@ -16,18 +16,16 @@ class Turn():
         self.turn_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
 
     def turn_90(self, direction="right"):
-        print("askr")
         twist.linear.x = 0
         twist.angular.z = ANGULAR_SPEED
 
-        if direction == "left":
+        if direction == "right":
             twist.angular.z *= - 1
 
         move_time = TIME90
         
         start_time = time.time()
         while time.time() - start_time < move_time:
-            print(twist)
             self.turn_pub.publish(twist)
             rospy.Rate(30).sleep()
 
@@ -35,7 +33,7 @@ class Turn():
         twist.linear.x = 0
         twist.angular.z = ANGULAR_SPEED
 
-        if direction == "left":
+        if direction == "right":
             twist.angular.z *= - 1
 
         move_time = TIME180
