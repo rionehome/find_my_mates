@@ -12,16 +12,15 @@ TIME23 = 2.0 #2~3の間を進む時間にする
 TIME34 = 2.0 #3~4の間を進む時間にする
 TIME24 = 2.0 #2~4の間を進む時間にする
 
-twist = Twist()
-twist.angular.z = 0
-
 #pos_~~の~~の部分はmemo.txtのpositionを参照
 class Position():
     def __init__(self):
         self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        self.twist = Twist()
+        self.twist.angular.z = 0
 
     def pos_12(self):
-        twist.linear.x = LINEAR_SPEED
+        self.twist.linear.x = LINEAR_SPEED
         move_time = TIME12
 
         start_time = time.time()
@@ -30,7 +29,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_21(self):
-        twist.linear.x = -1 * LINEAR_SPEED
+        self.twist.linear.x = -1 * LINEAR_SPEED
         move_time = TIME12
 
         start_time = time.time()
@@ -39,7 +38,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_23(self):
-        twist.linear.x = LINEAR_SPEED
+        self.twist.linear.x = LINEAR_SPEED
         move_time = TIME23
 
         start_time = time.time()
@@ -48,7 +47,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_32(self):
-        twist.linear.x = -1 * LINEAR_SPEED
+        self.twist.linear.x = -1 * LINEAR_SPEED
         move_time = TIME23
 
         start_time = time.time()
@@ -57,7 +56,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_34(self):
-        twist.linear.x = LINEAR_SPEED
+        self.twist.linear.x = LINEAR_SPEED
         move_time = TIME34
 
         start_time = time.time()
@@ -66,7 +65,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_43(self):
-        twist.linear.x =  -1 * LINEAR_SPEED
+        self.twist.linear.x =  -1 * LINEAR_SPEED
         move_time = TIME34
 
         start_time = time.time()
@@ -75,7 +74,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_24(self):
-        twist.linear.x = LINEAR_SPEED
+        self.twist.linear.x = LINEAR_SPEED
         move_time = TIME24
 
         start_time = time.time()
@@ -84,7 +83,7 @@ class Position():
             rospy.Rate(30).sleep()
 
     def pos_42(self):
-        twist.linear.x = -1 * LINEAR_SPEED
+        self.twist.linear.x = -1 * LINEAR_SPEED
         move_time = TIME24
 
         start_time = time.time()
