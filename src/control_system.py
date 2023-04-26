@@ -20,38 +20,38 @@ class ControlSystem():
         self.turn = Turn()
         pass
 
-    def first_destination(self, next_to_location):
-        if next_to_location == 1:
+    def first_destination(self, next_location):
+        if next_location == 1:
             self.pos.pos_12()
             current_position = 2
 
-        elif next_to_location == 2:
+        elif next_location == 2:
             self.pos.pos_12()
             self.pos.pos_23()
             self.turn.turn_90("left")
             current_position = 3
 
-        elif next_to_location == 3:
+        elif next_location == 3:
             self.pos.pos_12()
             self.pos.pos_23()
             self.turn.turn_90("right")
             current_position = 3
 
-        elif next_to_location == 4:
+        elif next_location == 4:
             self.pos.pos_12()
             self.pos.pos_24()
             self.turn.turn_90("right")
             current_position = 4
 
-        elif next_to_location == 5:
+        elif next_location == 5:
             self.pos.pos_12()
             self.pos.pos_24()
             self.turn.turn_90("left")
             current_position = 4
 
-        return current_position, next_to_location + 1
+        return current_position, next_location + 1
 
-    def move_to_destination(self, current_position, next_to_location): #2~4の間のポジションを移動するとき（１つ前のlocationに人が居なかった場合）に、
+    def move_to_destination(self, current_position, next_location): #2~4の間のポジションを移動するとき（１つ前のlocationに人が居なかった場合）に、
         if current_position == 2:            #次のpositionに移動してlocationの方向を向く関数
             self.turn.turn_90("right")
             time.sleep(0.5)
@@ -61,11 +61,11 @@ class ControlSystem():
             time.sleep(0.5)
             current_position = 2
 
-        elif current_position == 3 and next_to_location == 3:
+        elif current_position == 3 and next_location == 3:
             self.turn.turn_180("left")
             time.sleep(0.5)
 
-        elif current_position == 3 and next_to_location == 4:
+        elif current_position == 3 and next_location == 4:
             self.turn.turn_90("left")
             time.sleep(0.5)
             self.pos.pos_34()
@@ -78,7 +78,7 @@ class ControlSystem():
             self.turn.turn_180("left")
             time.sleep(0.5)
 
-        return current_position, next_to_location + 1
+        return current_position, next_location + 1
 
     def approach_guest(self):
         apr_guest_time = 0.0
@@ -107,29 +107,29 @@ class ControlSystem():
         while time.time() - start_time < apr_guest_time:
             self.turtle_pub.publish(self.twist)
 
-    def return_start_position(self, current_position, next_to_location):
+    def return_start_position(self, current_position, next_location):
         if current_position == 2:
             self.pos.pos_21()
 
-        elif current_position == 3 and next_to_location == 3:
+        elif current_position == 3 and next_location == 3:
             self.turn.turn_90("right")
             self.pos.pos_32()
             self.turn.turn_90("left")
             self.pos.pos_21()
 
-        elif current_position == 3 and next_to_location == 4:
+        elif current_position == 3 and next_location == 4:
             self.turn.turn_90("left")
             self.pos.pos_32()
             self.turn.turn_90("left")
             self.pos.pos_21()
 
-        elif current_position == 4 and next_to_location == 5:
+        elif current_position == 4 and next_location == 5:
             self.turn.turn_90("left")
             self.pos.pos_42()
             self.turn.turn_90("left")
             self.pos.pos_21()
 
-        elif current_position == 4 and next_to_location == 6:
+        elif current_position == 4 and next_location == 6:
             self.turn.turn_90("right")
             self.pos.pos_42()
             self.turn.turn_90("left")
