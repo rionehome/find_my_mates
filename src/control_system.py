@@ -138,5 +138,5 @@ class ControlSystem():
         
 
 if __name__=="__main__":
-    rospy.init_node("control")
+    #rospy.init_node("control")
     controlsystem = ControlSystem()
