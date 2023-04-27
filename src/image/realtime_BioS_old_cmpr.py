@@ -35,7 +35,8 @@ class RtBioSOldComp():
         制御への出版者を作成する (ターゲットが未発見、発見、または報告状態において、その人に接近し距離を調節するため)
         """
         rospy.init_node("raltimebio")
-        self.per_pub = rospy.
+        self.per_pub = rospy.Publisher("/person", Bool, queue_size=1)
+        self.bool = bool
 
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
@@ -176,9 +177,13 @@ class RtBioSOldComp():
             #カメラの起動中は顔を検出し、特徴抽出する
             if len(faces) == 0:
                 print("この位置の方向に人はいない")
+                self.bool = False
+                self.per_pub(self.bool)
                 break
 
             else: #顔が写っていたとき
+                self.bool = True
+                self.per_pub(self.bool)
                         
                 #0番目のみ対象が画面に映る顔の添字 
 

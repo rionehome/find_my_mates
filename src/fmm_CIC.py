@@ -5,6 +5,7 @@
 import rospy
 from control_system import ControlSystem
 import time
+from std_msgs.msg import Bool
 
 #image
 
@@ -38,17 +39,21 @@ class CIC():
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
-            discover_person = True#仮
+            discover_person = rospy.wait_for_message("/person", Bool)
             
             time.sleep(5)
-            while discover_person:
+
+            while discover_person.bool:
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 #画像認識で人間が要るかを検知
                 # if True:#人間がいる
                     # discover_person = False#人がいる場合Falseにしてループを抜ける
+                    
+                discover_person = rospy.wait_for_message("/person", Bool)
 
                 time.sleep(5)
+
                 if next_location == 6:#仮
                     break
 
