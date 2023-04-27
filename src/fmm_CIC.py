@@ -35,16 +35,11 @@ class CIC():
         current_position = 1#現在position
         next_position = 2#次のposition
         next_location = 1#次に人がいるかもしれないlocation
-        
-        ksntl = Ksntl()
-        mng = Mng()
-        mtfsl = Mtfsl()
-        rp = Rp()
-        rsp = Rsp()
 
         for i in range(3):
             mtfsl.next_to_location = next_to_location
             self.mtfsl_pub.publish(mtfsl)
+            self.control.
             time.sleep(3)
 
             #画像認識で人間が要るかを検知
