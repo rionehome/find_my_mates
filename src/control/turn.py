@@ -7,8 +7,10 @@ from geometry_msgs.msg import Twist
 
 #環境に合わせて変更する
 ANGULAR_SPEED = 0.8 #速すぎず遅すぎず
-TIME90 = 2.1 #90度回転できる時間にする
-TIME180 = 4.0 #180度回転できる時間にする
+L_TIME90 = 3.25 #90度回転できる時間にする
+L_TIME180 = 6.95 #180度回転できる時間にする
+R_TIME90 = 3.8
+R_TIME180 = 6.7
 
 
 #turn_~~の~~の部分は回転角度を表す
@@ -20,10 +22,11 @@ class Turn():
 
     def turn_90(self, direction="right"):
         self.twist.angular.z = ANGULAR_SPEED
-        move_time = TIME90
+        move_time = L_TIME90
 
         if direction == "right":
             self.twist.angular.z *= - 1
+            move_time = R_TIME90
 
         start_time = time.time()
         while time.time() - start_time < move_time:
@@ -32,10 +35,11 @@ class Turn():
 
     def turn_180(self, direction="left"):
         self.twist.angular.z = ANGULAR_SPEED
-        move_time = TIME180
+        move_time = L_TIME180
 
         if direction == "right":
             self.twist.angular.z *= - 1
+            move_time = R_TIME180
 
         start_time = time.time()
         while time.time() - start_time < move_time:

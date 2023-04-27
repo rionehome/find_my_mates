@@ -10,11 +10,14 @@ turn_〇〇()
 
 
 <当日に変更しないといけない部分>
-・turn.pyとmove_to_only_position.pyのTIME~の部分と~SPEEDの部分（定数）
+・turn.pyとmove_only_between_position.pyのTIME~の部分と~SPEEDの部分（定数）
 　・現地での90度または180度の回転時間する
 　・各ポジションの距離的移動時間にする
 　・回転する速度
 　・人間に近づくときの速度
+・control_system.pyのAPPROACH_SPEEDとAPPROACH_DISの部分（定数）
+　・APPROACH_SPEEDは近づく速度（正直、めっちゃゆっくりでいいと思う）
+　・APPROACH_DISは近づく距離（大会の規定と実行してみた感じの距離感に合わせて調整）
 
 --------------------------------------------------------------------
 |                                                            ----  |         
@@ -31,8 +34,8 @@ turn_〇〇()
 |                         |       |                          |タ|  |           
 |                         |       | ----                (L5) |ン|  |           
 |                         |       | |机| (L4)   <P4>         |ス|  |           
-|  ________    ________   |       | ----                     |  |  |           
-|  |_椅子_|    |_椅子_|   |       |                          ----  |           
+|  ________     _______   |       | ----                     |  |  |           
+|  |_椅子_|     |_椅子_|   |       |                          ----  |           
 ----------------------------------------------           ----------|
 
 OP = Operater
@@ -46,3 +49,12 @@ position = 移動に利用する中継地 (P)
 location = 人がいる可能性のある場所 <L>
 
 PからPへは直線移動
+
+
+
+first_destination()
+move_to_destination()
+move_near_guest()
+go_near_guest()
+return_position_from_guest()
+return_start_position()

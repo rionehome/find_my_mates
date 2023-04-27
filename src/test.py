@@ -3,10 +3,9 @@
 
 #control
 import rospy
-# from find_my_mates.msg import Place
-from std_msgs.msg import Float32
-from find_my_mates.msg import Cp, Gngt, Ksntl, Mng, Mtfsl, Rp, Rsp
 from control_system import ControlSystem
+from control.turn import Turn
+from control.move_only_between_position import Position
 import time
 
 
@@ -16,10 +15,22 @@ class Test():
         rospy.init_node("test")
         time.sleep(3)
         self.control = ControlSystem()
+        self.turn = Turn()
+        self.pos = Position()
 
     def main(self):
         next_to_location = 2
-        self.control.move_to_first_search_location(next_to_location)
+        # self.control.move_to_destination(next_to_location)
+        self.turn.turn_90("right")
+        time.sleep(3)
+        self.turn.turn_180("right")
+        time.sleep(3)
+        # self.turn.turn_90("left")
+        # time.sleep(3)
+        # self.turn.turn_180("left")
+        # time.sleep(3)
+
+        
 
 if __name__=="__main__":
     test = Test()
