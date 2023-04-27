@@ -52,11 +52,11 @@ class CIC():
                 if next_location == 6:#仮
                     break
 
-            apr_guest_time = self.control.approach_guest
+            # apr_guest_time = self.control.approach_guest
 
             #画像で特徴量を取得する
 
-            self.control.return_position_from_guest(apr_guest_time)
+            # self.control.return_position_from_guest(apr_guest_time)
 
             current_position = self.control.return_start_position(current_position, next_location)
             print("finish")

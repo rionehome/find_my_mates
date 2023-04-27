@@ -10,7 +10,7 @@ import numpy as np
 import cv2
 from insightface.app import FaceAnalysis
 import torch
-import image_system.detect_color_realtime as detect_color_realtime
+import detect_color_realtime as detect_color_realtime
 from scipy import stats
 import rospy
 from std_msgs.msg import String, Bool
@@ -35,11 +35,11 @@ class RtBioSOldComp():
         制御への出版者を作成する (ターゲットが未発見、発見、または報告状態において、その人に接近し距離を調節するため)
         """
         rospy.init_node("raltimebio")
+        self.per_pub = rospy.
 
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
         time.sleep(10)
-    
 
         #ゲストの特徴を報告する文章を作る関数
         #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
