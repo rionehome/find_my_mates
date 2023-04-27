@@ -20,7 +20,7 @@ class CIC():
     def __init__(self):
         #control
         rospy.init_node("cic")
-        time.sleep(3)
+        time.sleep(20)
         self.control = ControlSystem()
 
         #image
@@ -43,7 +43,7 @@ class CIC():
             
             time.sleep(5)
 
-            while discover_person.bool:
+            while discover_person.data:
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 #画像認識で人間が要るかを検知

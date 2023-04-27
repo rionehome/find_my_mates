@@ -178,12 +178,12 @@ class RtBioSOldComp():
             if len(faces) == 0:
                 print("この位置の方向に人はいない")
                 self.bool = False
-                self.per_pub(self.bool)
-                break
+                self.per_pub.publish(self.bool)
+                # break#仮
 
             else: #顔が写っていたとき
                 self.bool = True
-                self.per_pub(self.bool)
+                self.per_pub.publish(self.bool)
                         
                 #0番目のみ対象が画面に映る顔の添字 
 
