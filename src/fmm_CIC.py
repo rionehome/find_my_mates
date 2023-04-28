@@ -20,7 +20,7 @@ class CIC():
     def __init__(self):
         #control
         rospy.init_node("cic")
-        time.sleep(20)
+        time.sleep(3)
         self.control = ControlSystem()
 
         #image
@@ -59,7 +59,7 @@ class CIC():
 
             time.sleep(2)
 
-            apr_guest_time = self.control.approach_guest
+            apr_guest_time = self.control.approach_guest()
 
             #画像で特徴量を取得する
             time.sleep(3)

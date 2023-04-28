@@ -10,6 +10,7 @@ PIZZA = 24
 
 class Lidar():
     def __init__(self):
+        rospy.init_node("lidar")
         self.pub = rospy.Publisher('/lidar', LidarData, queue_size=1)
     
     def remove_inf(self, ranges):
