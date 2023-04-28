@@ -14,7 +14,7 @@ from speech_and_NLP.src.speechToText import recognize_speech
 from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning
 from speech_and_NLP.src.textToSpeech import textToSpeech
 
-class Audio():
+class AudioSystem():
     def __init__(self):
         self.sub = rospy.Subscriber("/audio", String, self.callback)
         self.speechToTextSrv = rospy.Service("/speechToText", SpeechToText, self.calbkSTT)
@@ -31,7 +31,7 @@ class Audio():
 
 if __name__ == '__main__':
     rospy.init_node("audio")
-    audio = Audio()
+    audio = AudioSystem()
     
     while not rospy.is_shutdown():
         rospy.Rate(10).sleep()
