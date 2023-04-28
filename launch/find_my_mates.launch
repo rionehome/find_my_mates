@@ -10,6 +10,7 @@
   <node pkg="find_my_mates" name="cic" type="fmm_CIC.py" required="true" output="screen" />
 
   <!--image-->
+  <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" />
   <!-- <node pkg="find_my_mates" name="realtime" type="realtime_BioS_old_cmpr.py" required="true" output="screen" /> -->
 
   <!--sound-->
