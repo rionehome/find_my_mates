@@ -27,6 +27,7 @@ class ControlSystem():
 
         elif next_location == 2:
             self.pos.pos_12()
+            self.turn.turn_90("right")
             self.pos.pos_23()
             self.turn.turn_90("left")
             current_position = 3
