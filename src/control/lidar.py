@@ -23,6 +23,8 @@ class Lidar():
         return f_ranges
     
     def average_ranges(self, ranges):
+        if len(ranges) == 0:
+            return 0
         return sum(ranges) / len(ranges)
     
     def get_distance(self):
@@ -51,5 +53,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         l = LidarData()
         l.distance = lidar.get_distance()
+        print(min(l.distance))
+        print("aaaaaaaaaaaaaaaaaa")
         lidar.pub.publish(l)
         rospy.Rate(10).sleep()

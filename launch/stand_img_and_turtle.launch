@@ -2,5 +2,10 @@
 
 <launch>
   <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
-  <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" /> 
+  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+  
+  <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" />
+
+  <!-- <include file="$(find rplidar_ros)/launch/rplidar.launch"/> -->
+  <node pkg="find_my_mates" name="lidar" type="lidar.py" required="true" output="screen" /> 
 </launch>

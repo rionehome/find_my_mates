@@ -10,7 +10,7 @@ from find_my_mates.msg import LidarData
 
 #環境に合わせて変更する
 APPROACH_SPEED = 0.20
-APPROACH_DIS = 0.9
+APPROACH_DIS = 0.7
 
 class ControlSystem():
     def __init__(self):
@@ -86,12 +86,14 @@ class ControlSystem():
 
     def approach_guest(self):
         apr_guest_time = 0.0
+        apr_start_time = time.time()
         while True:
             lidarData = rospy.wait_for_message("/lidar", LidarData)
             min_distance = min(lidarData.distance)
             print(min_distance)
             
             if min_distance < APPROACH_DIS: #adj
+                apr_guest_time = time.time() - apr_start_time
                 return apr_guest_time
             
             self.twist.linear.x = APPROACH_SPEED
@@ -101,7 +103,7 @@ class ControlSystem():
             start_time = time.time()
             while time.time() - start_time < move_time:
                 self.turtle_pub.publish(self.twist)
-                apr_guest_time += move_time
+                # apr_guest_time += move_time
 
     def return_position_from_guest(self, apr_guest_time):
         self.twist.linear.x = APPROACH_SPEED * -1

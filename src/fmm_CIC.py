@@ -11,7 +11,7 @@ from std_msgs.msg import Bool
 
 
 #sound
-from audio_system import AudioSystem
+# from audio_system import AudioSystem
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
 # from audio.speech_and_NLP.src.speechToText import recognize_speech #音声認識
 # from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
@@ -23,7 +23,7 @@ class CIC():
         rospy.init_node("cic")
         time.sleep(3)
         self.control = ControlSystem()
-        self.audio = AudioSystem()
+        # self.audio = textToSpeech()
 
         #image
 
@@ -36,7 +36,7 @@ class CIC():
         current_position = 1#現在position
         next_location = 1#次に人がいるかもしれないlocation
         apr_guest_time = 0#人間に近づく為にかかった時間
-        textToSpeech("I start program.")
+        textToSpeech(text="I start program.", gTTS_lang="en")
 
         for i in range(3):
             current_position, next_location = self.control.first_destination(next_location)
@@ -62,9 +62,11 @@ class CIC():
 
             time.sleep(2)
 
+            textToSpeech(text="Hello!", gTTS_lang="en")
+
             apr_guest_time = self.control.approach_guest()
 
-            textToSpeech("Can I listen your name?")
+            textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
             #画像で特徴量を取得する
             time.sleep(3)
