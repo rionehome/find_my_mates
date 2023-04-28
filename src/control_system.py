@@ -34,18 +34,21 @@ class ControlSystem():
 
         elif next_location == 3:
             self.pos.pos_12()
+            self.turn.turn_90("right")
             self.pos.pos_23()
             self.turn.turn_90("right")
             current_position = 3
 
         elif next_location == 4:
             self.pos.pos_12()
+            self.turn.turn_90("right")
             self.pos.pos_24()
             self.turn.turn_90("right")
             current_position = 4
 
         elif next_location == 5:
             self.pos.pos_12()
+            self.turn.turn_90("right")
             self.pos.pos_24()
             self.turn.turn_90("left")
             current_position = 4

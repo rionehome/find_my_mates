@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 
 #環境に合わせて変更する
 ANGULAR_SPEED = 0.8 #速すぎず遅すぎず
-L_TIME90 = 3.25 #90度回転できる時間にする
+L_TIME90 = 4.25 #90度回転できる時間にする
 L_TIME180 = 6.95 #180度回転できる時間にする
 R_TIME90 = 3.8
 R_TIME180 = 6.7

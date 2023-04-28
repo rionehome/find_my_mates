@@ -21,14 +21,14 @@ class Test():
     def main(self):
         next_to_location = 2
         # self.control.move_to_destination(next_to_location)
-        self.turn.turn_90("right")
-        time.sleep(3)
-        self.turn.turn_180("right")
-        time.sleep(3)
-        # self.turn.turn_90("left")
+        # self.turn.turn_90("right")
         # time.sleep(3)
-        # self.turn.turn_180("left")
+        # self.turn.turn_180("right")
         # time.sleep(3)
+        self.turn.turn_90("left")
+        time.sleep(3)
+        self.turn.turn_180("left")
+        time.sleep(3)
 
         
 

@@ -57,6 +57,8 @@ class CIC():
                 if next_location == 6:#仮
                     break
 
+            time.sleep(2)
+
             # apr_guest_time = self.control.approach_guest
 
             #画像で特徴量を取得する
