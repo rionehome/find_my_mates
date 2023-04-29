@@ -25,6 +25,7 @@ add_service_files(
   FILES
   Camera_msg.srv
   MoveArm.srv
+  OdomTurn.srv
 )
 
 generate_messages(
