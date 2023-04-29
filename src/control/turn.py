@@ -4,7 +4,7 @@
 import rospy
 import time
 from geometry_msgs.msg import Twist
-from angular import RotateBot
+from control.angular import RotateBot
 
 #環境に合わせて変更する
 ANGULAR_SPEED = 0.8 #速すぎず遅すぎず
