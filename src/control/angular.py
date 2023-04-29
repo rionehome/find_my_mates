@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import rospy
@@ -63,31 +63,31 @@ if __name__ == '__main__':
 #         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
 #         self.current_angle = yaw
 
-#     def rotate(self, target_angle=0, direction="left"):
-#         # self.target_angle = radians(target_angle)
-#         rate = rospy.Rate(10) # 10Hz
-#         # error = self.target_angle - self.current_angle
-#         if direction == "left":
-#             error = self.target_angle - self.current_angle
-#         else:
-#             error = self.current_angle - self.target_angle
+    def rotate(self, target_angle=0, direction="left"):
+        # self.target_angle = radians(target_angle)
+        rate = rospy.Rate(10) # 10Hz
+        # error = self.target_angle - self.current_angle
+        if direction == "left":
+            error = self.target_angle - self.current_angle
+        else:
+            error = self.current_angle - self.target_angle
 
-#         while abs(error) < 0.01:#abs()は絶対値を求める関数
-#             # 残差を計算
-#             if direction == "left":
-#                 error = self.target_angle - self.current_angle
-#             else:
-#                 error = self.current_angle - self.target_angle
-#             # if abs(error) < 0.01:  # 0.01 radian未満になったら回転終了
-#             #     break
-#             # PID制御
-#             Kp = 1.0  # 比例制御ゲイン
-#             # Ki = 0.0  # 積分制御ゲイン
-#             # Kd = 0.0  # 微分制御ゲイン
-#             twist = Twist()
-#             twist.angular.z = Kp * error
-#             self.turtle_pub.publish(twist)
-#             rate.sleep()
+        while abs(error) < 0.01:#abs()は絶対値を求める関数
+            # 残差を計算
+            if direction == "left":
+                error = self.target_angle - self.current_angle
+            else:
+                error = self.current_angle - self.target_angle
+            # if abs(error) < 0.01:  # 0.01 radian未満になったら回転終了
+            #     break
+            # PID制御
+            Kp = 1.0  # 比例制御ゲイン
+            # Ki = 0.0  # 積分制御ゲイン
+            # Kd = 0.0  # 微分制御ゲイン
+            twist = Twist()
+            twist.angular.z = Kp * error
+            self.turtle_pub.publish(twist)
+            rate.sleep()
 
 #     def euler_from_quaternion(self, quaternion):
 #         x = quaternion[0]
