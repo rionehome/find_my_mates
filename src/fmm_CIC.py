@@ -67,6 +67,9 @@ class CIC():
             apr_guest_time = self.control.approach_guest()
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+            #(音声)音声（名前）を取得する
+            #(音声)名前を組み込んだ文章を作成する
+            #(音声)今日は○○さん、みたいなことを言う
 
             #画像で特徴量を取得する
             time.sleep(3)
@@ -76,10 +79,16 @@ class CIC():
             time.sleep(1)
 
             current_position = self.control.return_start_position(current_position, next_location)
+
+            furniture = "long table"
+
+            #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
+            #(音声)I will search next guest!と喋る
+
             print("finish")
-            
-            #特徴量の情報をOPに対して喋る
             time.sleep(2)
+
+        #(音声)以上で終了します。と喋る
 
 if __name__=="__main__":
     rospy.init_node('cic')
