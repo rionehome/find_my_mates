@@ -13,9 +13,13 @@ from std_msgs.msg import Bool
 #sound
 # from audio_system import AudioSystem
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
-# from audio.speech_and_NLP.src.speechToText import recognize_speech #音声認識
+from audio.speech_and_NLP.src.speechToText import recognize_speech #音声認識
+from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 # from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
 # from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
+
+import nltk
+from nltk import word_tokenize, pos_tag, ne_chunk
 
 class CIC():
     def __init__(self):
@@ -68,8 +72,14 @@ class CIC():
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
             #(音声)音声（名前）を取得する
+            res = recognize_speech(print_partial=True, use_break=3, lang='en')
+
+            guest_name = find_nearest_word(res, ["ここに名前のリストを入れる"])
+
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
+            textToSpeech(text="My name is " + guest_name, gTTS_lang="en")
+            
 
             #画像で特徴量を取得する
             time.sleep(3)
@@ -83,7 +93,10 @@ class CIC():
             furniture = "long table"
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
+            textToSpeech(text=guest_name + "is near by" + furniture + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
             #(音声)I will search next guest!と喋る
+            textToSpeech(text="I will search next guest!", gTTS_lang="en")
+            
 
             print("finish")
             time.sleep(2)
