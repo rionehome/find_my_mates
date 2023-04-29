@@ -4,6 +4,7 @@
 import rospy
 import time
 from geometry_msgs.msg import Twist
+from angular import RotateBot
 
 #環境に合わせて変更する
 ANGULAR_SPEED = 0.8 #速すぎず遅すぎず
@@ -19,19 +20,21 @@ class Turn():
         self.turn_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.twist = Twist()
         self.twist.linear.x = 0
+        self.rotate = RotateBot()
 
     def turn_90(self, direction="right"):
-        self.twist.angular.z = ANGULAR_SPEED
-        move_time = L_TIME90
+        self.rotate.rotate(90, direction)
+        # self.twist.angular.z = ANGULAR_SPEED
+        # move_time = L_TIME90
 
-        if direction == "right":
-            self.twist.angular.z *= - 1
-            move_time = R_TIME90
+        # if direction == "right":
+        #     self.twist.angular.z *= - 1
+        #     move_time = R_TIME90
 
-        start_time = time.time()
-        while time.time() - start_time < move_time:
-            self.turn_pub.publish(self.twist)
-            rospy.Rate(30).sleep()
+        # start_time = time.time()
+        # while time.time() - start_time < move_time:
+        #     self.turn_pub.publish(self.twist)
+        #     rospy.Rate(30).sleep()
 
     def turn_180(self, direction="left"):
         self.twist.angular.z = ANGULAR_SPEED
