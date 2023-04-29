@@ -82,5 +82,9 @@ class CIC():
             time.sleep(2)
 
 if __name__=="__main__":
-    cic = CIC()
-    cic.main()
+    try:
+        cic = CIC()
+        cic.main()
+    except rospy.ROSInterruptException:
+        print("pass")
+        pass
