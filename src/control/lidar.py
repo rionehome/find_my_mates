@@ -54,6 +54,5 @@ if __name__ == '__main__':
         l = LidarData()
         l.distance = lidar.get_distance()
         print(min(l.distance))
-        print("aaaaaaaaaaaaaaaaaa")
         lidar.pub.publish(l)
         rospy.Rate(10).sleep()

@@ -24,6 +24,7 @@ class Turn():
 
     def turn_90(self, direction="right"):
         self.rotate.rotate(90, direction)
+        print("90どかいてんするはず")
         # self.twist.angular.z = ANGULAR_SPEED
         # move_time = L_TIME90
 

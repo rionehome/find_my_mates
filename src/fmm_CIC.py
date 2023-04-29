@@ -82,6 +82,7 @@ class CIC():
             time.sleep(2)
 
 if __name__=="__main__":
+    rospy.init_node('cic')
     try:
         cic = CIC()
         cic.main()
