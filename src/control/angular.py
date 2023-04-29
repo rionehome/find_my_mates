@@ -4,7 +4,7 @@
 import rospy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from tf.transformations import euler_from_quaternion
+# from tf.transformations import euler_from_quaternion
 from math import radians
 
 class RotateBot:
@@ -17,7 +17,7 @@ class RotateBot:
 
     def odom_callback(self, msg):
         orientation = msg.pose.pose.orientation
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        (roll, pitch, yaw) = self.euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         self.current_angle = yaw
 
     def rotate(self, target_angle, direction="left"):
@@ -45,6 +45,28 @@ class RotateBot:
             twist.angular.z = Kp * error
             self.turtle_pub.publish(twist)
             rate.sleep()
+
+    def euler_from_quaternion(quaternion):
+        x = quaternion[0]
+        y = quaternion[1]
+        z = quaternion[2]
+        w = quaternion[3]
+        
+        sinr_cosp = 2.0 * (w * x + y * z)
+        cosr_cosp = 1.0 - 2.0 * (x * x + y * y)
+        roll = math.atan2(sinr_cosp, cosr_cosp)
+        
+        sinp = 2.0 * (w * y - z * x)
+        if abs(sinp) >= 1:
+            pitch = math.copysign(math.pi / 2, sinp)  # use 90 degrees if out of range
+        else:
+            pitch = math.asin(sinp)
+        
+        siny_cosp = 2.0 * (w * z + x * y)
+        cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
+        yaw = math.atan2(siny_cosp, cosy_cosp)
+        
+        return roll, pitch, yaw
 
 if __name__ == '__main__':
     try:
