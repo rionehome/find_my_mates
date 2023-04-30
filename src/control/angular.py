@@ -8,7 +8,7 @@ from tf.transformations import euler_from_quaternion
 
 class RotateBot:
     def __init__(self, target_angle):
-        rospy.init_node('/rotate_turtlebot')
+        rospy.init_node('rotate_turtlebot')
         self.cmd_pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=1)
         self.odom_sub = rospy.Subscriber('/odom', Odometry, self.odom_callback)
         self.target_angle = target_angle
@@ -20,6 +20,7 @@ class RotateBot:
         self.current_angle = yaw
 
     def rotate(self):
+        print("ろーて")
         rate = rospy.Rate(10) # 10Hz
         while not rospy.is_shutdown():
             # 残差を計算
@@ -37,7 +38,8 @@ class RotateBot:
 
 if __name__ == '__main__':
     rospy.init_node('rotate_turtlebot')
-    rotate = RotateBot()
+    rotate = RotateBot(1.57)
+    rotate.rotate()
 
 
 # #!/usr/bin/env python

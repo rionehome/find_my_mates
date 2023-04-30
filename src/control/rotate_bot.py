@@ -26,17 +26,34 @@ class RotateBot:
         if direction == "left":
             error = angle - self.current_angle
         elif direction == "right":
-            error = angle - self.current_angle # 右回転するための処理
+            error = self.current_angle - angle
+            if error < 0:
+                error += radians(360)  # errorが負の場合に360度を加算する
         else:
             rospy.logerr("Invalid direction: %s" % direction)
             return False
+
+        # if direction == "left":
+        #     error = angle - self.current_angle
+        # elif direction == "right":
+        #     error = angle + radians(360) - self.current_angle # 右回転するための処理
+        # else:
+        #     rospy.logerr("Invalid direction: %s" % direction)
+        #     return False
 
         while abs(error) >= 0.01:
             print("whileのなか")
             if direction == "left":
                 error = angle - self.current_angle
             elif direction == "right":
-                error = angle - self.current_angle # 右回転するための処理
+                error = self.current_angle - angle
+                if error < 0:
+                    error += radians(360)  # errorが負の場合に360度を加算する
+
+            # if direction == "left":
+            #     error = angle - self.current_angle
+            # elif direction == "right":
+            #     error = angle + radians(360) - self.current_angle # 右回転するための処理
             
             Kp = 1.0
             twist = Twist()
