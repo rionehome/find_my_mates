@@ -14,12 +14,13 @@ from std_msgs.msg import Bool
 # from audio_system import AudioSystem
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
 from speech_and_NLP.src.speechToText import recognize_speech #音声認識
+import gc
+import vosk
 # from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 # from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning #文章の中に単語を検索する
 # from speech_and_NLP.src.tools.speech_to_text.extractPersonName import extractPersonName #人名取得
 
-# import nltk
-# from nltk import word_tokenize, pos_tag, ne_chunk
+from nltk import word_tokenize, pos_tag, ne_chunk
 
 class CIC():
     def __init__(self):
@@ -27,12 +28,12 @@ class CIC():
         rospy.init_node("cic")
         time.sleep(3)
         self.control = ControlSystem()
-        # self.audio = textToSpeech()
+        #self.audio = textToSpeech()
 
         #image
 
         #sound
-
+        
         
     def main(self):
         # position:移動するする場所の中継地
@@ -71,13 +72,14 @@ class CIC():
 
             print("approachsuruhazu")
             apr_guest_time = self.control.approach_guest()
+            print("近づき終了")
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
             #(音声)音声（名前）を取得する
             res = recognize_speech(print_partial=True, use_break=3, lang='en')
 
-            # guest_name = find_nearest_word(res, ["ここに名前のリストを入れる"])
-            guest_name = "mark"
+            guest_name = find_nearest_word(res, ["ここに名前のリストを入れる"])
+            # guest_name = "mark"
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
             textToSpeech(text="My name is " + guest_name, gTTS_lang="en")

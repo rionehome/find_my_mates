@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import rospy
@@ -16,7 +16,7 @@ if __name__ == '__main__':
         # print("Result: success={}".format(res.success))
         # time.sleep(2)
 
-        angle = radians(180)
+        angle = radians(90)
         print(angle)
 
         

@@ -2,6 +2,7 @@
 
 <launch>
   <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
-  <node pkg="find_my_mates" name="rotate_bot" type="test_rotate_bot.py" required="true" output="screen" />  
+  <!-- <node pkg="find_my_mates" name="rotate_bot" type="test_rotate_bot.py" required="true" output="screen" />   -->
   <node pkg="find_my_mates" name="totate_turtlebot" type="rotate_bot.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="rota_sam" type="rota_sample.py" required="true" output="screen" />
 </launch>
