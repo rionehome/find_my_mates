@@ -26,7 +26,7 @@ class RotateBot:
         if direction == "left":
             error = angle - self.current_angle
         elif direction == "right":
-            error = angle + radians(360) - self.current_angle # 右回転するための処理
+            error = angle - self.current_angle # 右回転するための処理
         else:
             rospy.logerr("Invalid direction: %s" % direction)
             return False
@@ -36,20 +36,12 @@ class RotateBot:
             if direction == "left":
                 error = angle - self.current_angle
             elif direction == "right":
-                error = angle + radians(360) - self.current_angle # 右回転するための処理
+                error = angle - self.current_angle # 右回転するための処理
             
             Kp = 1.0
             twist = Twist()
             twist.angular.z = Kp * error
             self.turtle_pub.publish(twist)
-
-            if direction == "left":
-                pass
-            elif direction == "right":
-                error = angle + radians(360) - self.current_angle # 右回転するための処理
-            else:
-                rospy.logerr("Invalid direction: %s" % direction)
-                return False
 
             rospy.sleep(1)
         return True
