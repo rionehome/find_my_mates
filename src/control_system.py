@@ -9,7 +9,7 @@ from control.turn import Turn
 from find_my_mates.msg import LidarData
 
 #環境に合わせて変更する
-APPROACH_SPEED = 0.20
+APPROACH_SPEED = 1.0
 APPROACH_DIS = 0.7
 
 class ControlSystem():
@@ -90,9 +90,10 @@ class ControlSystem():
         while True:
             lidarData = rospy.wait_for_message("/lidar", LidarData)
             min_distance = min(lidarData.distance)
+            front_back = lidarData.front_back
             print(min_distance)
             
-            if min_distance < APPROACH_DIS: #adj
+            if min_distance < APPROACH_DIS and front_back == "front": #adj
                 apr_guest_time = time.time() - apr_start_time
                 return apr_guest_time
             
