@@ -1,0 +1,101 @@
+#FMMの特徴量抽出mainルーチン
+
+import os
+import cv2
+import time
+
+from img_BioS_old_cmpr import get_sex_age_set, get_sex_age
+from img_clothes_color import get_clothes_color_set, get_clothes_color
+
+from UDP_module import UDP_recv
+
+
+#UDP通信の受信側の繰り返し
+#データを待ち受け
+
+def main():
+    count = 0 #繰り返し回数を数える
+
+    #ディレクトリのパスを指定
+    DIR = 'memory/'
+    
+    #ファイル数を出力
+    file_num = sum(os.path.isfile(os.path.join(DIR, name)) for name in os.listdir(DIR))
+    #print(file_num)
+
+    MAX_FILE_NUM = 10
+
+    while (True):
+
+        #写真が揃ってからまだ一回も実行していないときに、特徴を抽出する
+        if file_num == MAX_FILE_NUM and count == 0:
+            img_analysis_main()
+            print("OK")
+            count = 1
+
+        #写真が揃っていないときに、カウントを0に戻す
+        elif file_num < MAX_FILE_NUM:
+            count = 0
+
+
+def img_analysis_main():
+
+    app = get_sex_age_set()
+    pose, enable_segmentation, segmentation_score_th, use_brect, plot_world_landmark, ax, display_fps = get_clothes_color_set()
+
+
+    sock = UDP_recv("始まり")
+
+    img_c = 1
+
+    while(True):        
+
+        # 画像を読み込む #####################################################
+        read_path = "memory/person" + str(img_c) + ".png"
+
+
+        #ファイルが存在するとき読み込み
+        if os.path.exists(read_path):
+        
+            image = cv2.imread(read_path)
+
+
+            print(str(img_c) + ":")
+
+            age, sex = get_sex_age(app, image)
+            print(":age=" + str(age) + "、sex=" + str(sex))
+
+            color_dic_down, color_dic_up = get_clothes_color(pose, image, enable_segmentation, segmentation_score_th, use_brect, plot_world_landmark, ax, display_fps)
+            print("上の服の色:" + str(color_dic_up))
+            print("下の服の色:" + str(color_dic_down))
+
+            #glstf = get_glasses_tf(model, image)
+            #print(":glstf=" + glstf)
+
+            rcv_data = UDP_recv("繰り返し", sock=sock) #眼鏡が届くまで待っている
+            print("眼鏡=" + str(rcv_data))
+
+            print("\n")
+
+            img_c += 1
+
+        #存在しなければ終了
+        #else:
+        #    break
+
+    
+    UDP_recv("終了", sock=sock)
+
+
+        #del get_clothes_color_set(), get_clothes_color()
+ 
+#time.sleep(10)
+#del get_clothes_color_set, get_clothes_color
+#from img_glasses_detect import get_glasses_tf_set, get_glasses_tf
+
+
+if __name__ == "__main__":
+    #img_analysis_main()
+    main()
+    
+    
