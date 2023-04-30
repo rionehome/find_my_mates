@@ -9,7 +9,7 @@ from control.turn import Turn
 from find_my_mates.msg import LidarData
 
 #環境に合わせて変更する
-APPROACH_SPEED = 1.0
+APPROACH_SPEED = 0.3
 APPROACH_DIS = 0.7
 
 class ControlSystem():

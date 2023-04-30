@@ -69,6 +69,7 @@ class CIC():
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
+            print("approachsuruhazu")
             apr_guest_time = self.control.approach_guest()
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
