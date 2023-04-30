@@ -1,5 +1,6 @@
-#2022む作
 #!/usr/bin/env python
+
+#2022mu
 
 import math
 
@@ -82,9 +83,9 @@ if __name__ == "__main__":
 
 
 
-# #2022しゅ作
-
 # #!/usr/bin/env python
+
+# #2022shu
 
 # import rospy
 # from std_msgs.msg import Float32

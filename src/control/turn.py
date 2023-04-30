@@ -6,7 +6,7 @@
 import rospy
 import time
 from geometry_msgs.msg import Twist
-from control.angular import RotateBot
+# from control.angular import RotateBot
 
 #環境に合わせて変更する
 ANGULAR_SPEED = 0.8 #速すぎず遅すぎず
@@ -16,13 +16,13 @@ R_TIME90 = 3.8
 R_TIME180 = 6.7
 
 
-turn_~~の~~の部分は回転角度を表す
+# turn_~~の~~の部分は回転角度を表す
 class Turn():
     def __init__(self):
         self.turn_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.twist = Twist()
         self.twist.linear.x = 0
-        self.rotate = RotateBot()
+        # self.rotate = RotateBot()
 
     def turn_90(self, direction="right"):
         self.twist.angular.z = ANGULAR_SPEED

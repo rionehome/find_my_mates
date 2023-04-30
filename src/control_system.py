@@ -94,6 +94,7 @@ class ControlSystem():
             print(min_distance)
             
             if min_distance < APPROACH_DIS and front_back == "front": #adj
+                print("近づく")
                 apr_guest_time = time.time() - apr_start_time
                 return apr_guest_time
             
