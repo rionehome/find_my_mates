@@ -12,7 +12,7 @@ class Try():
 
 
     def main(self):
-        rospy.wait_for_service('/rotate_odom', OdomTurn)
+        rospy.wait_for_service('/rotate_odom')
         angle = float(radians(90))
         direction = "left"
 

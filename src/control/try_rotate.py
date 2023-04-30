@@ -9,11 +9,10 @@ from math import radians
 from find_my_mates.srv import OdomTurn
 
 class RotateBot:
-    def __init__(self, target_angle):
+    def __init__(self):
         self.turtle_pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=1)
         self.odom_sub = rospy.Subscriber('/odom', Odometry, self.odom_callback)
         self.speechToTextSrv = rospy.Service("/rotate_odom", OdomTurn, self.rotate)
-        self.target_angle = target_angle
         self.current_angle = 0.0
 
     def odom_callback(self, msg):

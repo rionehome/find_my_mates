@@ -71,7 +71,7 @@ class CIC():
             textToSpeech(text="Hello!", gTTS_lang="en")
 
             print("approachsuruhazu")
-            apr_guest_time = self.control.approach_guest()
+            # apr_guest_time = self.control.approach_guest()
             print("近づき終了")
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
@@ -88,7 +88,7 @@ class CIC():
             #画像で特徴量を取得する
             time.sleep(3)
 
-            self.control.return_position_from_guest(apr_guest_time)
+            # self.control.return_position_from_guest(apr_guest_time)
 
             time.sleep(1)
 
