@@ -4,7 +4,7 @@ import socket
 def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 
     if state == "始まり":
-        HOST_NAME = ''   
+        HOST_NAME = '127.0.0.1' 
         PORT = 8080
         #ipv4を使うので、AF_INET
         #udp通信を使いたいので、SOCK_DGRAM
@@ -18,7 +18,7 @@ def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
         rcv_data, addr = sock.recvfrom(1024)
         #print("receive data : [{}]  from {}".format(rcv_data.decode('utf-8'),addr))
 
-        return rcv_data.decode('utf-8')
+        return rcv_data.decode('utf-8'), sock
 
     elif state == "終了":
         sock.close()
@@ -29,7 +29,7 @@ def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 #UDP通信の送信側の準備
 def UDP_send(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), send_data = ''):
 
-    HOST_NAME = ''
+    HOST_NAME = '127.0.0.1' 
     PORT = 8080
 
     if state == "始まり":
@@ -43,7 +43,7 @@ def UDP_send(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), send_
 
     elif state == "繰り返し":
         sock.sendto(send_data.encode('utf-8'), (HOST_NAME, PORT))
-        return state
+        return sock
 
 
     elif state == "終了":

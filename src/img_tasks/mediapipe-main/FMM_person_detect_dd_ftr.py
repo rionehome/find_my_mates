@@ -6,16 +6,23 @@ import os
 
 def main():
   #state = "移動中"
-  state = "到着" 
+  state = "到着"
 
 
-  while(True):
-    if state == "到着":
+  #while(True):
+  print("state=" + str(state))
+
+  if state == "到着":
+    
+    person_dtc_wrt() #人の写真を切り抜く
+    
+    state = "移動中"
+
+
+
       
-      person_dtc_wrt() #人の写真を切り抜く
-      
 
-      state = "移動中"
+    
 
       #subprocess.call('python %s' % PATH1)
       #subprocess.call('python %s' % PATH2)
@@ -92,12 +99,8 @@ def person_dtc_wrt():
   person_c = 1 #画像の保存番号
   MAX_PERSON_C = 10 #撮影最大番号
 
-  #20枚まで撮影を続ける
+  #10枚まで撮影を続ける
   while True:
-
-    if person_c > MAX_PERSON_C:
-       break
-
    
 
     #--- 画像の取得 ---
@@ -223,7 +226,8 @@ def person_dtc_wrt():
     #  cv2.imshow('color',pic)
 
     #--- 「q」キー操作があればwhileループを抜ける ---
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('q') or person_c > MAX_PERSON_C:
+      cv2.destroyAllWindows()
       break
 
   #while(video.isOpened()):
@@ -248,4 +252,6 @@ def person_dtc_wrt():
   #results.pandas().xyxy[0]  # img1 predictions (pandas)
 
 if __name__ == '__main__':
-  main()
+  for i in range(3):
+    main()
+    time.sleep(10)
