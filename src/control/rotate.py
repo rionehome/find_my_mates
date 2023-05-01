@@ -37,7 +37,7 @@ class RotateBot:
             rate.sleep()
 
 if __name__ == '__main__':
-    rospy.init_node('rota_sam')
+    rospy.init_node("rotate")
     r = RotateBot()
 
     while not rospy.is_shutdown():

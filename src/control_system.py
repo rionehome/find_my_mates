@@ -7,6 +7,8 @@ from geometry_msgs.msg import Twist
 from control.move_only_between_position import Position
 from control.turn import Turn
 from find_my_mates.msg import LidarData
+from math import radians
+from find_my_mates.srv import OdomTurn
 
 #環境に合わせて変更する
 APPROACH_SPEED = 0.08
@@ -15,71 +17,147 @@ APPROACH_DIS = 0.8
 class ControlSystem():
     def __init__(self):
         self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        self.rotate_srv = rospy.ServiceProxy("/rotate_odom", OdomTurn)
         self.twist = Twist()
         self.pos = Position()
         self.turn = Turn()
         pass
 
     def first_destination(self, next_location):
+        rospy.wait_for_service("/rotate_odom")
+        angle = float(radians(90))
+
         if next_location == 1:
             self.pos.pos_12()
             current_position = 2
 
         elif next_location == 2:
             self.pos.pos_12()
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_23()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
             current_position = 3
 
         elif next_location == 3:
             self.pos.pos_12()
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_23()
-            self.turn.turn_90("right")
+
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             current_position = 3
 
         elif next_location == 4:
             self.pos.pos_12()
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_24()
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             current_position = 4
 
         elif next_location == 5:
             self.pos.pos_12()
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_24()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             current_position = 4
 
         return current_position, next_location + 1
 
-    def move_to_destination(self, current_position, next_location): #2~4の間のポジションを移動するとき（１つ前のlocationに人が居なかった場合）に、
-        if current_position == 2:            #次のpositionに移動してlocationの方向を向く関数
-            self.turn.turn_90("right")
+    def move_to_destination(self, current_position, next_location): #2~4の間のポジションを移動するとき（１つ前のlocationに人が居なかった場合）に、次のpositionに移動してlocationの方向を向く関数
+        rospy.wait_for_service("/rotate_odom")
+        
+        if current_position == 2:
+
+            angle = float(radians(90))
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             time.sleep(0.5)
             self.pos.pos_23()
             time.sleep(0.5)
-            self.turn.turn_90("left")
+
+            angle = float(radians(90))
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             time.sleep(0.5)
             current_position = 3
 
         elif current_position == 3 and next_location == 3:
-            self.turn.turn_180("left")
+            angle = float(radians(180))
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_180("left")
+
             time.sleep(0.5)
 
         elif current_position == 3 and next_location == 4:
-            self.turn.turn_90("left")
+            angle = float(radians(90))
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             time.sleep(0.5)
             self.pos.pos_34()
             time.sleep(0.5)
-            self.turn.turn_90("right")
+
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             time.sleep(0.5)
             current_position = 4
 
         elif current_position == 4:
-            self.turn.turn_180("left")
+            angle = float(radians(180))
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_180("left")
+            
             time.sleep(0.5)
 
         return current_position, next_location + 1
