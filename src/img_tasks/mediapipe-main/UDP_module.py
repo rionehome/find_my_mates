@@ -5,7 +5,7 @@ def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 
     if state == "始まり":
         HOST_NAME = '127.0.0.1' 
-        PORT = 8080
+        PORT = 20000
         #ipv4を使うので、AF_INET
         #udp通信を使いたいので、SOCK_DGRAM
         #ブロードキャストするときは255.255.255.255と指定せずに空文字
@@ -30,7 +30,7 @@ def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 def UDP_send(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), send_data = ''):
 
     HOST_NAME = '127.0.0.1' 
-    PORT = 8080
+    PORT = 20000
 
     if state == "始まり":
         #ipv4を使うので、AF_INET

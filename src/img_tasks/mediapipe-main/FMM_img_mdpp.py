@@ -4,6 +4,8 @@ import os
 import cv2
 import time
 
+from statistics import mean, mode
+
 from img_BioS_old_cmpr import get_sex_age_set, get_sex_age
 from img_clothes_color import get_clothes_color_set, get_clothes_color
 
@@ -73,8 +75,11 @@ def img_analysis_main(sock):
             age, sex = get_sex_age(app, image)
             print(":age=" + str(age) + "、sex=" + str(sex))
 
-            age_list.append(age)
-            sex_list.append(sex)
+            if age != "なし":
+                age_list.append(age)
+            
+            if age != "なし":
+                sex_list.append(sex)
 
             color_dic_down, color_dic_up = get_clothes_color(pose, image, enable_segmentation, segmentation_score_th, use_brect, plot_world_landmark, ax, display_fps)
             print("上の服の色:" + str(color_dic_up))
@@ -110,6 +115,46 @@ def img_analysis_main(sock):
     print("up_color_list=" + str(up_color_list))
     print("down_color_list=" + str(down_color_list))
     print("glasstf_list=" + str(glasstf_list))
+
+    print("\n")
+
+    #年齢の処理
+    age_lvl = int((mean(age_list) // 10) * 10) #平均値 --> 代
+    age_push = str(age_lvl) + "代"
+
+    if age_lvl < 10:
+        age_push = "10代未満"
+        
+
+    #性別の処理
+    sex_push = mode(sex_list)
+
+    #上の服の色の処理
+    up_color_push = mode(up_color_list)
+
+    #下の服の色の処理
+    down_color_push = mode(down_color_list)
+
+    #眼鏡の有無の処理
+    glasstf_push = "眼鏡なし"
+
+    if "眼鏡をかけている" in glasstf_list:
+        glasstf_push = "眼鏡をかけている"
+
+
+
+    print("最終出力")
+    print("age_push=" + age_push)
+    print("sex_push=" + sex_push)
+    print("up_color_push=" + up_color_push)
+    print("down_color_push=" + down_color_push)
+    print("glasstf_push=" + glasstf_push)
+
+    """
+    age_push, sex_push, up_color_push, down_color_push, glasstf_push
+    をメインへ出版しよう
+    """
+
 
     
 
