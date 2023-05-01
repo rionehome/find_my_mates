@@ -8,7 +8,7 @@ import os
 import rospy
 
 
-def main():
+def person_pic():
   #state = "移動中"
   state = "到着"
 
@@ -22,7 +22,7 @@ def main():
     
     state = "移動中"
 
-
+    return person_dtc_wrt
 
       
 
@@ -256,7 +256,6 @@ def person_dtc_wrt():
   #results.pandas().xyxy[0]  # img1 predictions (pandas)
 
 if __name__ == '__main__':
-  rospy.init_node("img_per_detect")
   for i in range(3):
-    main()
+    person_pic()
     time.sleep(10)

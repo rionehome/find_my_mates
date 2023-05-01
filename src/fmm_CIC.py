@@ -6,8 +6,11 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool
+import threading
 
 #image
+from img_tasks.mediapipe-main.FMM_person_detect_dd_ftr import person_pic
+from find_my_mates.msg import ImgData
 
 
 #sound
@@ -21,9 +24,11 @@ class CIC():
         rospy.init_node("cic")
         self.control = ControlSystem()
         #self.audio = textToSpeech()
+        self.thread_approach_guest = threading.Thread(target=self.control.approach_guest)
 
         #image
         self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
+        self.thread_img_pic = threading.Thread(target=person_pic)
 
         #sound
         
@@ -38,7 +43,6 @@ class CIC():
 
         for i in range(3):
             current_position, next_location = self.control.first_destination(next_location)
-            textToSpeech(text="hahahahhah", gTTS_lang="en")
 
             #画像認識で人間が要るかを検知
             discover_person = rospy.wait_for_message("/person", Bool)
@@ -65,6 +69,13 @@ class CIC():
 
             print("approachsuruhazu")
             # apr_guest_time = self.control.approach_guest()
+
+            #人間に近づく処理と写真を撮る処理を同時に行う必要があるため、threadingしている
+            apr_guest_time = self.thread_approach_guest.start()
+            take_pic = self.thread_img_pic.start()
+            
+            print(take_pic)
+
             print("近づき終了")
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
@@ -76,13 +87,14 @@ class CIC():
             # guest_name = "mark"
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
-            textToSpeech(text="My name is " + guest_name, gTTS_lang="en")
+            textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
+            img_data = rospy.wait_for_message("/imgdata", ImgData)
             
 
             #画像で特徴量を取得する
             time.sleep(3)
 
-            # self.control.return_position_from_guest(apr_guest_time)
+            self.control.return_position_from_guest(apr_guest_time)
 
             time.sleep(1)
 

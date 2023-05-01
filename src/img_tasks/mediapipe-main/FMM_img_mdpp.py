@@ -13,6 +13,7 @@ from img_clothes_color import get_clothes_color_set, get_clothes_color
 from UDP_module import UDP_recv
 
 import rospy
+from find_my_mates.msg import ImgData
 
 
 #UDP通信の受信側の繰り返し
@@ -49,6 +50,9 @@ def main():
 
 
 def img_analysis_main(sock):
+
+    data_pub = rospy.Publish("/imgdata", ImgData, queue_size=1)
+    imgdata = ImgData()
 
     app = get_sex_age_set()
     pose, enable_segmentation, segmentation_score_th, use_brect, plot_world_landmark, ax, display_fps = get_clothes_color_set()
@@ -115,6 +119,14 @@ def img_analysis_main(sock):
     print("up_color_list=" + str(up_color_list))
     print("down_color_list=" + str(down_color_list))
     print("glasstf_list=" + str(glasstf_list))
+
+    imgdata.age_list = age_list
+    imgdata.sex_list = sex_list
+    imgdata.up_color_list = up_color_list
+    imgdata.down_color_list = down_color_list
+    imgdata.glasstf_list = glasstf_list
+
+    data_pub.Publish(imgdata)
 
     
 
