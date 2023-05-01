@@ -205,31 +205,70 @@ class ControlSystem():
         time.sleep(2)
 
     def return_start_position(self, current_position, next_location):
+        rospy.wait_for_service("/rotate_odom")
+        angle = float(radians(90))
+
         if current_position == 2:
             self.pos.pos_21()
 
         elif current_position == 3 and next_location == 3:
-            self.turn.turn_90("right")
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_32()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_21()
 
         elif current_position == 3 and next_location == 4:
-            self.turn.turn_90("left")
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_32()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_21()
 
         elif current_position == 4 and next_location == 5:
-            self.turn.turn_90("left")
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_42()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_21()
 
         elif current_position == 4 and next_location == 6:
-            self.turn.turn_90("right")
+            direction = "right"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("right")
+
             self.pos.pos_42()
-            self.turn.turn_90("left")
+
+            direction = "left"
+            res = self.rotate_srv(angle, direction)
+
+            # self.turn.turn_90("left")
+
             self.pos.pos_21()
 
         current_position = 1

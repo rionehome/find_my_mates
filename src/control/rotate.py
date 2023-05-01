@@ -35,6 +35,7 @@ class RotateBot:
             twist.angular.z = Kp * error
             self.turtle_pub.publish(twist)
             rate.sleep()
+        return True
 
 if __name__ == '__main__':
     rospy.init_node("rotate")
