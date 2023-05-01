@@ -23,6 +23,7 @@ class CIC():
         #self.audio = textToSpeech()
 
         #image
+        self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
 
         #sound
         
