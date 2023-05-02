@@ -9,7 +9,7 @@ from std_msgs.msg import Bool
 import threading
 
 #image
-from img_tasks.mediapipe-main.FMM_person_detect_dd_ftr import person_pic
+from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import person_pic
 from find_my_mates.msg import ImgData
 
 
