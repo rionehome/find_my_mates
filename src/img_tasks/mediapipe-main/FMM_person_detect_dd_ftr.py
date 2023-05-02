@@ -3,60 +3,7 @@ import cv2
 import time
 import os
 
-
-def main():
-  #state = "移動中"
-  state = "到着"
-
-
-  #while(True):
-  print("state=" + str(state))
-
-  if state == "到着":
-    
-    person_dtc_wrt() #人の写真を切り抜く
-    
-    state = "移動中"
-
-
-
-      
-
-    
-
-      #subprocess.call('python %s' % PATH1)
-      #subprocess.call('python %s' % PATH2)
-
-      
-
-
-
-def person_dtc_wrt():
-
-  #memory内の画像を消去する
-  img_c = 1
-
-  while(True):
-        # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"
-
-        #ファイルが存在するとき削除し
-        if os.path.exists(read_path):
-          os.remove(read_path)
-          img_c += 1
-
-        #なければ終了する
-        else:
-          break
-
-
-
-  # Model
-  #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-  model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local')
-
-
-  """
+"""
   [‘person’, ‘bicycle’, ‘car’, ‘motorcycle’, ‘airplane’, ‘bus’, 
   ‘train’, ‘truck’, ‘boat’, ‘traffic light’, ‘fire hydrant’, ‘stop sign’, 
   ‘parking meter’, ‘bench’, ‘bird’, ‘cat’, ‘dog’, ‘horse’, ‘sheep’, ‘cow’, 
@@ -70,24 +17,141 @@ def person_dtc_wrt():
   ‘microwave’, ‘oven’, ‘toaster’, ‘sink’, ‘refrigerator’, ‘book’, ‘clock’, 
   ‘vase’, ‘scissors’, ‘teddy bear’, ‘hair drier’, ‘toothbrush’]
 
-  """
+"""
+
+def main():
+
+  #state = "移動中"
+  state = "到着"
+
+  # Model
+  #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+  model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local')
 
   #--- 検出の設定 ---
   model.conf = 0.5 #--- 検出の下限値（<1）。設定しなければすべて検出
   model.classes = [0] #--- 0:person クラスだけ検出する。設定しなければすべて検出
   print(model.names) #--- （参考）クラスの一覧をコンソールに表示
 
+  #--- カメラの設定 ---
+  PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
+  USB_CAM_DEV = 2 #USBカメラのデバイス番号 (その都度デバイス番号を変えること)
+
+  camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
+  web_camera = cv2.VideoCapture(USB_CAM_DEV) #USBカメラを取得
+
+
+  
+  while(True):
+    """
+    stateを購読する
+    """
+
+
+    if state == "到着":
+      person_dtc_wrt(model, camera, web_camera) #人の写真を切り抜く
+      state = "移動中"
+
+    elif state == "移動中":
+      person_exist(model, camera)
+
+
+
+def person_exist(model, camera):
+
+  person_exit = False #存在しない。   
+
+  #--- 画像の取得 ---
+  #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
+  #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
+  ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+
+  #--- 推定の検出結果を取得 ---
+  #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
+  results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
+
+  #--- 出力 ---
+  #--- 検出結果を画像に描画して表示 ---
+  #--- 各検出について
+
+  person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+
+  
+  #検出した人がいないとき
+  if len(person_dtc_list) == 0:
+    #人が写っていない前提で初期化する
+    person_exit = False #存在しない。
+
+
+  person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+  
+  #検出した人がいないとき
+  if len(person_dtc_list) == 0:
+    #人が写っていない前提で初期化する
+    person_exit = False #存在しない。
+
+
+  box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
+
+
+  for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
+
+    box_w = box[2] - box[0] #バウンディングボックスの幅
+    box_w_list.append(box_w) #リストに矩形の幅を追加
+
+
+  #人が検出されており、
+  if len(box_w_list) != 0:
+    
+    box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
+    #矩形の幅が150を超えているものがあれば
+    if box_w_max >= 150:
+      person_exit = True
+
+
+  print("person_exit=" + str(person_exit))
+
+
+
+def person_dtc_wrt(model, camera, web_camera):
+
+
+  person_exit = False #人が存在するか False:存在しない、True:存在する
+
+  #memory内の画像を消去する
+  img_c = 1
+
+  #--------------------------------------------------------------
+
+
+  #---以前の画像を削除する--------
+  while(True):
+    # 画像を読み込む #####################################################
+    read_path = "memory/person" + str(img_c) + ".png"
+
+    #ファイルが存在するとき削除し
+    if os.path.exists(read_path):
+      os.remove(read_path)
+      img_c += 1
+
+    #なければ終了する
+    else:
+      break
+  #-------------------------------
+
+
+
   #--- 映像の読込元指定 ---
   #camera = cv2.VideoCapture("../pytorch_yolov3/data/sample.avi")#--- localの動画ファイルを指定
-  camera = cv2.VideoCapture(0)                #--- カメラ：Ch.(ここでは0)を指定
+
   cap_count = 0 #1回だけ画像のサイズを取得する。
 
   #--- 画像のこの位置より左で検出したら、ヒットとするヒットエリアのためのパラメータ ---
   #pos_x = 240
 
   #人が写っていない前提で初期化する
-  robo_p_dis = 3 #ロボットと人との距離感覚
-  robo_p_drct = 3 #ロボットと人との方向感覚
+  #robo_p_dis = 3 #ロボットと人との距離感覚
+  #robo_p_drct = 3 #ロボットと人との方向感覚
 
   heigh = 0 #カメラから取得した画像の高さを保持
   width = 0 #カメラから取得した画像の幅を保持
@@ -99,6 +163,10 @@ def person_dtc_wrt():
   person_c = 1 #画像の保存番号
   MAX_PERSON_C = 10 #撮影最大番号
 
+
+  #-----繰り返し処理--------------------------------------------
+
+
   #10枚まで撮影を続ける
   while True:
    
@@ -107,28 +175,28 @@ def person_dtc_wrt():
     #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
     #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
     ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+    w_ret, w_img = web_camera.read()
 
+    #--- 画像の大きさを取得する
     if cap_count == 0:
       height, width = imgs.shape[:2]    
       print("幅:" + str(width) + "、高さ:" + str(height))
       cap_count = 1 
 
-  #--- 推定の検出結果を取得 ---
+    #--- 推定の検出結果を取得 ---
     #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
     results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
 
-  #--- 出力 ---
-  #--- 検出結果を画像に描画して表示 ---
+    #--- 出力 ---
+    #--- 検出結果を画像に描画して表示 ---
     #--- 各検出について
 
     person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-
     
     #検出した人がいないとき
     if len(person_dtc_list) == 0:
       #人が写っていない前提で初期化する
-      robo_p_dis = 3 #ロボットと人との距離感覚
-      robo_p_drct = 3 #ロボットと人との方向感覚
+      person_exit = False #存在しない。
 
 
     box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
@@ -161,7 +229,7 @@ def person_dtc_wrt():
         #--- 枠描画
 
     #以下のような矩形を追跡する(距離と位置で挙動を変える。)
-
+    #print("results.xyxy[0]=" + str(results.xyxy[0]))
 
     end_time = time.time() #現在時刻を終了時刻として取得する
 
@@ -176,7 +244,9 @@ def person_dtc_wrt():
       #print("box_w_max=" + str(box_w_max))
 
       #幅が350のバウンディングボックスを対象にする。
-      if box_w_max >= 150:
+      if box_w_max >= 150:    
+
+        box = results.xyxy[0][box_w_max_idx] #最大のバウンディングボックスを取得する
         
         #delta_time(1秒)以上の時間が経過していたら、
         if end_time - start_time >= delta_time:
@@ -184,6 +254,10 @@ def person_dtc_wrt():
 
           # img[top : bottom, left : right]
           cv2.imwrite("memory/person" + str(person_c) + ".png", imgs[int(box[1]):int(box[3]), int(box[0]):int(box[2])])
+
+          if w_img is not None:
+            cv2.imwrite("memory/face" + str(person_c) + ".png", w_img)
+
           person_c += 1 #番号をどんどん増やす
 
 
@@ -209,7 +283,16 @@ def person_dtc_wrt():
         #print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
 
     #--- 描画した画像を表示
-    cv2.imshow('color',imgs)
+    cv2.imshow("camera",imgs)
+
+    if w_img is not None:
+      cv2.imwrite("web_camere", w_img)
+
+    """
+    ここでperson_existを出版する。
+    True:立ち止まって撮影する
+    False:なにもしない
+    """
 
       #for i in range(len(results.xyxy)):
       #    print(results.pandas().xyxy[i])

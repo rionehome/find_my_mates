@@ -119,21 +119,42 @@ def img_analysis_main(sock):
     print("\n")
 
     #年齢の処理
-    age_lvl = int((mean(age_list) // 10) * 10) #平均値 --> 代
-    age_push = str(age_lvl) + "代"
+    if len(age_list) == 0:
+        age_push = "不明"
 
-    if age_lvl < 10:
-        age_push = "10代未満"
-        
+    else:
+        age_lvl = int((mean(age_list) // 10) * 10) #平均値 --> 代
+        age_push = str(age_lvl) + "代"
 
+        if age_lvl < 10:
+            age_push = "10代未満"
+
+    
     #性別の処理
-    sex_push = mode(sex_list)
+    if len(sex_list) == 0:
+        sex_list = "不明"
+    
+    else:
+        sex_push = mode(sex_list)
+
+
 
     #上の服の色の処理
-    up_color_push = mode(up_color_list)
+    if len(up_color_list) == 0:
+        up_color_push = "不明"
+
+    else:
+        up_color_push = mode(up_color_list)
+
+
 
     #下の服の色の処理
-    down_color_push = mode(down_color_list)
+    if len(down_color_list) == 0:
+        down_color_push = "不明"
+
+    else:
+        down_color_push = mode(down_color_list)
+
 
     #眼鏡の有無の処理
     glasstf_push = "眼鏡なし"
