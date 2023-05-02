@@ -18,6 +18,9 @@ from speech_and_NLP.src.textToSpeech import textToSpeech #発話
 from speech_and_NLP.src.speechToText import recognize_speech #音声認識
 from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 
+Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
+Guest = ["Amelia", "Angel", "Ava", "Charlie", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah", "Thomas", "William"]
+
 class CIC():
     def __init__(self):
         #control
@@ -34,7 +37,7 @@ class CIC():
         
         
     def main(self):
-        function_list = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
+        # function_list = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
         current_position = 1#現在position
@@ -83,7 +86,7 @@ class CIC():
             #(音声)音声（名前）を取得する
             res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
 
-            guest_name = find_nearest_word(res, ["mark", "alexa"])
+            guest_name = find_nearest_word(res, Guest)
             print(guest_name)
             # guest_name = "mark"
             #(音声)名前を組み込んだ文章を作成する
@@ -101,9 +104,10 @@ class CIC():
 
             current_position = self.control.return_start_position(current_position, next_location)
 
+            textToSpeech(text="Hi, operator", gTTS_lang="en")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + function_list[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
+            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
             #(音声)I will search next guest!と喋る
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
             
