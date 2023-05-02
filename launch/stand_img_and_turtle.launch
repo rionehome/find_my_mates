@@ -12,4 +12,5 @@
   <node pkg="find_my_mates" name="rotate" type="rotate.py" required="true" output="screen" />
 
   <node pkg="find_my_mates" name="lidar" type="lidar.py" required="true" output="screen" /> 
+  <node pkg="find_my_mates" name="img_per_detect" type="FMM_person_detect_dd_ftr.py" required="true" output="screen" />
 </launch>

@@ -256,6 +256,10 @@ def person_dtc_wrt():
   #results.pandas().xyxy[0]  # img1 predictions (pandas)
 
 if __name__ == '__main__':
+  rospy.init_node("img_per_detect")
   for i in range(3):
     person_pic()
     time.sleep(10)
+
+  while not rospy.is_shutdown():
+    rospy.Rate(10).sleep()

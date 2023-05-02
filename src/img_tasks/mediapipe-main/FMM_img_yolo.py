@@ -85,4 +85,5 @@ if __name__ == "__main__":
     #img_analysis_sub()
     main()
     
-    
+    while not rospy.is_shutdown():
+        rospy.Rate(10).sleep()

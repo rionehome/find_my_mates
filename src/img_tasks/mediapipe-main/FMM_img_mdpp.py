@@ -141,5 +141,8 @@ if __name__ == "__main__":
     rospy.init_node("img_mdpp")
     #img_analysis_main()
     main()
+
+    while not rospy.is_shutdown():
+        rospy.Rate(10).sleep()
     
     
