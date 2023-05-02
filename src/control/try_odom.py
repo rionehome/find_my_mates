@@ -82,7 +82,7 @@ class RotateBot:
         return True
 
 if __name__ == '__main__':
-    rospy.init_node('test_rotate')
+    rospy.init_node('test_odom')
     r = RotateBot()
 
     while not rospy.is_shutdown():

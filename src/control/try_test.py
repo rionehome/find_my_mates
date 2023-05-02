@@ -19,6 +19,9 @@ class Try():
         print("try")
         
         # distance(m)前進したところで、direction方向にangle(度)だけ回転を行う
+        # angle: float64 = 0 〜 360
+        # distance: float64 = 0 〜 x
+        # direction:　string = "left" or "right"
         res = self.rotate_srv(angle, distance, direction)
 
         print("Result: " + str(res.success))
