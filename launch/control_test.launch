@@ -2,5 +2,6 @@
 
 <launch>
   <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
-  <node pkg="find_my_mates" name="test" type="control_test.py" required="true" output="screen" />   
+  <node pkg="find_my_mates" name="move_odom" type="move_odom.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="control_system" type="control_system.py" required="true" output="screen" />   
 </launch>

@@ -7,7 +7,7 @@ import math
 import rospy
 from sensor_msgs.msg import LaserScan
 
-from carry_my_luggage.msg import LidarData
+from find_my_mates.msg import LidarData
 
 PIZZA = 24
 
