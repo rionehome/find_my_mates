@@ -34,6 +34,7 @@ class CIC():
         
         
     def main(self):
+        function_list = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
         current_position = 1#現在position
@@ -100,10 +101,9 @@ class CIC():
 
             current_position = self.control.return_start_position(current_position, next_location)
 
-            furniture = "long table"
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + furniture + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
+            textToSpeech(text=guest_name + "is near by" + function_list[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
             #(音声)I will search next guest!と喋る
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
             
