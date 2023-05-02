@@ -17,6 +17,7 @@ add_service_files(
 add_message_files(
   FILES
   Feature.msg
+  ImgData.msg
   LidarData.msg
   RealTime.msg
 )
