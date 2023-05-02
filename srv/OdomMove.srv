@@ -1,4 +1,5 @@
 float64 angle   # 回転する角度（単位：ラジアン）
+float64 distance # 前に進む距離
 string direction # 回転する方向（"left"または"right"）
 ---
 bool success    # サービスの成功/失敗を表すフラグ

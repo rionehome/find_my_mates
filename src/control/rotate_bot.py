@@ -5,7 +5,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
-from find_my_mates.srv import OdomTurn
+from find_my_mates.srv import OdomMove
 from math import radians
 
 class RotateBot:
