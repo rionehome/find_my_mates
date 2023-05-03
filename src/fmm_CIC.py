@@ -93,6 +93,9 @@ class CIC():
             #(音声)今日は○○さん、みたいなことを言う
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
             img_data = rospy.wait_for_message("/imgdata", ImgData)
+
+            if i == 0:
+                function = 
             
 
             #画像で特徴量を取得する
