@@ -1,5 +1,5 @@
-int16[] age_list
-string[] sex_list
-string[] up_color_list
-string[] down_color_list
-string[] glasstf_list
+string age_push
+string sex_push
+string up_color_push
+string down_color_push
+string glasstf_push

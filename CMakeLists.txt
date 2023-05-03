@@ -19,6 +19,7 @@ add_message_files(
   Feature.msg
   ImgData.msg
   LidarData.msg
+  OdomData.msg
   RealTime.msg
 )
 

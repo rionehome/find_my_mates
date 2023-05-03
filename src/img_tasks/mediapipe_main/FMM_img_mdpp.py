@@ -7,6 +7,8 @@ import os
 import cv2
 import time
 
+from statistics import mean, mode
+
 from img_BioS_old_cmpr import get_sex_age_set, get_sex_age
 from img_clothes_color import get_clothes_color_set, get_clothes_color
 
@@ -25,11 +27,11 @@ def main():
     count = 0 #繰り返し回数を数える
 
     #ディレクトリのパスを指定
-    DIR = 'memory/'
+    DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
     
     #print(file_num)
 
-    MAX_FILE_NUM = 10
+    MAX_FILE_NUM = 20
 
     while (True):
 
@@ -51,7 +53,7 @@ def main():
 
 def img_analysis_main(sock):
 
-    data_pub = rospy.Publish("/imgdata", ImgData, queue_size=1)
+    data_pub = rospy.Publisher("/imgdata", ImgData, queue_size=1)
     imgdata = ImgData()
 
     app = get_sex_age_set()
@@ -68,7 +70,7 @@ def img_analysis_main(sock):
     while(True):        
 
         # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"
+        read_path = "memory/person" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
 
 
         #ファイルが存在するとき読み込み
@@ -82,8 +84,10 @@ def img_analysis_main(sock):
             age, sex = get_sex_age(app, image)
             print(":age=" + str(age) + "、sex=" + str(sex))
 
-            age_list.append(age)
-            sex_list.append(sex)
+            if age != "なし":
+                age_list.append(age)
+            if age != "なし":
+                sex_list.append(sex)
 
             color_dic_down, color_dic_up = get_clothes_color(pose, image, enable_segmentation, segmentation_score_th, use_brect, plot_world_landmark, ax, display_fps)
             print("上の服の色:" + str(color_dic_up))
@@ -120,13 +124,67 @@ def img_analysis_main(sock):
     print("down_color_list=" + str(down_color_list))
     print("glasstf_list=" + str(glasstf_list))
 
-    imgdata.age_list = age_list
-    imgdata.sex_list = sex_list
-    imgdata.up_color_list = up_color_list
-    imgdata.down_color_list = down_color_list
-    imgdata.glasstf_list = glasstf_list
 
-    data_pub.Publish(imgdata)
+    print("\n")
+
+    #年齢の処理
+    if len(age_list) == 0:
+        age_push = "不明"
+
+    else:
+        age_lvl = int((mean(age_list) // 10) * 10) #平均値 --> 代
+        age_push = str(age_lvl) + "代"
+
+        if age_lvl < 10:
+            age_push = "10代未満"
+
+    
+    #性別の処理
+    if len(sex_list) == 0:
+        sex_list = "不明"
+    
+    else:
+        sex_push = mode(sex_list)
+
+
+
+    #上の服の色の処理
+    if len(up_color_list) == 0:
+        up_color_push = "不明"
+
+    else:
+        up_color_push = mode(up_color_list)
+
+
+
+    #下の服の色の処理
+    if len(down_color_list) == 0:
+        down_color_push = "不明"
+
+    else:
+        down_color_push = mode(down_color_list)
+
+
+    #眼鏡の有無の処理
+    glasstf_push = "眼鏡なし"
+
+    if "眼鏡をかけている" in glasstf_list:
+        glasstf_push = "眼鏡をかけている"
+
+    print("最終出力")
+    print("age_push=" + age_push)
+    print("sex_push=" + sex_push)
+    print("up_color_push=" + up_color_push)
+    print("down_color_push=" + down_color_push)
+    print("glasstf_push=" + glasstf_push)
+
+    imgdata.age_push = age_push
+    imgdata.sex_push = sex_push
+    imgdata.up_color_push = up_color_push
+    imgdata.down_color_push = down_color_push
+    imgdata.glasstf_push = glasstf_push
+
+    data_pub.publish(imgdata)
 
     
 
