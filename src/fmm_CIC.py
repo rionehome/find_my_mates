@@ -55,6 +55,9 @@ class CIC():
         apr_guest_time = 0.0#人間に近づく為にかかった時間
         textToSpeech("I start program.", gTTS_lang="en")
 
+        a = ["age", "gender", "glasses", "up_color", "down_color", "height"]
+        b = []
+
         for i in range(3):
             thread_approach_guest = threading.Thread(target=self.approach_guest)
             thread_img_pic = threading.Thread(target=self.person.person_detect)
@@ -126,8 +129,17 @@ class CIC():
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
-            if i == 1:
-                feature1 = "blackpink"
+            # a = ["age", "gender", "glasses", "up_color", "down_color", "height"]
+            # b = []
+            for j in range(3):
+                k = a[0]
+                l = a[1]
+
+                a.remove(k)
+                a.remove(l)
+
+                b.append(k)
+                b.append(l)
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
             textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
