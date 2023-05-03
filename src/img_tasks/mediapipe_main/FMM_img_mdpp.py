@@ -27,7 +27,7 @@ def main():
     count = 0 #繰り返し回数を数える
 
     #ディレクトリのパスを指定
-    DIR = 'memory/'
+    DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
     
     #print(file_num)
 
@@ -53,7 +53,7 @@ def main():
 
 def img_analysis_main(sock):
 
-    data_pub = rospy.Publish("/imgdata", ImgData, queue_size=1)
+    data_pub = rospy.Publisher("/imgdata", ImgData, queue_size=1)
     imgdata = ImgData()
 
     app = get_sex_age_set()
@@ -184,7 +184,7 @@ def img_analysis_main(sock):
     imgdata.down_color_push = down_color_push
     imgdata.glasstf_push = glasstf_push
 
-    data_pub.Publish(imgdata)
+    data_pub.publish(imgdata)
 
     
 

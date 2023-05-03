@@ -19,7 +19,8 @@ def main():
     count = 0 #繰り返し回数を数える
 
     #ディレクトリのパスを指定
-    DIR = 'memory/'
+    #DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
+    DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
     
     #print(file_num)
 

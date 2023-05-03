@@ -9,7 +9,7 @@ from math import pi, sqrt
 from find_my_mates.srv import OdomMove
 from tf.transformations import euler_from_quaternion
 from math import pi
-from find_my_mates import OdomData
+from find_my_mates.msg import OdomData
 
 LINEAR_MAX_SPEED = 0.2
 ANGULAR_MAX_SPEED = 0.5

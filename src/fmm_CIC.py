@@ -7,14 +7,13 @@ from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, Float32
 import threading
-from find_my_mates.msg import LidarData
+from find_my_mates.msg import LidarData, OdomData
 from geometry_msgs.msg import Twist
 from math import sqrt
 
 #image
-from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import main
+from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import Person
 from find_my_mates.msg import ImgData
-
 
 #sound
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
@@ -40,8 +39,9 @@ class CIC():
 
         #image
         self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
-        # self.thread_img_pic = threading.Thread(target=main)
+        # self.thread_img_pic = threading.Thread(target=person_detect)
         self.apr_guest_time = 0.0
+        self.person = Person
 
         #sound
         
@@ -57,7 +57,7 @@ class CIC():
 
         for i in range(3):
             thread_approach_guest = threading.Thread(target=self.approach_guest)
-            thread_img_pic = threading.Thread(target=main)
+            thread_img_pic = threading.Thread(target=self.person.person_detect)
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
@@ -83,7 +83,7 @@ class CIC():
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
-            odom_start_data = rospy.wait_for_message("/odom_data", Float32)
+            odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
             print("approachsuruhazu")
             self.approach_guest()
@@ -97,7 +97,7 @@ class CIC():
 
             print("近づき終了")
 
-            odom_finish_data = rospy.wait_for_message("/odom_data", Float32)
+            odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
             #(音声)音声（名前）を取得する
