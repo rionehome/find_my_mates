@@ -5,7 +5,7 @@
 import rospy
 from control_system import ControlSystem
 import time
-from std_msgs.msg import Bool, Float32
+from std_msgs.msg import Bool
 import threading
 from find_my_mates.msg import LidarData, OdomData
 from geometry_msgs.msg import Twist
@@ -115,7 +115,7 @@ class CIC():
             img_data = rospy.wait_for_message("/imgdata", ImgData)
 
             if i == 0:
-                function = 
+                function = "age"
             
 
             #画像で特徴量を取得する
@@ -124,7 +124,10 @@ class CIC():
             x = odom_finish_data.x - odom_start_data.x
             y = odom_finish_data.y - odom_start_data.y
             distance = sqrt(x**2 + y**2)
-            self.return_position_from_guest(distance)
+            self.control.return_position_from_guest(distance)
+
+
+            aaaaaa
 
             time.sleep(1)
 
@@ -186,15 +189,15 @@ class CIC():
                 # apr_guest_time += move_time
         # return apr_guest_time
 
-    def return_position_from_guest(self):
-        print("近づき時間" + str(self.apr_guest_time))
-        self.twist.linear.x = APPROACH_SPEED * -1
-        self.twist.angular.z = 0
+    # def return_position_from_guest(self, distance):
+    #     print("近づき時間" + str(self.apr_guest_time))
+    #     self.twist.linear.x = APPROACH_SPEED * -1
+    #     self.twist.angular.z = 0
 
-        start_time = time.time()
-        while time.time() - start_time < self.apr_guest_time:
-            self.turtle_pub.publish(self.twist)
-        time.sleep(2)
+    #     start_time = time.time()
+    #     while time.time() - start_time < self.apr_guest_time:
+    #         self.turtle_pub.publish(self.twist)
+    #     time.sleep(2)
 
 if __name__=="__main__":
     rospy.init_node('cic')
