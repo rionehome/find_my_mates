@@ -57,7 +57,7 @@ def person_dtc_wrt():
 
   # Model
   #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-  model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local')
+  model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path='yolov5s.pt', source='local')
 
 
   """
@@ -141,7 +141,12 @@ def person_dtc_wrt():
     #print("results.xyxy[0]=" + str(results.xyxy[0]))
     #print("len(results.xyxy[0])=" + str(len(results.xyxy[0])))
 
+    #print("results.xyxy[0]")
+    #print(results.xyxy[0])
+
     for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
+
+        print("cls=" + str(cls))
 
         #--- クラス名と信頼度を文字列変数に代入
         s = model.names[int(cls)]+":"+'{:.1f}'.format(float(conf)*100)
@@ -201,7 +206,7 @@ def person_dtc_wrt():
             )
 
         #--- 文字枠と文字列描画
-        #yoloの中よりも自分で描画した方が非常に高速
+        #yoloの中qqよりも自分で描画した方が非常に高速
         cv2.rectangle(imgs, (int(box[0]), int(box[1])-20), (int(box[0])+len(s)*10, int(box[1])), cc, -1)
         cv2.putText(imgs, s, (int(box[0]), int(box[1])-5), cv2.FONT_HERSHEY_PLAIN, 1, cc2, 1, cv2.LINE_AA)
 

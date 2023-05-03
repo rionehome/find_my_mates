@@ -4,9 +4,9 @@
 import rospy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from tf.transformations import euler_from_quaternion
-from math import radians, pi
 from find_my_mates.srv import OdomMove
+from tf.transformations import euler_from_quaternion
+from math import pi
 
 LINEAR_MAX_SPEED = 0.2
 ANGULAR_MAX_SPEED = 0.5
@@ -21,9 +21,7 @@ class RotateBot:
 
     def odom_callback(self, msg):
         self.current_linear = msg.pose.pose.position.y
-        orientation = msg.pose.pose.orientation
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        self.current_angle = yaw
+        self.current_angle = msg.pose.pose.orientation.z
 
     def rotate(self, msg):
         # 前進に関する設定
@@ -44,14 +42,15 @@ class RotateBot:
         if target_angle <= 0:
             target_angle = target_angle + 2 * pi
         target_angle = target_angle - pi
+        
+        print(target_point)
         print(target_angle)
+        
         rate = rospy.Rate(10) # 10Hz
         while not rospy.is_shutdown():
             # 残差を計算
             lin_error = abs(target_point - self.current_linear)
-            # 残差を計算
-            ang_error = abs(target_angle - self.current_angle)
-            if abs(ang_error) < 0.02:  # 0.02 radian未満になったら回転終了
+            if abs(lin_error) < 0.02:  # 0.02 radian未満になったら回転終了
                 break
             # PID制御
             Kp = 1.0  # 比例制御ゲイン
