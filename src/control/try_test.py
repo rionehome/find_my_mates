@@ -25,6 +25,10 @@ class Try():
         # distance:     float64 = 0 〜 x
         # direction:　  string  = "left" or "right"
         # angle:        float64 = 0 〜 360
+
+        # res = self.rotate_srv(forward_back, 0.0, "right", 270.0)
+        distance = 0.1
+
         res = self.rotate_srv(forward_back, distance, direction, angle)
 
         print("Result: " + str(res.res))

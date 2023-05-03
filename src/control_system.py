@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from geometry_msgs.msg import Twist
-from find_my_mates.msg import LidarData
+# from geometry_msgs.msg import Twist
+# from find_my_mates.msg import LidarData
 from find_my_mates.srv import OdomMove
 from math import radians
 import time
 
 #環境に合わせて変更する
-APPROACH_SPEED = 0.08
-APPROACH_DIS = 0.8
+# APPROACH_SPEED = 0.08
+# APPROACH_DIS = 0.8
 
 DISTANCE_12 = 0.5
 DISTANCE_23 = 0.5
@@ -36,9 +36,9 @@ DISTANCE_42 = DISTANCE_24
 
 class ControlSystem():
     def __init__(self):
-        self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        # self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.move_odom_srv = rospy.ServiceProxy("/move_odom", OdomMove)
-        self.twist = Twist()
+        # self.twist = Twist()
 
     def first_destination(self, next_location):
         rospy.wait_for_service("/move_odom")
@@ -123,45 +123,48 @@ class ControlSystem():
 
 ########## この間は、いじってないです。
 
-    def approach_guest(self):
-        print(1)
-        apr_guest_time = 0.0
-        apr_start_time = time.time()
-        while True:
-            print(2)
-            lidarData = rospy.wait_for_message("/lidar", LidarData)
-            min_DISTANCE = min(lidarData.DISTANCE)
-            front_back = lidarData.front_back
-            print(min_DISTANCE)
-            print(3)
+
+    # def approach_guest(self):
+    #     print(1)
+    #     apr_guest_time = 0.0
+    #     apr_start_time = time.time()
+    #     while True:
+    #         print(2)
+    #         lidarData = rospy.wait_for_message("/lidar", LidarData)
+    #         min_DISTANCE = min(lidarData.distance)
+    #         front_back = lidarData.front_back
+    #         print(min_DISTANCE)
+    #         print(3)
             
-            if min_DISTANCE < APPROACH_DIS and front_back == "front": #adj
-                print("近づく")
-                apr_guest_time = time.time() - apr_start_time
-                print(apr_guest_time)
-                # return apr_guest_time
-                break
+    #         if min_DISTANCE < APPROACH_DIS and front_back == "front": #adj
+    #             print("近づく")
+    #             apr_guest_time = time.time() - apr_start_time
+    #             print(apr_guest_time)
+    #             # return apr_guest_time
+    #             break
             
-            self.twist.linear.x = APPROACH_SPEED
-            self.twist.angular.z = 0
-            move_time = 0.1
+    #         self.twist.linear.x = APPROACH_SPEED
+    #         self.twist.angular.z = 0
+    #         move_time = 0.1
 
-            print(4)
+    #         print(4)
 
-            start_time = time.time()
-            while time.time() - start_time < move_time:
-                self.turtle_pub.publish(self.twist)
-                # apr_guest_time += move_time
-        return apr_guest_time
+    #         start_time = time.time()
+    #         while time.time() - start_time < move_time:
+    #             self.turtle_pub.publish(self.twist)
+    #             # apr_guest_time += move_time
+    #     return apr_guest_time
 
-    def return_position_from_guest(self, apr_guest_time):
-        self.twist.linear.x = APPROACH_SPEED * -1
-        self.twist.angular.z = 0
+    def return_position_from_guest(self, distance):
+        self.move_odom_srv("back", distance, "None", 0)
+        # print("近づき時間" + str(apr_guest_time))
+        # self.twist.linear.x = APPROACH_SPEED * -1
+        # self.twist.angular.z = 0
 
-        start_time = time.time()
-        while time.time() - start_time < apr_guest_time:
-            self.turtle_pub.publish(self.twist)
-        time.sleep(2)
+        # start_time = time.time()
+        # while time.time() - start_time < apr_guest_time:
+        #     self.turtle_pub.publish(self.twist)
+        # time.sleep(2)
 
 ##########
 

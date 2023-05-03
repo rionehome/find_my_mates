@@ -4,14 +4,12 @@
 import rospy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-<<<<<<< HEAD:src/control/try_odom.py
-=======
 from tf.transformations import euler_from_quaternion
 from math import pi, sqrt
->>>>>>> dabc9f33d5e0faefe5914e739089b89d8d504e2a:src/control/move_odom.py
 from find_my_mates.srv import OdomMove
 from tf.transformations import euler_from_quaternion
 from math import pi
+from find_my_mates import OdomData
 
 LINEAR_MAX_SPEED = 0.2
 ANGULAR_MAX_SPEED = 0.5
@@ -26,17 +24,17 @@ class RotateBot:
         self.speechToTextSrv = rospy.Service("/move_odom", OdomMove, self.move_odom)
         self.current_point = [0.0, 0.0]
         self.current_angle = 0.0
+        self.data_pub = rospy.Publisher('/odom_data',OdomData, queue_size=1)
 
     def odom_callback(self, msg):
-<<<<<<< HEAD:src/control/try_odom.py
-        self.current_linear = msg.pose.pose.position.y
-        self.current_angle = msg.pose.pose.orientation.z
-=======
         self.current_point = [msg.pose.pose.position.x, msg.pose.pose.position.y]
         orientation = msg.pose.pose.orientation
         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         self.current_angle = yaw
->>>>>>> dabc9f33d5e0faefe5914e739089b89d8d504e2a:src/control/move_odom.py
+        o = OdomData()
+        o.x = self.current_point[0]
+        o.y = self.current_point[1]
+        self.data_pub.publish(o)
 
     def move_odom(self, msg):
         # 前進に関する設定
@@ -54,27 +52,15 @@ class RotateBot:
             target_angle = start_angle - msg.angle
         if target_angle <= 0:
             target_angle = target_angle + 2 * pi
-<<<<<<< HEAD:src/control/try_odom.py
-        target_angle = target_angle - pi
-        
-        print(target_point)
-        print(target_angle)
-=======
         target_angle = target_angle - pi        # 0〜2*pi -> -pi〜pi
->>>>>>> dabc9f33d5e0faefe5914e739089b89d8d504e2a:src/control/move_odom.py
         
         rate = rospy.Rate(10) # 10Hz
         while not rospy.is_shutdown():
             # 残差を計算
-<<<<<<< HEAD:src/control/try_odom.py
-            lin_error = abs(target_point - self.current_linear)
-            if abs(lin_error) < 0.02:  # 0.02 radian未満になったら回転終了
-=======
             x = self.current_point[0] - start_point[0]
             y = self.current_point[1] - start_point[1]
             lin_error = distance - sqrt(x**2 + y**2)
             if abs(lin_error) < THRESHOLD_LINEAR:  # (閾値) (m) 未満になったら回転終了
->>>>>>> dabc9f33d5e0faefe5914e739089b89d8d504e2a:src/control/move_odom.py
                 break
             # PID制御
             Kp = 1.0  # 比例制御ゲイン

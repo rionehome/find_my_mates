@@ -1,16 +1,17 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" />
-  <node pkg="find_my_mates" name="img_yolo" type="FMM_img_yolo.py" required="true" output="screen" />
+  <!-- <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" /> -->
+  <!-- <node pkg="find_my_mates" name="img_yolo" type="FMM_img_yolo.py" required="true" output="screen" /> -->
 
   <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
   <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
   
-  <!-- <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" /> -->
+  <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" />
 
   <node pkg="find_my_mates" name="rotate" type="rotate.py" required="true" output="screen" />
 
   <node pkg="find_my_mates" name="lidar" type="lidar.py" required="true" output="screen" /> 
-  <node pkg="find_my_mates" name="img_per_detect" type="FMM_person_detect_dd_ftr.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="move_odom" type="move_odom.py" output="screen" />
+  <!-- <node pkg="find_my_mates" name="img_per_detect" type="FMM_person_detect_dd_ftr.py" required="true" output="screen" /> -->
 </launch>
