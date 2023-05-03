@@ -52,9 +52,52 @@ class CIC():
         
         
     def main(self):
+        print("final")
+
+        current_position = 4#現在地
+        route = "down"#positionを時計回りを"up"、反時計回りを"down"としている
+
+        textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
+        response = ["Yes", "No"]
+        res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+        audio_response = find_nearest_word(res, response)
+
+        if audio_response == "No":
+            textToSpeech("I finish program.", gTTS_lang="en")
+            return
+        
+        textToSpeech("I'll see you later.", gTTS_lang="en")
+        time.sleep(3)
+
+        while True:
+            textToSpeech("I start serching.", gTTS_lang="en")
+
+            while True:
+                if route == "down":
+                    self.control.move_position(current_position, current_position - 1)
+                    current_position -= 1
+                    if current_position == 0:
+                        route == "up"
+
+                else:
+                    self.control.move_position(current_position, current_position + 1)
+                    current_position += 1
+                    if current_position == 4:
+                        route == "down"
+                        
+                
+                
+                if True:#人間を見つけたら
+                    textToSpeech("I detect person.")
+                    break
+
+            break
+
+        time.sleep(20)
+######################################################################################################################
+
         state = String()
         state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
-        self.pic_pub.publish(state)
 
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
