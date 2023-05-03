@@ -23,7 +23,7 @@ def main():
     
     #print(file_num)
 
-    MAX_FILE_NUM = 10
+    MAX_FILE_NUM = 20 #personとface合わせて20枚
 
     while (True):
 
@@ -53,7 +53,7 @@ def img_analysis_sub(sock):
 
     while(True):
         # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"
+        read_path = "memory/face" + str(img_c) + ".png"#眼鏡は顔画像から読み取る
 
 
         #ファイルが存在するとき読み込み

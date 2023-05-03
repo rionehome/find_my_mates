@@ -31,7 +31,7 @@ def main():
     
     #print(file_num)
 
-    MAX_FILE_NUM = 10
+    MAX_FILE_NUM = 20
 
     while (True):
 
@@ -70,7 +70,7 @@ def img_analysis_main(sock):
     while(True):        
 
         # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"
+        read_path = "memory/person" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
 
 
         #ファイルが存在するとき読み込み
@@ -171,11 +171,18 @@ def img_analysis_main(sock):
     if "眼鏡をかけている" in glasstf_list:
         glasstf_push = "眼鏡をかけている"
 
-    imgdata.age_list = age_push
-    imgdata.sex_list = sex_push
-    imgdata.up_color_list = up_color_push
-    imgdata.down_color_list = down_color_push
-    imgdata.glasstf_list = glasstf_push
+    print("最終出力")
+    print("age_push=" + age_push)
+    print("sex_push=" + sex_push)
+    print("up_color_push=" + up_color_push)
+    print("down_color_push=" + down_color_push)
+    print("glasstf_push=" + glasstf_push)
+
+    imgdata.age_push = age_push
+    imgdata.sex_push = sex_push
+    imgdata.up_color_push = up_color_push
+    imgdata.down_color_push = down_color_push
+    imgdata.glasstf_push = glasstf_push
 
     data_pub.Publish(imgdata)
 
