@@ -25,7 +25,7 @@ def main():
     
     #print(file_num)
 
-    MAX_FILE_NUM = 10
+    MAX_FILE_NUM = 20
 
     while (True):
 
@@ -61,7 +61,7 @@ def img_analysis_main(sock):
     while(True):        
 
         # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"
+        read_path = "memory/person" + str(img_c) + ".png" #多くの特徴は人画像から読み取る
 
 
         #ファイルが存在するとき読み込み

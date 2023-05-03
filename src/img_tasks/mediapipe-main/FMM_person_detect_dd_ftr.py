@@ -35,12 +35,11 @@ def main():
 
   #--- カメラの設定 ---
   PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
-  USB_CAM_DEV = 2 #USBカメラのデバイス番号 (その都度デバイス番号を変えること)
+  WEB_CAM_DEV = cam_dev_dtc() #Webカメラのデバイス番号
 
   camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
-  web_camera = cv2.VideoCapture(USB_CAM_DEV) #USBカメラを取得
-
-
+  web_camera = cv2.VideoCapture(WEB_CAM_DEV)
+  
   
   while(True):
     """
@@ -54,6 +53,30 @@ def main():
 
     elif state == "移動中":
       person_exist(model, camera)
+      
+
+#使用可能なカメラのデバイス番号を調べる。
+def cam_dev_dtc(START_NUM=1, VIDEO_DEV_NUM=10):
+  #VIDEO_DEV_NUM = 10
+  #START_NUM = 3
+
+  WEB_CAM_DEV = 2
+
+  #webカメラの番号を取得する。
+  for i in range(START_NUM, VIDEO_DEV_NUM+1):
+    web_camera = cv2.VideoCapture(i) #USBカメラを取得
+    w_ret, w_imgs = web_camera.read()             
+
+    #画像を取得できる番号ときに、その番号をusbカメラとして使用できる。
+    if w_imgs is not None:
+      WEB_CAM_DEV = i
+      #print("WEB_CAM_DEV=" + str(WEB_CAM_DEV))
+      break
+
+    print("WEB_CAM_DEV=" + str(WEB_CAM_DEV))
+
+  return WEB_CAM_DEV
+      
 
 
 
@@ -119,20 +142,25 @@ def person_dtc_wrt(model, camera, web_camera):
   person_exit = False #人が存在するか False:存在しない、True:存在する
 
   #memory内の画像を消去する
-  img_c = 1
-
+  p_img_c = 1
+  f_img_c = 1
   #--------------------------------------------------------------
 
 
   #---以前の画像を削除する--------
   while(True):
     # 画像を読み込む #####################################################
-    read_path = "memory/person" + str(img_c) + ".png"
+    p_read_path = "memory/person" + str(p_img_c) + ".png"
+    f_read_path = "memory/face" + str(f_img_c) + ".png"
 
     #ファイルが存在するとき削除し
-    if os.path.exists(read_path):
-      os.remove(read_path)
-      img_c += 1
+    if os.path.exists(p_read_path):
+      os.remove(p_read_path)
+      p_img_c += 1
+
+    elif os.path.exists(f_read_path):
+      os.remove(f_read_path)
+      f_img_c += 1
 
     #なければ終了する
     else:
@@ -285,8 +313,9 @@ def person_dtc_wrt(model, camera, web_camera):
     #--- 描画した画像を表示
     cv2.imshow("camera",imgs)
 
+    print("w_img=" + str(w_img))
     if w_img is not None:
-      cv2.imwrite("web_camere", w_img)
+      cv2.imshow("web_camere", w_img)
 
     """
     ここでperson_existを出版する。
