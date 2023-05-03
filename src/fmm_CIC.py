@@ -24,7 +24,7 @@ APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.8
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
-Guest = ["Amelia", "Angel", "Ava", "Charlie", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah", "Thomas", "William"]
+Guest = ["Amelia", "Angel", "Ava", "Charlie", "Charlotte" "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah", "Thomas", "William"]
 
 
 class CIC():
@@ -125,9 +125,6 @@ class CIC():
             y = odom_finish_data.y - odom_start_data.y
             distance = sqrt(x**2 + y**2)
             self.control.return_position_from_guest(distance)
-
-
-            aaaaaa
 
             time.sleep(1)
 
