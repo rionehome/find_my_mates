@@ -6,6 +6,8 @@ import cv2
 import time
 import os
 import rospy
+from std_msgs.msg import Bool, String
+import threading
 
 """
   [‘person’, ‘bicycle’, ‘car’, ‘motorcycle’, ‘airplane’, ‘bus’, 
@@ -26,11 +28,16 @@ import rospy
 class Person:
   def __init__(self):
     #self.state = "移動中"
-    self.state = '到着'
+    self.state = "到着"
+    self.state_sub = rospy.Subscriber('/state', String, self.pic_callback)
+    self.check_exit_pub = rospy.Publisher("/person", Bool, queue_size=1)
+
+  def pic_callback(self, msg):
+    self.state = msg.pic_state
 
   def main(self):
 
-    #self.state = "移動中"
+    self.state = "移動中"
     # self.state = "到着"
 
     # Model
@@ -44,7 +51,7 @@ class Person:
 
     #--- カメラの設定 ---
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
-    WEB_CAM_DEV = self.cam_dev_dtc() #Webカメラのデバイス番号
+    WEB_CAM_DEV = 4#self.cam_dev_dtc() #Webカメラのデバイス番号
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
     web_camera = cv2.VideoCapture(WEB_CAM_DEV)
@@ -63,9 +70,6 @@ class Person:
 
       elif self.state == "移動中":
         self.person_exist(model, camera)
-
-  def person_detect(self):
-    self.state = "到着"
 
   #使用可能なカメラのデバイス番号を調べる。	
   def cam_dev_dtc(self, START_NUM=2, VIDEO_DEV_NUM=10):	
@@ -91,7 +95,6 @@ class Person:
 
 
   def person_exist(self, model, camera):
-
     person_exit = False #存在しない。   
 
     #--- 画像の取得 ---
@@ -144,10 +147,15 @@ class Person:
 
     print("person_exit=" + str(person_exit))
 
+    b = Bool()
+    b.data = person_exit
+    self.check_exit_pub.publish(b)
+
     """
     画像から メインへ 人がいるかどうか[person_exit]を出版する
     """
 
+    
 
 
   def person_dtc_wrt(self, model, camera, web_camera):
@@ -159,14 +167,17 @@ class Person:
     p_img_c = 1
     f_img_c = 1
 
+    FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory"
+
     #--------------------------------------------------------------
 
 
     #---以前の画像を削除する--------
     while(True):
+
       # 画像を読み込む #####################################################
-      p_read_path = "memory/person" + str(p_img_c) + ".png"
-      f_read_path = "memory/face" + str(f_img_c) + ".png"
+      p_read_path = FOLDER_PATH + "/person" + str(p_img_c) + ".png"
+      f_read_path = FOLDER_PATH + "/face" + str(f_img_c) + ".png"
 
       #ファイルが存在するとき削除し
       if os.path.exists(p_read_path):
@@ -206,6 +217,8 @@ class Person:
     person_c = 1 #画像の保存番号
     MAX_PERSON_C = 10 #撮影最大番号
 
+    time_count = 0 #時間の経過を数える
+    END_TIME_COUNT = 20 #20病後に窓を閉じる
 
     #-----繰り返し処理--------------------------------------------
 
@@ -235,11 +248,7 @@ class Person:
       #--- 各検出について
 
       person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-      
-      #検出した人がいないとき
-      if len(person_dtc_list) == 0:
-        #人が写っていない前提で初期化する
-        person_exit = False #存在しない。
+
 
 
       box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
@@ -290,18 +299,25 @@ class Person:
         if box_w_max >= 150:    
 
           box = results.xyxy[0][box_w_max_idx] #最大のバウンディングボックスを取得する
-          
+
+          #time_count += 1 #時間を数える
+
           #delta_time(1秒)以上の時間が経過していたら、
           if end_time - start_time >= delta_time:
             start_time = time.time() #現在時刻を開始時刻として取得する
+  
 
-            # img[top : bottom, left : right]
-            cv2.imwrite("memory/person" + str(person_c) + ".png", imgs[int(box[1]):int(box[3]), int(box[0]):int(box[2])])
+            if person_c < 11:
+              # img[top : bottom, left : right]
+              cv2.imwrite(FOLDER_PATH + "/person" + str(person_c) + ".png", imgs[int(box[1]):int(box[3]), int(box[0]):int(box[2])])
 
-            if w_img is not None:
-              cv2.imwrite("memory/face" + str(person_c) + ".png", w_img)
+              if w_img is not None:
+                cv2.imwrite(FOLDER_PATH + "/face" + str(person_c) + ".png", w_img)
 
-            person_c += 1 #番号をどんどん増やす
+              person_c += 1 #番号をどんどん増やす
+
+
+            time_count += 1
 
 
             #--- 枠描画
@@ -353,7 +369,10 @@ class Person:
       #  cv2.imshow('color',pic)
 
       #--- 「q」キー操作があればwhileループを抜ける ---
-      if cv2.waitKey(1) & 0xFF == ord('q') or person_c > MAX_PERSON_C:
+      print("time_count=" + str(time_count))
+
+      #qキーが押され、
+      if cv2.waitKey(1) & 0xFF == ord('q') or (person_c > MAX_PERSON_C and delta_time > END_TIME_COUNT):
         cv2.destroyAllWindows()
         break
 
@@ -381,6 +400,10 @@ class Person:
 if __name__ == '__main__':
   rospy.init_node("img_per_detect")
   p = Person()
+  # thread_main = threading.Thread(target=p.main)
+  # thread_person_exist = threading.Thread(target=p.person_exist)
+  # thread_main.start()
+  # thread_person_exist.start()
   p.main()
 
   while not rospy.is_shutdown():

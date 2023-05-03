@@ -12,9 +12,13 @@ import time
 # APPROACH_SPEED = 0.08
 # APPROACH_DIS = 0.8
 
-DISTANCE_12 = 0.5
-DISTANCE_23 = 0.5
-DISTANCE_34 = 0.5
+#12=2.8
+#23=1.45
+#34=1.318
+
+DISTANCE_12 = 2.45
+DISTANCE_23 = 2.0
+DISTANCE_34 = 2.0
 
 DISTANCE_21 = DISTANCE_12
 DISTANCE_32 = DISTANCE_23
@@ -39,6 +43,12 @@ class ControlSystem():
         # self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.move_odom_srv = rospy.ServiceProxy("/move_odom", OdomMove)
         # self.twist = Twist()
+
+    def turn(self, direction, degree):
+        rospy.wait_for_service("/move_odom")
+        angle = float(radians(degree))
+        self.move_odom_srv("None", 0, direction, angle)
+        return 0
 
     def first_destination(self, next_location):
         rospy.wait_for_service("/move_odom")
