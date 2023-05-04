@@ -131,7 +131,7 @@ class CIC():
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
-            # img_data = rospy.wait_for_message("/imgdata", ImgData)
+            img_data = rospy.wait_for_message("/imgdata", ImgData)
                         
             #画像で特徴量を取得する
             time.sleep(3)
@@ -147,73 +147,70 @@ class CIC():
             current_position = self.control.return_start_position(current_position, next_location)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
+            
+            age = img_data.age_push
+            sex = img_data.sex_push
+            up_color = img_data.up_color_push
+            down_color = img_data.down_color_push
+            glasstf = img_data.glasstf_pushglasstf
 
-            # a = ["age", "gender", "glasses", "up_color", "down_color", "height"]
-            # b = []
-            
-            # age = img_data.age_push
-            # sex = img_data.sex_push
-            # up_color = img_data.up_color_push
-            # down_color = img_data.down_color_push
-            # glasstf = img_data.glasstf_pushglasstf
+            used_feature_n = 0
 
-            # used_feature_n = 0
-
-            # if is_features_usable(age, used_feature_list, used_feature_n):
-            #     used_feature_list.push("age")
-            #     used_feature_n += 1
+            if is_features_usable(age, used_feature_list, used_feature_n):
+                used_feature_list.push("age")
+                used_feature_n += 1
             
-            # if is_features_usable(age, used_feature_list, used_feature_n):
-            #     used_feature_list.push("sex")
-            #     used_feature_n += 1
+            if is_features_usable(age, used_feature_list, used_feature_n):
+                used_feature_list.push("sex")
+                used_feature_n += 1
             
-            # if is_features_usable(up_color, used_feature_list, used_feature_n):
-            #     used_feature_list.push("up_color")
-            #     used_feature_n += 1
+            if is_features_usable(up_color, used_feature_list, used_feature_n):
+                used_feature_list.push("up_color")
+                used_feature_n += 1
             
-            # if is_features_usable(down_color, used_feature_list, used_feature_n):
-            #     used_feature_list.push("down_color")
-            #     used_feature_n += 1
+            if is_features_usable(down_color, used_feature_list, used_feature_n):
+                used_feature_list.push("down_color")
+                used_feature_n += 1
             
-            # if is_features_usable(glasstf, used_feature_list, used_feature_n):
-            #     used_feature_list.push("glasses")
-            #     used_feature_n += 1
+            if is_features_usable(glasstf, used_feature_list, used_feature_n):
+                used_feature_list.push("glasses")
+                used_feature_n += 1
             
-            # first_feature = used_feature_list[-1]
-            # second_feature = used_feature_list[-2]
+            first_feature = used_feature_list[-1]
+            second_feature = used_feature_list[-2]
 
 
-            # i = first_feature
-            # j = second_feature
+            i = first_feature
+            j = second_feature
 
-            # if i == "age":
-            #     first_feature = age
-            # elif i == "sex":
-            #     first_feature = sex
-            # elif i == "up_color":
-            #     first_feature = up_color
-            # elif i == "down_color":
-            #     first_feature = down_color
-            # elif i == "glasses":
-            #     first_feature = glasstf
+            if i == "age":
+                first_feature = age
+            elif i == "sex":
+                first_feature = sex
+            elif i == "up_color":
+                first_feature = up_color
+            elif i == "down_color":
+                first_feature = down_color
+            elif i == "glasses":
+                first_feature = glasstf
             
-            # if j == "age":
-            #     second_feature = age
-            # elif j == "sex":
-            #     second_feature = sex
-            # elif j == "up_color":
-            #     second_feature = up_color
-            # elif j == "down_color":
-            #     second_feature = down_color
-            # elif j == "glasses":
-            #     second_feature = glasstf
+            if j == "age":
+                second_feature = age
+            elif j == "sex":
+                second_feature = sex
+            elif j == "up_color":
+                second_feature = up_color
+            elif j == "down_color":
+                second_feature = down_color
+            elif j == "glasses":
+                second_feature = glasstf
 
             # first_feature １つめの特徴量
             # second_feature ２つめの特徴量
             # ここで煮るなり焼くなり二宮和也
 
-            # if len(used_feature_n) < 2:
-            #     print("Not enough features")
+            if len(used_feature_n) < 2:
+                print("Not enough features")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
             textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
