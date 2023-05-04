@@ -24,8 +24,12 @@ APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.8
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
-Guest = ["Amelia", "Angel", "Ava", "Charlie", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah", "Thomas", "William"]
+Guest = ["Amelia", "Angel", "Ava", "Charlie", "Charlotte", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah","Oliver", "Thomas", "William"]
 
+def is_features_usable(feature, used_feature_list, used_feature_n):
+    if feature != "不明" and not feature in used_feature_list and used_feature_n < 2:
+        return True
+    return False
 
 class CIC():
     def __init__(self):
@@ -36,9 +40,13 @@ class CIC():
         # self.thread_approach_guest = threading.Thread(target=self.approach_guest)
         self.twist = Twist()
         self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        self.first_feature1_num = 0
+        self.first_feature2_num = 1
+        self.second_feature1_num = 2
+        self.second_feature2_num = 3
 
         #image
-        self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
+        # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
         # self.thread_img_pic = threading.Thread(target=person_detect)
         self.apr_guest_time = 0.0
         self.person = Person
@@ -55,8 +63,8 @@ class CIC():
         apr_guest_time = 0.0#人間に近づく為にかかった時間
         textToSpeech("I start program.", gTTS_lang="en")
 
-        a = ["age", "gender", "glasses", "up_color", "down_color", "height"]
-        b = []
+        feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
+        used_feature_list = []
 
         for i in range(3):
             thread_approach_guest = threading.Thread(target=self.approach_guest)
@@ -64,25 +72,30 @@ class CIC():
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
+            thread_img_pic.start()
             discover_person = rospy.wait_for_message("/person", Bool)
+            thread_img_pic.join()
             
             time.sleep(5)
 
-            while discover_person.data:
+            while not discover_person.data:
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                thread_img_pic = threading.Thread(target=self.person.person_detect)
 
                 #画像認識で人間が要るかを検知
                 # if True:#人間がいる
                     # discover_person = False#人がいる場合Falseにしてループを抜ける
                     
+                thread_img_pic.start()
                 discover_person = rospy.wait_for_message("/person", Bool)
 
-                time.sleep(5)
+                thread_img_pic.join()
 
                 if next_location == 6:#後で使うから要る
                     break
 
             time.sleep(2)
+            thread_img_pic = threading.Thread(target=self.person.person_detect)
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
@@ -95,6 +108,9 @@ class CIC():
             thread_approach_guest.start()
             print("apr:" + str(self.apr_guest_time))
             take_pic = thread_img_pic.start()
+
+            thread_approach_guest.join()
+            thread_img_pic.join()
             
             print(take_pic)
 
@@ -112,12 +128,8 @@ class CIC():
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
-            img_data = rospy.wait_for_message("/imgdata", ImgData)
-
-            if i == 0:
-                function = "age"
-            
-
+            # img_data = rospy.wait_for_message("/imgdata", ImgData)
+                        
             #画像で特徴量を取得する
             time.sleep(3)
 
@@ -127,8 +139,6 @@ class CIC():
             self.control.return_position_from_guest(distance)
 
 
-            aaaaaa
-
             time.sleep(1)
 
             current_position = self.control.return_start_position(current_position, next_location)
@@ -137,19 +147,75 @@ class CIC():
 
             # a = ["age", "gender", "glasses", "up_color", "down_color", "height"]
             # b = []
-            for j in range(3):
-                k = a[0]
-                l = a[1]
+            
+            # age = img_data.age_push
+            # sex = img_data.sex_push
+            # up_color = img_data.up_color_push
+            # down_color = img_data.down_color_push
+            # glasstf = img_data.glasstf_pushglasstf
 
-                a.remove(k)
-                a.remove(l)
+            # used_feature_n = 0
 
-                b.append(k)
-                b.append(l)
+            # if is_features_usable(age, used_feature_list, used_feature_n):
+            #     used_feature_list.push("age")
+            #     used_feature_n += 1
+            
+            # if is_features_usable(age, used_feature_list, used_feature_n):
+            #     used_feature_list.push("sex")
+            #     used_feature_n += 1
+            
+            # if is_features_usable(up_color, used_feature_list, used_feature_n):
+            #     used_feature_list.push("up_color")
+            #     used_feature_n += 1
+            
+            # if is_features_usable(down_color, used_feature_list, used_feature_n):
+            #     used_feature_list.push("down_color")
+            #     used_feature_n += 1
+            
+            # if is_features_usable(glasstf, used_feature_list, used_feature_n):
+            #     used_feature_list.push("glasses")
+            #     used_feature_n += 1
+            
+            # first_feature = used_feature_list[-1]
+            # second_feature = used_feature_list[-2]
+
+
+            # i = first_feature
+            # j = second_feature
+
+            # if i == "age":
+            #     first_feature = age
+            # elif i == "sex":
+            #     first_feature = sex
+            # elif i == "up_color":
+            #     first_feature = up_color
+            # elif i == "down_color":
+            #     first_feature = down_color
+            # elif i == "glasses":
+            #     first_feature = glasstf
+            
+            # if j == "age":
+            #     second_feature = age
+            # elif j == "sex":
+            #     second_feature = sex
+            # elif j == "up_color":
+            #     second_feature = up_color
+            # elif j == "down_color":
+            #     second_feature = down_color
+            # elif j == "glasses":
+            #     second_feature = glasstf
+
+            # first_feature １つめの特徴量
+            # second_feature ２つめの特徴量
+            # ここで煮るなり焼くなり二宮和也
+
+            # if len(used_feature_n) < 2:
+            #     print("Not enough features")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
             textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
             #(音声)I will search next guest!と喋る
+            
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
             
 

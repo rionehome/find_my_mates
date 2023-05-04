@@ -5,7 +5,8 @@ import numpy as np
 
 #初期化
 def get_glasses_tf_set():
-    model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='19sbest_glasses.pt', source='local')
+    MODEL_PATH = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/19sbest_glasses.pt'
+    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path=MODEL_PATH, source='local')
     model.conf = 0.5
 
     return model
