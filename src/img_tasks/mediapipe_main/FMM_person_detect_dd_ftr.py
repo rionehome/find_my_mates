@@ -7,6 +7,7 @@ import time
 import os
 import rospy
 from std_msgs.msg import Bool, String
+import threading
 
 """
   [‘person’, ‘bicycle’, ‘car’, ‘motorcycle’, ‘airplane’, ‘bus’, 
@@ -29,13 +30,14 @@ class Person:
     #self.state = "移動中"
     self.state = "到着"
     self.state_sub = rospy.Subscriber('/state', String, self.pic_callback)
+    self.check_exit_pub = rospy.Publisher("/person", Bool, queue_size=1)
 
   def pic_callback(self, msg):
     self.state = msg.pic_state
 
   def main(self):
 
-    #self.state = "移動中"
+    self.state = "移動中"
     # self.state = "到着"
 
     # Model
@@ -69,14 +71,6 @@ class Person:
       elif self.state == "移動中":
         self.person_exist(model, camera)
 
-        
-
-
-    
-
-  def person_detect(self):
-    self.state = "到着"
-
   #使用可能なカメラのデバイス番号を調べる。	
   def cam_dev_dtc(self, START_NUM=2, VIDEO_DEV_NUM=10):	
     #VIDEO_DEV_NUM = 10	
@@ -101,8 +95,6 @@ class Person:
 
 
   def person_exist(self, model, camera):
-    check_exit_pub = rospy.Publisher("/person", Bool, queue_size=1)
-
     person_exit = False #存在しない。   
 
     #--- 画像の取得 ---
@@ -157,7 +149,7 @@ class Person:
 
     b = Bool()
     b.data = person_exit
-    check_exit_pub.publish(b)
+    self.check_exit_pub.publish(b)
 
     """
     画像から メインへ 人がいるかどうか[person_exit]を出版する
@@ -408,6 +400,10 @@ class Person:
 if __name__ == '__main__':
   rospy.init_node("img_per_detect")
   p = Person()
+  # thread_main = threading.Thread(target=p.main)
+  # thread_person_exist = threading.Thread(target=p.person_exist)
+  # thread_main.start()
+  # thread_person_exist.start()
   p.main()
 
   while not rospy.is_shutdown():

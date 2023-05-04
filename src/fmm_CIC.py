@@ -65,13 +65,18 @@ class CIC():
         feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
         used_feature_list = []
 
+        print("start")
+
         for i in range(3):
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
-            discover_person = rospy.wait_for_message("/person", Bool)
+            print("aaa")
+            discover_person.data = rospy.wait_for_message("/person", Bool)
+            print("bbb")
 
             while not discover_person.data:
+                print("No person")
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
@@ -80,6 +85,8 @@ class CIC():
 
                 if next_location == 6:#後で使うから要る
                     break
+
+            print("There is person.")
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
