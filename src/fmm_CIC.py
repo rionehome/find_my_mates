@@ -5,8 +5,8 @@
 import rospy
 from control_system import ControlSystem
 import time
-from std_msgs.msg import Bool
-import threading
+from std_msgs.msg import Bool, String
+# import threading
 from find_my_mates.msg import LidarData, OdomData
 from geometry_msgs.msg import Twist
 from math import sqrt
@@ -44,6 +44,7 @@ class CIC():
         self.first_feature2_num = 1
         self.second_feature1_num = 2
         self.second_feature2_num = 3
+        self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
@@ -55,6 +56,8 @@ class CIC():
         
         
     def main(self):
+        state = String()
+        state.data = "到着"
         # function_list = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
@@ -67,8 +70,8 @@ class CIC():
         used_feature_list = []
 
         for i in range(3):
-            thread_approach_guest = threading.Thread(target=self.approach_guest)
-            thread_img_pic = threading.Thread(target=self.person.person_detect)
+            # thread_approach_guest = threading.Thread(target=self.approach_guest)
+            # thread_img_pic = threading.Thread(target=self.person.person_detect)
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知

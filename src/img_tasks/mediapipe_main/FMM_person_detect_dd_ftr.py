@@ -6,7 +6,7 @@ import cv2
 import time
 import os
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 
 """
   [‘person’, ‘bicycle’, ‘car’, ‘motorcycle’, ‘airplane’, ‘bus’, 
@@ -27,7 +27,11 @@ from std_msgs.msg import Bool
 class Person:
   def __init__(self):
     #self.state = "移動中"
-    self.state = '到着'
+    self.state = "到着"
+    self.state_sub = rospy.Subscriber('/state', String, self.pic_callback)
+
+  def pic_callback(self, msg):
+    self.state = msg.pic_state
 
   def main(self):
 
