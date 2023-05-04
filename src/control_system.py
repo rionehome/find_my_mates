@@ -44,6 +44,12 @@ class ControlSystem():
         self.move_odom_srv = rospy.ServiceProxy("/move_odom", OdomMove)
         # self.twist = Twist()
 
+    def turn(self, direction, degree):
+        rospy.wait_for_service("/move_odom")
+        angle = float(radians(degree))
+        self.move_odom_srv("None", 0, direction, angle)
+        return 0
+
     def first_destination(self, next_location):
         rospy.wait_for_service("/move_odom")
         angle = float(radians(90))

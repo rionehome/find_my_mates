@@ -6,7 +6,6 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, String
-# import threading
 from find_my_mates.msg import LidarData, OdomData
 from geometry_msgs.msg import Twist
 from math import sqrt
@@ -21,7 +20,7 @@ from speech_and_NLP.src.speechToText import recognize_speech #音声認識
 from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 
 APPROACH_SPEED = 0.08
-APPROACH_DIS = 0.8
+APPROACH_DIS = 0.9
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
 Guest = ["Amelia", "Angel", "Ava", "Charlie", "Charlotte", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah","Oliver", "Thomas", "William"]
@@ -36,8 +35,6 @@ class CIC():
         #control
         rospy.init_node("cic")
         self.control = ControlSystem()
-        #self.audio = textToSpeech()
-        # self.thread_approach_guest = threading.Thread(target=self.approach_guest)
         self.twist = Twist()
         self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.first_feature1_num = 0
@@ -48,8 +45,7 @@ class CIC():
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
-        # self.thread_img_pic = threading.Thread(target=person_detect)
-        self.apr_guest_time = 0.0
+        # self.apr_guest_time = 0.0
         self.person = Person
 
         #sound
@@ -57,96 +53,72 @@ class CIC():
         
     def main(self):
         state = String()
-        state.data = "到着"
-        # function_list = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
+        state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
+
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
         current_position = 1#現在position
         next_location = 1#次に人がいるかもしれないlocation
-        apr_guest_time = 0.0#人間に近づく為にかかった時間
+        # apr_guest_time = 0.0#人間に近づく為にかかった時間
         textToSpeech("I start program.", gTTS_lang="en")
 
         feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
         used_feature_list = []
 
         for i in range(3):
-            # thread_approach_guest = threading.Thread(target=self.approach_guest)
-            # thread_img_pic = threading.Thread(target=self.person.person_detect)
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
-            thread_img_pic.start()
             discover_person = rospy.wait_for_message("/person", Bool)
-            thread_img_pic.join()
-            
-            time.sleep(5)
 
             while not discover_person.data:
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
-                thread_img_pic = threading.Thread(target=self.person.person_detect)
 
-                #画像認識で人間が要るかを検知
-                # if True:#人間がいる
-                    # discover_person = False#人がいる場合Falseにしてループを抜ける
-                    
-                thread_img_pic.start()
+                time.sleep(1)
+
                 discover_person = rospy.wait_for_message("/person", Bool)
-
-                thread_img_pic.join()
 
                 if next_location == 6:#後で使うから要る
                     break
-
-            time.sleep(2)
-            thread_img_pic = threading.Thread(target=self.person.person_detect)
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
             odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            print("approachsuruhazu")
+            self.pic_pub.publish(state)
             self.approach_guest()
 
-            #人間に近づく処理と写真を撮る処理を同時に行う必要があるため、threadingしている
-            thread_approach_guest.start()
-            print("apr:" + str(self.apr_guest_time))
-            take_pic = thread_img_pic.start()
-
-            thread_approach_guest.join()
-            thread_img_pic.join()
+            # print("apr:" + str(self.apr_guest_time))
             
-            print(take_pic)
 
-            print("近づき終了")
+            print("I finish to approach guest.")
+            time.sleep(1)
 
             odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+
             #(音声)音声（名前）を取得する
             res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
 
             guest_name = find_nearest_word(res, Guest)
             print(guest_name)
-            # guest_name = "mark"
+
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
-            img_data = rospy.wait_for_message("/imgdata", ImgData)
-                        
+
             #画像で特徴量を取得する
-            time.sleep(3)
+            img_data = rospy.wait_for_message("/imgdata", ImgData)
 
             x = odom_finish_data.x - odom_start_data.x
             y = odom_finish_data.y - odom_start_data.y
             distance = sqrt(x**2 + y**2)
             self.control.return_position_from_guest(distance)
 
-
             time.sleep(1)
 
             current_position = self.control.return_start_position(current_position, next_location)
-
-            textToSpeech(text="Hi, operator", gTTS_lang="en")
             
             age = img_data.age_push
             sex = img_data.sex_push
@@ -212,17 +184,25 @@ class CIC():
             if len(used_feature_n) < 2:
                 print("Not enough features")
 
+            self.control.turn("right", 90)
+
+            textToSpeech(text="Hi, operator", gTTS_lang="en")
+
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
             textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
             #(音声)I will search next guest!と喋る
             
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
+
+            time.sleep(1)
+
+            self.control.turn("left", 90)
             
 
-            print("finish")
-            time.sleep(2)
+            print(str(i) + "person" + "finish")
 
         #(音声)以上で終了します。と喋る
+        textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
 
     def approach_guest(self):
         print(1)
