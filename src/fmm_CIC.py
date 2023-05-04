@@ -54,6 +54,7 @@ class CIC():
     def main(self):
         state = String()
         state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
+        self.pic_pub.publish(state)
 
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
