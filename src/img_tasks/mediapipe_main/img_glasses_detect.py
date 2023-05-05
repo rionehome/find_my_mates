@@ -5,8 +5,13 @@ import numpy as np
 
 #初期化
 def get_glasses_tf_set():
-    MODEL_PATH = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/19sbest_glasses.pt'
-    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path=MODEL_PATH, source='local')
+    #YOLO_PATH = '/home/ri-one/Github_Local_repo/yolov5' #大会用PC
+    YOLO_PATH = '/home/ri-one/Desktop/github_local_repository/yolov5' #個人用PC
+
+    #MODEL_PATH = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/19sbest_glasses.pt' #大会用PC
+    MODEL_PATH = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/19sbest_glasses.pt'
+    
+    model = torch.hub.load(YOLO_PATH, 'custom', path=MODEL_PATH, source='local')
     model.conf = 0.5
 
     return model

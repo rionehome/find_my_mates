@@ -12,12 +12,14 @@ from math import sqrt
 
 #image
 from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import Person
+from img_tasks.mediapipe_main.UDP_module import UDP_recv, UDP_send
+
 from find_my_mates.msg import ImgData
 
 #sound
-from speech_and_NLP.src.textToSpeech import textToSpeech #発話
-from speech_and_NLP.src.speechToText import recognize_speech #音声認識
-from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
+#from speech_and_NLP.src.textToSpeech import textToSpeech #発話
+#from speech_and_NLP.src.speechToText import recognize_speech #音声認識
+#from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 
 APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
@@ -44,6 +46,9 @@ class CIC():
         self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
         self.state = "移動中"
 
+        self.sock = UDP_recv("始まり")
+        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.4')
+
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
         # self.apr_guest_time = 0.0
@@ -61,7 +66,7 @@ class CIC():
         current_position = 1#現在position
         next_location = 1#次に人がいるかもしれないlocation
         # apr_guest_time = 0.0#人間に近づく為にかかった時間
-        textToSpeech("I start program.", gTTS_lang="en")
+        #textToSpeech("I start program.", gTTS_lang="en")
 
         feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
         used_feature_list = []
@@ -75,28 +80,33 @@ class CIC():
             #画像認識で人間が要るかを検知
             print("aaa")
             #discover_person = rospy.wait_for_message("/person", Bool)
-            discover_person = self.person.main("移動中") #人の有無を調べる
+            discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
             print("bbb")
 
             #人がいない場合、別の家具へ移動する
-            while not discover_person.data:
-                print("No person")
+            while not discover_person:
+                #print("No person")
                 #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
-                discover_person = self.person.main("移動中") #人の有無を調べる
+                discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
+
+                print("discover_person=" + str(discover_person))
 
                 if next_location == 6:#後で使うから要る
                     break
 
 
             #人がいる場合、写真を10枚撮影する
-            textToSpeech(text="Hello!", gTTS_lang="en")
+            #textToSpeech(text="Hello!", gTTS_lang="en")
 
             #@odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            #img_data = self.person.main("到着") #特徴を抽出するための写真を10枚撮影する
+            age, sex, up_color, down_color, glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
+            print("fmm_CIC")
+            print("age_push, sex_push, up_color_push, down_color_push, glasstf_push")
+            print("age_push=" + age)
 
             #self.pic_pub.publish("到着")
             print("person exist")
@@ -112,17 +122,18 @@ class CIC():
 
             #@odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+            #textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
             #(音声)音声（名前）を取得する
-            res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+            #res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
 
-            guest_name = find_nearest_word(res, Guest)
+            #guest_name = find_nearest_word(res, Guest)
+            guest_name = "Mark"
             print(guest_name)
 
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
-            textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
+            #textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
             # img_data = rospy.wait_for_message("/imgdata", ImgData)
@@ -136,11 +147,11 @@ class CIC():
 
             #@current_position = self.control.return_start_position(current_position, next_location)
             
-            age = img_data.age_push
-            sex = img_data.sex_push
-            up_color = img_data.up_color_push
-            down_color = img_data.down_color_push
-            glasstf = img_data.glasstf_push
+            #age = img_data.age_push
+            #sex = img_data.sex_push
+            #up_color = img_data.up_color_push
+            #down_color = img_data.down_color_push
+            #glasstf = img_data.glasstf_push
 
             used_feature_n = 0
 
@@ -202,13 +213,13 @@ class CIC():
 
             #@self.control.turn("right", 90)
 
-            textToSpeech(text="Hi, operator", gTTS_lang="en")
+            #textToSpeech(text="Hi, operator", gTTS_lang="en")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            #textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
             #(音声)I will search next guest!と喋る
             
-            textToSpeech(text="I will search next guest!", gTTS_lang="en")
+            #extToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
 
@@ -218,7 +229,7 @@ class CIC():
             print(str(i) + "person" + "finish")
 
         #(音声)以上で終了します。と喋る
-        textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
+        #textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
 
     def approach_guest(self):
         print(1)

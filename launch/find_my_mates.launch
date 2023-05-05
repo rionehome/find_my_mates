@@ -8,9 +8,10 @@
   <!-- <node pkg="find_my_mates" name="lidar" type="lidar.py" required="true" output="screen" /> -->
   <!-- <node pkg="find_my_mates" name="control" type="control_system.py" required="true" output="screen" /> -->
   <node pkg="find_my_mates" name="cic" type="fmm_CIC.py" required="true" output="screen" />
-
+  
   <!--image-->
   <!-- <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" /> -->
+  <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" />
 
   <!--sound-->
   <!-- <node pkg="find_my_mates" name="audio" type="audio.py" required="true" output="screen" /> -->
