@@ -23,7 +23,8 @@ APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
-Guest = ["Amelia", "Angel", "Ava", "Charlie", "Charlotte", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah","Oliver", "Thomas", "William"]
+Guest = ["amelia", "angel", "ava", "charlie", "charlotte", "hunter", "max", "mia", "olivia", "parker", "sam", "jack", "noah","oliver", "thomas", "william"]
+CHECK = ["yes", "no"]
 
 def is_features_usable(feature, used_feature_list, used_feature_n):
     if feature != "不明" and not feature in used_feature_list and used_feature_n < 2:
@@ -68,7 +69,7 @@ class CIC():
         print("start")
 
         for i in range(3):
-            current_position, next_location = self.control.first_destination(next_location)
+            #@current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
@@ -77,7 +78,7 @@ class CIC():
 
             while not discover_person:
                 print("No person")
-                current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
@@ -94,7 +95,7 @@ class CIC():
 
             # self.approach_guest()
 
-            self.control.straight("front", 0.3)
+            #@self.control.straight("front", 0.3)
 
             # print("apr:" + str(self.apr_guest_time))
             
@@ -104,13 +105,28 @@ class CIC():
 
             # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
+            # while True:
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
             #(音声)音声（名前）を取得する
-            res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+            res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
 
             guest_name = find_nearest_word(res, Guest)
             print(guest_name)
+
+                # textToSpeech("Are your name is " + guest_name + "? Please tell me Yes or No.", gTTS_lang="en")
+
+                # check = ["no", "yes"]
+
+                # ans = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+                # name_check = find_nearest_word(ans, check)
+                # print(name_check)
+                
+                # if name_check == "Yes" or name_check == "yes":
+                #     break
+                # else:
+                #     textToSpeech("Sorry, ")
+
 
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
@@ -124,11 +140,11 @@ class CIC():
             # distance = sqrt(x**2 + y**2)
             # self.control.return_position_from_guest(distance)
 
-            self.control.straight("back", 0.3)
+            #@self.control.straight("back", 0.3)
 
             # time.sleep(1)
 
-            current_position = self.control.return_start_position(current_position, next_location)
+            #@current_position = self.control.return_start_position(current_position, next_location)
             
             # age = img_data.age_push
             # sex = img_data.sex_push
@@ -194,7 +210,7 @@ class CIC():
             # if len(used_feature_n) < 2:
             #     print("Not enough features")
 
-            self.control.turn("right", 90)
+            #@self.control.turn("right", 90)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
@@ -203,12 +219,16 @@ class CIC():
             #(音声)I will search next guest!と喋る
 
             textToSpeech(text="Sorry, I can't get guest feature more.", gTTS_lang="en")
+
+
+            time.sleep(1)
+
             
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
 
-            self.control.turn("left", 90)
+            #@self.control.turn("left", 90)
             
 
             print(str(i) + "person" + "finish")
