@@ -127,6 +127,8 @@ def img_analysis_main(sock):
         else:
             break
 
+    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
     print("age_list=" + str(age_list))
     print("sex_list=" + str(sex_list))
     print("up_color_list=" + str(up_color_list))
@@ -208,6 +210,7 @@ if __name__ == "__main__":
     rospy.init_node("img_mdpp")
     #img_analysis_main()
     main()
+    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 
     while not rospy.is_shutdown():
         rospy.Rate(10).sleep()

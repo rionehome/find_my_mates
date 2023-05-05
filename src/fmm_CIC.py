@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 #control
@@ -23,7 +23,7 @@ APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
-Guest = ["Amelia", "Angel", "Ava", "Charlie", "Charlotte", "Hunter", "Max", "Mia", "Olivia", "Parker", "Sam", "Jack", "Noah","Oliver", "Thomas", "William"]
+Guest = ["amelia", "angel", "ava", "charlie", "charlotte", "hunter", "max", "mia", "olivia", "parker", "sam", "jack", "noah","oliver", "thomas", "william"]
 
 def is_features_usable(feature, used_feature_list, used_feature_n):
     if feature != "不明" and not feature in used_feature_list and used_feature_n < 2:
@@ -42,6 +42,7 @@ class CIC():
         self.second_feature1_num = 2
         self.second_feature2_num = 3
         self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
+        self.state = "移動中"
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
@@ -53,7 +54,7 @@ class CIC():
         
     def main(self):
         state = String()
-        state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
+        # state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
 
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
@@ -68,16 +69,16 @@ class CIC():
         print("start")
 
         for i in range(3):
-            current_position, next_location = self.control.first_destination(next_location)
+            #@current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
-            discover_person.data = rospy.wait_for_message("/person", Bool)
+            discover_person = rospy.wait_for_message("/person", Bool)
             print("bbb")
 
             while not discover_person.data:
                 print("No person")
-                current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
@@ -90,10 +91,13 @@ class CIC():
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
-            odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
+            #@odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            self.pic_pub.publish(state)
-            self.approach_guest()
+            self.pic_pub.publish("到着")
+            print("person exist")
+            img_data = rospy.wait_for_message("/imgdata", ImgData)
+            #@self.approach_guest()
+            print("yes")
 
             # print("apr:" + str(self.apr_guest_time))
             
@@ -101,7 +105,7 @@ class CIC():
             print("I finish to approach guest.")
             time.sleep(1)
 
-            odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
+            #@odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
@@ -116,43 +120,43 @@ class CIC():
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
-            img_data = rospy.wait_for_message("/imgdata", ImgData)
+            # img_data = rospy.wait_for_message("/imgdata", ImgData)
 
-            x = odom_finish_data.x - odom_start_data.x
-            y = odom_finish_data.y - odom_start_data.y
-            distance = sqrt(x**2 + y**2)
-            self.control.return_position_from_guest(distance)
+            #@x = odom_finish_data.x - odom_start_data.x
+            #@y = odom_finish_data.y - odom_start_data.y
+            #@distance = sqrt(x**2 + y**2)
+            #@self.control.return_position_from_guest(distance)
 
             time.sleep(1)
 
-            current_position = self.control.return_start_position(current_position, next_location)
+            #@current_position = self.control.return_start_position(current_position, next_location)
             
             age = img_data.age_push
             sex = img_data.sex_push
             up_color = img_data.up_color_push
             down_color = img_data.down_color_push
-            glasstf = img_data.glasstf_pushglasstf
+            glasstf = img_data.glasstf_push
 
             used_feature_n = 0
 
             if is_features_usable(age, used_feature_list, used_feature_n):
-                used_feature_list.push("age")
+                used_feature_list.append("age")
                 used_feature_n += 1
             
             if is_features_usable(age, used_feature_list, used_feature_n):
-                used_feature_list.push("sex")
+                used_feature_list.append("sex")
                 used_feature_n += 1
             
             if is_features_usable(up_color, used_feature_list, used_feature_n):
-                used_feature_list.push("up_color")
+                used_feature_list.append("up_color")
                 used_feature_n += 1
             
             if is_features_usable(down_color, used_feature_list, used_feature_n):
-                used_feature_list.push("down_color")
+                used_feature_list.append("down_color")
                 used_feature_n += 1
             
             if is_features_usable(glasstf, used_feature_list, used_feature_n):
-                used_feature_list.push("glasses")
+                used_feature_list.append("glasses")
                 used_feature_n += 1
             
             first_feature = used_feature_list[-1]
@@ -188,22 +192,22 @@ class CIC():
             # second_feature ２つめの特徴量
             # ここで煮るなり焼くなり二宮和也
 
-            if len(used_feature_n) < 2:
+            if used_feature_n < 2:
                 print("Not enough features")
 
-            self.control.turn("right", 90)
+            #@self.control.turn("right", 90)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
+            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
             #(音声)I will search next guest!と喋る
             
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
 
-            self.control.turn("left", 90)
+            #@self.control.turn("left", 90)
             
 
             print(str(i) + "person" + "finish")
