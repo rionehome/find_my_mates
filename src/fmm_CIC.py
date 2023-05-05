@@ -69,7 +69,7 @@ class CIC():
         print("start")
 
         for i in range(3):
-            #@current_position, next_location = self.control.first_destination(next_location)
+            current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
@@ -78,7 +78,7 @@ class CIC():
 
             while not discover_person:
                 print("No person")
-                #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
@@ -95,7 +95,7 @@ class CIC():
 
             # self.approach_guest()
 
-            #@self.control.straight("front", 0.3)
+            self.control.straight("front", 0.3)
 
             # print("apr:" + str(self.apr_guest_time))
             
@@ -140,11 +140,11 @@ class CIC():
             # distance = sqrt(x**2 + y**2)
             # self.control.return_position_from_guest(distance)
 
-            #@self.control.straight("back", 0.3)
+            self.control.straight("back", 0.3)
 
             # time.sleep(1)
 
-            #@current_position = self.control.return_start_position(current_position, next_location)
+            current_position = self.control.return_start_position(current_position, next_location)
             
             # age = img_data.age_push
             # sex = img_data.sex_push
@@ -210,7 +210,7 @@ class CIC():
             # if len(used_feature_n) < 2:
             #     print("Not enough features")
 
-            #@self.control.turn("right", 90)
+            self.control.turn("right", 90)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
@@ -228,7 +228,7 @@ class CIC():
 
             time.sleep(1)
 
-            #@self.control.turn("left", 90)
+            self.control.turn("left", 90)
             
 
             print(str(i) + "person" + "finish")
