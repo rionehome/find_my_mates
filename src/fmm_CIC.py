@@ -68,7 +68,7 @@ class CIC():
         print("start")
 
         for i in range(3):
-            #@current_position, next_location = self.control.first_destination(next_location)
+            current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
@@ -77,7 +77,7 @@ class CIC():
 
             while not discover_person:
                 print("No person")
-                #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
@@ -90,9 +90,9 @@ class CIC():
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
-            #@odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
+            odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            #@self.approach_guest()
+            self.approach_guest()
 
             # print("apr:" + str(self.apr_guest_time))
             
@@ -100,7 +100,7 @@ class CIC():
             print("I finish to approach guest.")
             time.sleep(1)
 
-            #@odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
+            odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
@@ -115,16 +115,16 @@ class CIC():
             textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
-            #@img_data = rospy.wait_for_message("/imgdata", ImgData)
+            #img_data = rospy.wait_for_message("/imgdata", ImgData)
 
-            #@x = odom_finish_data.x - odom_start_data.x
-            #@y = odom_finish_data.y - odom_start_data.y
-            #@distance = sqrt(x**2 + y**2)
-            #@self.control.return_position_from_guest(distance)
+            x = odom_finish_data.x - odom_start_data.x
+            y = odom_finish_data.y - odom_start_data.y
+            distance = sqrt(x**2 + y**2)
+            self.control.return_position_from_guest(distance)
 
             time.sleep(1)
 
-            #@current_position = self.control.return_start_position(current_position, next_location)
+            current_position = self.control.return_start_position(current_position, next_location)
             
             # age = img_data.age_push
             # sex = img_data.sex_push
@@ -190,7 +190,7 @@ class CIC():
             # if len(used_feature_n) < 2:
             #     print("Not enough features")
 
-            #@self.control.turn("right", 90)
+            self.control.turn("right", 90)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
@@ -204,7 +204,7 @@ class CIC():
 
             time.sleep(1)
 
-            #@self.control.turn("left", 90)
+            self.control.turn("left", 90)
             
 
             print(str(i) + "person" + "finish")
