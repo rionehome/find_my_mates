@@ -37,8 +37,8 @@ class Person:
 
   def main(self):
 
-    self.state = "移動中"
-    # self.state = "到着"
+    #self.state = "移動中"
+    self.state = "到着"
 
     # Model
     #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
@@ -51,7 +51,9 @@ class Person:
 
     #--- カメラの設定 ---
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
+    
     WEB_CAM_DEV = 4#self.cam_dev_dtc() #Webカメラのデバイス番号
+    WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
     web_camera = cv2.VideoCapture(WEB_CAM_DEV)
@@ -72,11 +74,12 @@ class Person:
         self.person_exist(model, camera)
 
   #使用可能なカメラのデバイス番号を調べる。	
-  def cam_dev_dtc(self, START_NUM=2, VIDEO_DEV_NUM=10):	
+  def cam_dev_dtc(self, START_NUM=3, VIDEO_DEV_NUM=10):	
     #VIDEO_DEV_NUM = 10	
     #START_NUM = 3
 
     WEB_CAM_DEV = 2
+
 
     #webカメラの番号を取得する。	
     for i in range(START_NUM, VIDEO_DEV_NUM+1):	
@@ -344,7 +347,7 @@ class Person:
       #--- 描画した画像を表示
       cv2.imshow("camera",imgs)
 
-      print("w_img=" + str(w_img))
+      #print("w_img=" + str(w_img))
       if w_img is not None:
         cv2.imshow("web_camere", w_img)
 
@@ -372,7 +375,7 @@ class Person:
       print("time_count=" + str(time_count))
 
       #qキーが押され、
-      if cv2.waitKey(1) & 0xFF == ord('q') or (person_c > MAX_PERSON_C and delta_time > END_TIME_COUNT):
+      if cv2.waitKey(1) & 0xFF == ord('q') or person_c > MAX_PERSON_C:
         cv2.destroyAllWindows()
         break
 

@@ -52,9 +52,11 @@ def img_analysis_sub(sock):
     model = get_glasses_tf_set()
     img_c = 1 
 
+    DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
+
     while(True):
         # 画像を読み込む #####################################################
-        read_path = "memory/face" + str(img_c) + ".png"#眼鏡は顔画像から読み取る
+        read_path = DIR + "/face" + str(img_c) + ".png"#眼鏡は顔画像から読み取る
 
 
         #ファイルが存在するとき読み込み

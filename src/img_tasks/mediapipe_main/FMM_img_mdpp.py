@@ -61,6 +61,15 @@ def img_analysis_main(sock):
 
     img_c = 1
 
+    DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
+
+    age_push = "不明"
+    sex_push = "不明"
+    up_color_push = "不明"
+    down_color_push = "不明"
+    glasstf_push = "不明"
+
+
     age_list = []
     sex_list = []
     up_color_list = []
@@ -70,7 +79,7 @@ def img_analysis_main(sock):
     while(True):        
 
         # 画像を読み込む #####################################################
-        read_path = "memory/person" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
+        read_path = DIR + "/person" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
 
 
         #ファイルが存在するとき読み込み
