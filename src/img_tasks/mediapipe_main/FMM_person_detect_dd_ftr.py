@@ -42,7 +42,8 @@ class Person:
 
     # Model
     #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path='yolov5s.pt', source='local')
+    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path='yolov5s.pt', source='local') #大会用PC
+    model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local') #個人PC
 
     #--- 検出の設定 ---
     model.conf = 0.5 #--- 検出の下限値（<1）。設定しなければすべて検出
@@ -170,7 +171,8 @@ class Person:
     p_img_c = 1
     f_img_c = 1
 
-    FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory"
+    FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #大会用PC
+    FOLDER_PATH = "memory" #個人用PC
 
     #--------------------------------------------------------------
 

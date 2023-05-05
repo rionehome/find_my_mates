@@ -47,7 +47,7 @@ class CIC():
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
         # self.apr_guest_time = 0.0
-        self.person = Person
+        self.person = Person() #FMM_person_detect_dd_ftrのクラスの実体化
 
         #sound
         
@@ -68,34 +68,39 @@ class CIC():
 
         print("start")
 
+        #
         for i in range(3):
             #@current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
-            discover_person = rospy.wait_for_message("/person", Bool)
+            #discover_person = rospy.wait_for_message("/person", Bool)
+            discover_person = self.person.main("移動中") #人の有無を調べる
             print("bbb")
 
+            #人がいない場合、別の家具へ移動する
             while not discover_person.data:
                 print("No person")
                 #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
-                discover_person = rospy.wait_for_message("/person", Bool)
+                discover_person = self.person.main("移動中") #人の有無を調べる
 
                 if next_location == 6:#後で使うから要る
                     break
 
-            print("There is person.")
 
+            #人がいる場合、写真を10枚撮影する
             textToSpeech(text="Hello!", gTTS_lang="en")
 
             #@odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            self.pic_pub.publish("到着")
+            #img_data = self.person.main("到着") #特徴を抽出するための写真を10枚撮影する
+
+            #self.pic_pub.publish("到着")
             print("person exist")
-            img_data = rospy.wait_for_message("/imgdata", ImgData)
+            #img_data = rospy.wait_for_message("/imgdata", ImgData)
             #@self.approach_guest()
             print("yes")
 
