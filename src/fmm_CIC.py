@@ -90,9 +90,11 @@ class CIC():
 
             textToSpeech(text="Hello!", gTTS_lang="en")
 
-            odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
+            # odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            self.approach_guest()
+            # self.approach_guest()
+
+            self.control.straight("front", 0.3)
 
             # print("apr:" + str(self.apr_guest_time))
             
@@ -100,7 +102,7 @@ class CIC():
             print("I finish to approach guest.")
             time.sleep(1)
 
-            odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
+            # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
@@ -117,12 +119,14 @@ class CIC():
             #画像で特徴量を取得する
             #img_data = rospy.wait_for_message("/imgdata", ImgData)
 
-            x = odom_finish_data.x - odom_start_data.x
-            y = odom_finish_data.y - odom_start_data.y
-            distance = sqrt(x**2 + y**2)
-            self.control.return_position_from_guest(distance)
+            # x = odom_finish_data.x - odom_start_data.x
+            # y = odom_finish_data.y - odom_start_data.y
+            # distance = sqrt(x**2 + y**2)
+            # self.control.return_position_from_guest(distance)
 
-            time.sleep(1)
+            self.control.straight("back", 0.3)
+
+            # time.sleep(1)
 
             current_position = self.control.return_start_position(current_position, next_location)
             
