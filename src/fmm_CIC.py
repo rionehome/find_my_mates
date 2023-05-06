@@ -17,9 +17,9 @@ from img_tasks.mediapipe_main.UDP_module import UDP_recv, UDP_send
 from find_my_mates.msg import ImgData
 
 #sound
-#from speech_and_NLP.src.textToSpeech import textToSpeech #発話
-#from speech_and_NLP.src.speechToText import recognize_speech #音声認識
-#from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
+from speech_and_NLP.src.textToSpeech import textToSpeech #発話
+from speech_and_NLP.src.speechToText import recognize_speech #音声認識
+from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
 
 APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
@@ -28,7 +28,7 @@ Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
 Guest = ["amelia", "angel", "ava", "charlie", "charlotte", "hunter", "max", "mia", "olivia", "parker", "sam", "jack", "noah","oliver", "thomas", "william"]
 
 def is_features_usable(feature, used_feature_list, used_feature_n):
-    if feature != "不明" and not feature in used_feature_list and used_feature_n < 2:
+    if feature != "unknown" and not feature in used_feature_list and used_feature_n < 2:
         return True
     return False
 
@@ -46,8 +46,8 @@ class CIC():
         self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
         self.state = "移動中"
 
-        self.sock = UDP_recv("始まり")
-        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.4')
+        self.sock = UDP_recv("始まり", HOST_NAME='127.0.0.10')
+        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.11')
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
@@ -66,7 +66,7 @@ class CIC():
         current_position = 1#現在position
         next_location = 1#次に人がいるかもしれないlocation
         # apr_guest_time = 0.0#人間に近づく為にかかった時間
-        #textToSpeech("I start program.", gTTS_lang="en")
+        textToSpeech("I start program.", gTTS_lang="en")
 
         feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
         used_feature_list = []
@@ -75,7 +75,7 @@ class CIC():
 
         #
         for i in range(3):
-            #@current_position, next_location = self.control.first_destination(next_location)
+            current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
             print("aaa")
@@ -86,7 +86,7 @@ class CIC():
             #人がいない場合、別の家具へ移動する
             while not discover_person:
                 #print("No person")
-                #@current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
@@ -99,11 +99,28 @@ class CIC():
 
 
             #人がいる場合、写真を10枚撮影する
-            #textToSpeech(text="Hello!", gTTS_lang="en")
+            textToSpeech(text="Hello!", gTTS_lang="en")
 
-            #@odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
+            
+
+            # odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
             age, sex, up_color, down_color, glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
+            color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
+            color_en = ["orange", "yellow", "light green", "green","aqua", "blue", "purple", "pink", "red", "black","gray", "white"]
+
+            self.control.straight("front", 0.3)
+            
+            for i in range(len(color_jp)):
+                if up_color == color_jp[i]:
+                    up_color = color_en[i]
+
+            for i in range(len(color_jp)):
+                if down_color == color_jp[i]:
+                    down_color = color_en[i] 
+
+            
+
             print("fmm_CIC")
             print("age_push, sex_push, up_color_push, down_color_push, glasstf_push")
             print("age_push=" + age)
@@ -111,7 +128,7 @@ class CIC():
             #self.pic_pub.publish("到着")
             print("person exist")
             #img_data = rospy.wait_for_message("/imgdata", ImgData)
-            #@self.approach_guest()
+            # self.approach_guest()
             print("yes")
 
             # print("apr:" + str(self.apr_guest_time))
@@ -120,32 +137,33 @@ class CIC():
             print("I finish to approach guest.")
             time.sleep(1)
 
-            #@odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
+            # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            #textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+            textToSpeech(text="Can I listen your name?", gTTS_lang="en")
 
             #(音声)音声（名前）を取得する
-            #res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+            res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
 
-            #guest_name = find_nearest_word(res, Guest)
-            guest_name = "Mark"
+            guest_name = find_nearest_word(res, Guest)
             print(guest_name)
 
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
-            #textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
+            textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
             # img_data = rospy.wait_for_message("/imgdata", ImgData)
 
-            #@x = odom_finish_data.x - odom_start_data.x
-            #@y = odom_finish_data.y - odom_start_data.y
-            #@distance = sqrt(x**2 + y**2)
-            #@self.control.return_position_from_guest(distance)
+            # x = odom_finish_data.x - odom_start_data.x
+            # y = odom_finish_data.y - odom_start_data.y
+            # distance = sqrt(x**2 + y**2)
+            # self.control.return_position_from_guest(distance)
 
             time.sleep(1)
 
-            #@current_position = self.control.return_start_position(current_position, next_location)
+            self.control.straight("back", 0.3)
+
+            current_position = self.control.return_start_position(current_position, next_location)
             
             #age = img_data.age_push
             #sex = img_data.sex_push
@@ -159,7 +177,7 @@ class CIC():
                 used_feature_list.append("age")
                 used_feature_n += 1
             
-            if is_features_usable(age, used_feature_list, used_feature_n):
+            if is_features_usable(sex, used_feature_list, used_feature_n):
                 used_feature_list.append("sex")
                 used_feature_n += 1
             
@@ -211,25 +229,26 @@ class CIC():
             if used_feature_n < 2:
                 print("Not enough features")
 
-            #@self.control.turn("right", 90)
+            self.control.turn("right", 180)
 
-            #textToSpeech(text="Hi, operator", gTTS_lang="en")
+            textToSpeech(text="Hi, operator", gTTS_lang="en")
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            #textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            print(guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature)
             #(音声)I will search next guest!と喋る
             
-            #extToSpeech(text="I will search next guest!", gTTS_lang="en")
+            textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
 
-            #@self.control.turn("left", 90)
+            self.control.turn("left", 180)
             
 
             print(str(i) + "person" + "finish")
 
         #(音声)以上で終了します。と喋る
-        #textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
+        textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
 
     def approach_guest(self):
         print(1)

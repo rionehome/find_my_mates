@@ -24,8 +24,8 @@ from find_my_mates.msg import ImgData
 
 def main():
     #sock = UDP_recv("始まり")
-    sock = UDP_send("始まり") #データを送る用のソケット
-    sock2 = UDP_recv("始まり", HOST_NAME = '127.0.0.4') #データが届いたかを確認するためのソケット
+    sock = UDP_send("始まり", HOST_NAME = '127.0.0.10') #データを送る用のソケット
+    sock2 = UDP_recv("始まり", HOST_NAME = '127.0.0.11') #データが届いたかを確認するためのソケット
     
 
     count = 0 #繰り返し回数を数える
@@ -88,6 +88,7 @@ def img_analysis_main(sock, sock2):
 
         # 画像を読み込む #####################################################
         read_path = DIR + "/person" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
+        read_path2 = DIR + "/face" + str(img_c) + ".png"#多くの特徴は人画像から読み取る
 
 
         #ファイルが存在するとき読み込み
@@ -96,11 +97,12 @@ def img_analysis_main(sock, sock2):
             print("image_OK")
         
             image = cv2.imread(read_path)
+            image2 = cv2.imread(read_path2) #顔
 
 
             print(str(img_c) + ":")
 
-            age, sex = get_sex_age(app, image)
+            age, sex = get_sex_age(app, image2)
             print(":age=" + str(age) + "、sex=" + str(sex))
 
             if age != "なし":
@@ -136,12 +138,12 @@ def img_analysis_main(sock, sock2):
             #OKのサインが来るまで送らない
             #待ち状態に入ってから、OKを受取、データを発信する
             while True:
-                rcv_data2, sock2 = UDP_recv("繰り返し", sock=sock2, HOST_NAME='127.0.0.4')
+                rcv_data2, sock2 = UDP_recv("繰り返し", sock=sock2, HOST_NAME='127.0.0.11')
                 if rcv_data2 == "OK":
                     break
 
             #rcv_data, sock = UDP_recv("繰り返し", sock=sock) #眼鏡が届くまで待っている
-            sock = UDP_send("繰り返し", sock=sock, send_data=ftrs)
+            sock = UDP_send("繰り返し", sock=sock, send_data=ftrs, HOST_NAME='127.0.0.10')
             
             #print("眼鏡=" + str(rcv_data))
             #glasstf_list.append(rcv_data)

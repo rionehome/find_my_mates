@@ -48,7 +48,7 @@ def get_glasses_tf(model, image):
         #メガネをかけていない。
         put_glss = 0
 
-        return "眼鏡なし"
+        return "wearing no glasses"
 
 
 
@@ -93,7 +93,7 @@ def get_glasses_tf(model, image):
         
         #print("メガネをかけている=" + str(put_glss))
 
-        return "眼鏡をかけている"
+        return "wearing a glasses"
 
 
 

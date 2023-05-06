@@ -67,11 +67,11 @@ def img_analysis_sub(sock, sock2):
     model = get_glasses_tf_set()
     img_c = 1 
 
-    age_push = "不明"
-    sex_push = "不明"
-    up_color_push = "不明"
-    down_color_push = "不明"
-    glasstf_push = "不明"
+    age_push = "unknown"
+    sex_push = "unknown"
+    up_color_push = "unknown"
+    down_color_push = "unknown"
+    glasstf_push = "unknown"
 
     age_list = []
     sex_list = []
@@ -98,8 +98,8 @@ def img_analysis_sub(sock, sock2):
 
                 print(str(img_c) + ":")
 
-                sock2 = UDP_send("繰り返し", sock=sock2, send_data="OK", HOST_NAME='127.0.0.4') 
-                rcv_data, sock = UDP_recv("繰り返し", sock=sock) #他の特徴がimg_mdppから届くのを待つ
+                sock2 = UDP_send("繰り返し", sock=sock2, send_data="OK", HOST_NAME='127.0.0.11') 
+                rcv_data, sock = UDP_recv("繰り返し", sock=sock, HOST_NAME='127.0.0.10') #他の特徴がimg_mdppから届くのを待つ
 
                 rcv_ftr_list = rcv_data.split(",")
 
@@ -150,7 +150,7 @@ def img_analysis_sub(sock, sock2):
     print("glasstf_list=" + str(glasstf_list))
 
     if len(age_list) != 0:
-        age_push = str(int(mean(age_list))) + "歳"
+        age_push = str(int(mean(age_list))) + "years old"
 
     if len(sex_list) != 0:
         sex_push = mode(sex_list)

@@ -372,7 +372,8 @@ class Person:
 
       #print("w_img=" + str(w_img))
       if w_img is not None:
-        cv2.imshow("web_camere", w_img)
+        cv2.imshow("web_camerq", w_img)
+        cv2.moveWindow("web_camerq", 1000,60) # Window表示位置指定
 
       """
       ここでperson_existを出版する。
