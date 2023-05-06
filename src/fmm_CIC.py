@@ -6,7 +6,7 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, String
-from find_my_mates.msg import LidarData, OdomData
+from find_my_mates.msg import LidarData, OdomData, Detect
 from geometry_msgs.msg import Twist
 from math import sqrt
 
@@ -54,10 +54,155 @@ class CIC():
         # self.apr_guest_time = 0.0
         self.person = Person() #FMM_person_detect_dd_ftrのクラスの実体化
 
+        self.image_person_detect_switch_pub = rospy.Publisher(
+            "/image_system/person_detect/switch", String, queue_size=1
+        )
+        rospy.Subscriber("/image_system/person_detect/result", Detect, self.image_person_detect_result_callback)
+        self.person_count = 0
+        self.person_direction = []
+        self.person_distance = []
+        self.person_xmid = []
+        self.person_ymid = []
+        self.person_width = []
+        self.person_height = []
+
         #sound
-        
-        
+
     def main(self):
+        print("final")
+        while not discover_person:#人の有無を調べる
+            # if discover_person == True:#人間を見つけたら
+            #     textToSpeech("Welcome home!")
+            #     break
+
+            if route == "down":
+                self.control.move_position(current_position, current_position - 1)
+                current_position -= 1
+                print("a")
+                if current_position == 0:
+                    route == "up"
+
+            else:
+                self.control.move_position(current_position, current_position + 1)
+                current_position += 1
+                print("b")
+                if current_position == 4:
+                    route == "down"
+
+        # textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
+        # response = ["yes", "no"]
+        # res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+        # audio_response = find_nearest_word(res, response)
+
+        # if audio_response == "No":
+        #     textToSpeech("I finish program.", gTTS_lang="en")
+        # #     return
+        
+        # textToSpeech("OK. I start program.", gTTS_lang="en")
+        # textToSpeech("Please come closer", gTTS_lang="en")
+
+        age, sex, up_color, down_color, glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
+        color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
+        color_en = ["orange", "yellow", "light green", "green","aqua", "blue", "purple", "pink", "red", "black","gray", "white"]
+        for i in range(len(color_jp)):
+            if up_color == color_jp[i]:
+                up_color = color_en[i]
+
+        for i in range(len(color_jp)):
+            if down_color == color_jp[i]:
+                down_color = color_en[i] 
+
+        current_position = 4#現在地
+        route = "down"#positionを時計回りを"up"、反時計回りを"down"としている
+        
+        textToSpeech("I'll see you later.", gTTS_lang="en")
+        time.sleep(3)
+
+        while True:
+            textToSpeech("I start serching.", gTTS_lang="en")
+
+
+            # person_count = self.person_count
+
+            discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+            while not discover_person:#人の有無を調べる
+                # if discover_person == True:#人間を見つけたら
+                #     textToSpeech("Welcome home!")
+                #     break
+
+                if route == "down":
+                    self.control.move_position(current_position, current_position - 1)
+                    current_position -= 1
+                    print("a")
+                    if current_position == 0:
+                        route == "up"
+
+                else:
+                    self.control.move_position(current_position, current_position + 1)
+                    current_position += 1
+                    print("b")
+                    if current_position == 4:
+                        route == "down"
+
+                # self.control.turn("left", 90)
+                # discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+                # if discover_person == True:#人間を見つけたら
+                #     textToSpeech("Welcome home!")
+                #     break
+                # self.control.turn("left", 90)
+                # discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+                # if discover_person == True:#人間を見つけたら
+                #     textToSpeech("Welcome home!")
+                #     break
+                # self.control.turn("left", 90)
+                # discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+                # if discover_person == True:#人間を見つけたら
+                #     textToSpeech("Welcome home!")
+                #     break
+                # self.control.turn("left", 90)
+                # discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+
+            a_age, a_sex, a_up_color, a_down_color, a_glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
+            color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
+            color_en = ["orange", "yellow", "light green", "green","aqua", "blue", "purple", "pink", "red", "black","gray", "white"]
+            for i in range(len(color_jp)):
+                if a_up_color == color_jp[i]:
+                    a_up_color = color_en[i]
+
+            for i in range(len(color_jp)):
+                if a_down_color == color_jp[i]:
+                    a_down_color = color_en[i] 
+
+        
+            if age == a_age or sex == a_sex or a_up_color == up_color or a_down_color == down_color or a_glasstf == glasstf:
+                textToSpeech("Can I stop the program? Please tell me Yes? or No?", gTTS_lang="en")
+                response = ["yes", "no"]
+                res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
+                audio_response = find_nearest_word(res, response)
+
+                if audio_response == "Yes":
+                    textToSpeech("I finish program.", gTTS_lang="en")
+                    return
+            else:
+                textToSpeech("Oh, no you are stranger I will call the police", gTTS_lang="en")
+                textToSpeech("I finish program.", gTTS_lang="en")
+                return
+                        
+
+
+
+        time.sleep(20)   
+        
+    '''
+    def main(self):
+        
+
+
+
+        #以下、find_my_matesのため、実行しない
+
+
+
         state = String()
         # state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
 
@@ -250,6 +395,7 @@ class CIC():
         #(音声)以上で終了します。と喋る
         textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
 
+    '''
     def approach_guest(self):
         print(1)
         apr_guest_time = 0.0
@@ -290,6 +436,15 @@ class CIC():
     #     while time.time() - start_time < self.apr_guest_time:
     #         self.turtle_pub.publish(self.twist)
     #     time.sleep(2)
+
+    def image_person_detect_result_callback(self, msg):
+        self.person_count = msg.count
+        self.person_direction = msg.direction
+        self.person_distance = msg.distance
+        self.person_xmid = msg.xmid
+        self.person_ymid = msg.ymid
+        self.person_width = msg.width
+        self.person_height = msg.height
 
 if __name__=="__main__":
     rospy.init_node('cic')
