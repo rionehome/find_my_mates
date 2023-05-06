@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import torch
@@ -46,19 +46,21 @@ class Person:
 
     # Model
     #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    #model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path='yolov5s.pt', source='local') #大会用PC
-    model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local') #個人PC
+    MODEL_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/yolov5s.pt"
+    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path=MODEL_PATH, source='local') #大会用PC
+    # model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local') #個人PC
 
     #--- 検出の設定 ---
     model.conf = 0.5 #--- 検出の下限値（<1）。設定しなければすべて検出
     model.classes = [0] #--- 0:person クラスだけ検出する。設定しなければすべて検出
+    print("")
     print(model.names) #--- （参考）クラスの一覧をコンソールに表示
 
     #--- カメラの設定 ---
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
     
-    WEB_CAM_DEV = 1#self.cam_dev_dtc() #Webカメラのデバイス番号
-    WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
+    WEB_CAM_DEV = 4#self.cam_dev_dtc() #Webカメラのデバイス番号
+    #WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
     web_camera = cv2.VideoCapture(WEB_CAM_DEV)
@@ -70,6 +72,7 @@ class Person:
 
     elif state == "移動中":
       discover_person = self.person_exist(model, camera)
+      print("per_dtc_ftr:discover_person=" + str(discover_person))
       return discover_person
 
 
@@ -99,54 +102,70 @@ class Person:
 
 
   def person_exist(self, model, camera):
-    person_exit = False #存在しない。   
 
-    #--- 画像の取得 ---
-    #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
-    #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
-    ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+    count = 0
 
-    #--- 推定の検出結果を取得 ---
-    #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
-    results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
+    while True:
 
-    #--- 出力 ---
-    #--- 検出結果を画像に描画して表示 ---
-    #--- 各検出について
+      count += 1
 
-    person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-
-    
-    #検出した人がいないとき
-    if len(person_dtc_list) == 0:
-      #人が写っていない前提で初期化する
       person_exit = False #存在しない。
+      #print("FMM_per_dtc:OK")   
 
-
-    person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-    
-    #検出した人がいないとき
-    if len(person_dtc_list) == 0:
-      #人が写っていない前提で初期化する
-      person_exit = False #存在しない。
-
-
-    box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
-
-
-    for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
-
-      box_w = box[2] - box[0] #バウンディングボックスの幅
-      box_w_list.append(box_w) #リストに矩形の幅を追加
-
-
-    #人が検出されており、
-    if len(box_w_list) != 0:
+      #--- 画像の取得 ---
+      #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
+      #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
+      ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+      #print("imgs=" + str(imgs))
+      #cv2.imshow("imgs", imgs)
       
-      box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
-      #矩形の幅が150を超えているものがあれば
-      if box_w_max >= 150:
-        person_exit = True
+      #--- 推定の検出結果を取得 ---
+      #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
+      results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
+      print("FMM_per_dtc:results=" + str(results))
+
+      #--- 出力 ---
+      #--- 検出結果を画像に描画して表示 ---
+      #--- 各検出について
+
+      person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+
+      
+      #検出した人がいないとき
+      if len(person_dtc_list) == 0:
+        #人が写っていない前提で初期化する
+        person_exit = False #存在しない。
+
+
+
+      person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+      
+      #検出した人がいないとき
+      if len(person_dtc_list) == 0:
+        #人が写っていない前提で初期化する
+        person_exit = False #存在しない。
+
+
+      box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
+
+
+      for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
+
+        box_w = box[2] - box[0] #バウンディングボックスの幅
+        box_w_list.append(box_w) #リストに矩形の幅を追加
+
+
+      #人が検出されており、
+      if len(box_w_list) != 0:
+        
+        box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
+        #矩形の幅が150を超えているものがあれば
+        if box_w_max >= 100:
+          person_exit = True
+          break
+
+      elif count > 100:
+        break
 
 
     #print("person_exit=" + str(person_exit))
@@ -174,7 +193,7 @@ class Person:
     f_img_c = 1
 
     FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #大会用PC
-    FOLDER_PATH = "/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #個人用PC
+    #FOLDER_PATH = "/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #個人用PC
 
     #--------------------------------------------------------------
 

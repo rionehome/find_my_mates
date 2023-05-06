@@ -32,7 +32,7 @@ def main():
 
     #ディレクトリのパスを指定
     DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #大会用PC
-    DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
+    # DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
     
     #print(file_num)
 
@@ -70,7 +70,7 @@ def img_analysis_main(sock, sock2):
     img_c = 1
 
     DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #大会用PC
-    DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
+    #DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
 
     age_push = "不明"
     sex_push = "不明"
@@ -235,12 +235,12 @@ def img_analysis_main(sock, sock2):
 
 
 if __name__ == "__main__":
-    rospy.init_node("img_mdpp")
+    #rospy.init_node("img_mdpp")
     #img_analysis_main()
     main()
-    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+    #print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 
-    while not rospy.is_shutdown():
-        rospy.Rate(10).sleep()
+    #while not rospy.is_shutdown():
+    #    rospy.Rate(10).sleep()
     
     

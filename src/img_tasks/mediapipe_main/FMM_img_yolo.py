@@ -80,7 +80,7 @@ def img_analysis_sub(sock, sock2):
     glasstf_list = []
 
     DIR = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory'
-    DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
+    # DIR = '/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory' #個人用PC
 
     while(True):
         # 画像を読み込む #####################################################
