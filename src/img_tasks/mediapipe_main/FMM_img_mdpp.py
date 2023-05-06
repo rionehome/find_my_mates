@@ -36,7 +36,7 @@ def main():
     
     #print(file_num)
 
-    MAX_FILE_NUM = 20
+    MAX_FILE_NUM = 10 #WEBカメラのとき20、PCカメラのとき10
 
     while (True):
 
@@ -45,6 +45,7 @@ def main():
         
         #写真が揃ってからまだ一回も実行していないときに、特徴を抽出する
         if file_num == MAX_FILE_NUM and count == 0:
+            print("if file_num == MAX_FILE_NUM and count == 0")
             time.sleep(1)
             img_analysis_main(sock=sock, sock2=sock2)
             count = 1
@@ -91,6 +92,8 @@ def img_analysis_main(sock, sock2):
 
         #ファイルが存在するとき読み込み
         if os.path.exists(read_path):
+
+            print("image_OK")
         
             image = cv2.imread(read_path)
 

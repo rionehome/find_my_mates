@@ -58,7 +58,7 @@ class Person:
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
     
     WEB_CAM_DEV = 1#self.cam_dev_dtc() #Webカメラのデバイス番号
-    #WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
+    WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
     web_camera = cv2.VideoCapture(WEB_CAM_DEV)
@@ -174,7 +174,7 @@ class Person:
     f_img_c = 1
 
     FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #大会用PC
-    FOLDER_PATH = "memory" #個人用PC
+    FOLDER_PATH = "/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #個人用PC
 
     #--------------------------------------------------------------
 

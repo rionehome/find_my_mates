@@ -89,10 +89,12 @@ def img_analysis_sub(sock, sock2):
 
         #ファイルが存在するとき読み込み
         if os.path.exists(read_path):
+            print("img_yolo:if os.path.exists(read_path) OK")
         
             image = cv2.imread(read_path)
 
             if image is not None:
+                print("img_yolo:img_OK")
 
                 print(str(img_c) + ":")
 
