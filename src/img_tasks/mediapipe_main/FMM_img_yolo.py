@@ -7,7 +7,8 @@
 import os
 import cv2
 import time
-from statistics import mean, mode
+from statistics import mean
+from scipy.stats import mode
 
 from img_tasks.mediapipe_main.img_glasses_detect import get_glasses_tf_set, get_glasses_tf
 
@@ -152,17 +153,18 @@ def img_analysis_sub(sock, sock2):
     if len(age_list) != 0:
         age_push = str(int(mean(age_list))) + "years old"
 
+    sex_list=["woman", "man", "woman", "man"]
     if len(sex_list) != 0:
-        sex_push = mode(sex_list)
+        sex_push = mode(sex_list)[0]
 
     if len(up_color_list) != 0:
-        up_color_push = mode(up_color_list)
+        up_color_push = mode(up_color_list)[0]
 
     if len(down_color_list) != 0:
-        down_color_push = mode(down_color_list)
+        down_color_push = mode(down_color_list)[0]
 
     if len(glasstf_list) != 0:
-        glasstf_push = mode(glasstf_list)
+        glasstf_push = mode(glasstf_list)[0]
 
 
     print("age_push=" + age_push)
