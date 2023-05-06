@@ -56,15 +56,6 @@ class CIC():
 
         current_position = 4#現在地
         route = "down"#positionを時計回りを"up"、反時計回りを"down"としている
-
-        textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
-        response = ["Yes", "No"]
-        res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
-        audio_response = find_nearest_word(res, response)
-
-        if audio_response == "No":
-            textToSpeech("I finish program.", gTTS_lang="en")
-            return
         
         textToSpeech("I'll see you later.", gTTS_lang="en")
         time.sleep(3)
@@ -73,6 +64,11 @@ class CIC():
             textToSpeech("I start serching.", gTTS_lang="en")
 
             while True:
+                discover_person = rospy.wait_for_message("/person", Bool)
+                if discover_person.data:#人間を見つけたら
+                    textToSpeech("Welcome home!")
+                    break
+
                 if route == "down":
                     self.control.move_position(current_position, current_position - 1)
                     current_position -= 1
@@ -85,13 +81,14 @@ class CIC():
                     if current_position == 4:
                         route == "down"
                         
-                
-                
-                if True:#人間を見つけたら
-                    textToSpeech("I detect person.")
-                    break
+            textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
+            response = ["Yes", "No"]
+            res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+            audio_response = find_nearest_word(res, response)
 
-            break
+            if audio_response == "No":
+                textToSpeech("I finish program.", gTTS_lang="en")
+                break
 
         time.sleep(20)
 ######################################################################################################################

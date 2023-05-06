@@ -16,10 +16,12 @@ import time
 #23=1.45
 #34=1.318
 
-DISTANCE_12 = 2.45
-DISTANCE_23 = 2.0
-DISTANCE_34 = 2.0
+DISTANCE_01 = 2.40
+DISTANCE_12 = 2.8
+DISTANCE_23 = 1.45
+DISTANCE_34 = 1.318
 
+DISTANCE_10 = DISTANCE_01
 DISTANCE_21 = DISTANCE_12
 DISTANCE_32 = DISTANCE_23
 DISTANCE_43 = DISTANCE_34
@@ -43,6 +45,28 @@ class ControlSystem():
         # self.turtle_pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
         self.move_odom_srv = rospy.ServiceProxy("/move_odom", OdomMove)
         # self.twist = Twist()
+
+    def move_position(self, current_position, next_position):
+        if current_position == 0:
+            self.move_odom_srv("forward", DISTANCE_01, "None", 0)
+        elif current_position == 1:
+            if next_position == 0:
+                self.move_odom_srv("forward", DISTANCE_10, "None", 0)
+            else:
+                self.move_odom_srv("forward", DISTANCE_12, "None", 0)
+        elif current_position == 2:
+            if next_position == 1:
+                self.move_odom_srv("forward", DISTANCE_21, "None", 0)
+            else:
+                self.move_odom_srv("forward", DISTANCE_23, "None", 0)
+        elif current_position == 3:
+            if next_position == 2:
+                self.move_odom_srv("forward", DISTANCE_32, "None", 0)
+            else:
+                self.move_odom_srv("forward", DISTANCE_34, "None", 0)
+        elif current_position == 4:
+            self.move_odom_srv("forward", DISTANCE_43, "None", 0)
+        
 
     def turn(self, direction, degree):
         rospy.wait_for_service("/move_odom")
