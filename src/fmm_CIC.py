@@ -6,7 +6,7 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, String
-from find_my_mates.msg import LidarData, OdomData
+from find_my_mates.msg import LidarData, OdomData, Info
 from geometry_msgs.msg import Twist
 from math import sqrt
 
@@ -48,8 +48,17 @@ class CIC():
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
         # self.apr_guest_time = 0.0
         self.person = Person
+        self.info_sub = rospy.Subscriber('/information', Info, self.info_data)
+        self.age = "no information"
+        self.gender = "no information"
+        self.up_color = "no information"
 
         #sound
+
+    def info_data(self, msg):
+        self.age = msg.age
+        self.gender = msg.gender
+        self.up_color = msg.up_color
         
         
     def main(self):
@@ -72,9 +81,7 @@ class CIC():
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
-            print("aaa")
             discover_person = rospy.wait_for_message("/person", Bool)
-            print("bbb")
 
             while not discover_person:
                 print("No person")
@@ -101,18 +108,24 @@ class CIC():
             
 
             print("I finish to approach guest.")
-            time.sleep(1)
+
+            # img_imfo = rospy.wait_for_message("/information", Info)
+            if i == 0:
+                feature1 = self.age
+                feature2 = self.gender
+            elif i == 1:
+                feature = self.up_color
 
             # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             # while True:
-            textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+            textToSpeech(text="May I have your name?", gTTS_lang="en")
 
             #(音声)音声（名前）を取得する
             res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
 
             guest_name = find_nearest_word(res, Guest)
-            print(guest_name)
+            print(str(i) + "-person: " + guest_name)
 
                 # textToSpeech("Are your name is " + guest_name + "? Please tell me Yes or No.", gTTS_lang="en")
 
@@ -130,7 +143,7 @@ class CIC():
 
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
-            textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
+            textToSpeech(text="Hello " + guest_name + "I'm glad to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
             #img_data = rospy.wait_for_message("/imgdata", ImgData)
@@ -210,13 +223,25 @@ class CIC():
             # if len(used_feature_n) < 2:
             #     print("Not enough features")
 
-            self.control.turn("right", 90)
+            self.control.turn("right", 180)
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
+
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2], gTTS_lang="en")# + "and guest is" + "特徴量の変数" + "and" + "特徴量の変数", gTTS_lang="en")
+
+            if i == 0:
+                # feature1 = self.age
+                # feature2 = self.gender
+                textToSpeech(text=guest_name + "is near " + Function[next_location - 2] + "and guest is" + feature1 + "and" + feature2, gTTS_lang="en")
             #(音声)I will search next guest!と喋る
+
+            elif i == 1:
+                # feature = img_imfo.up_color
+                textToSpeech(text=guest_name + "is near " + Function[next_location - 2]+ "and guest is" + feature, gTTS_lang="en")
+
+            print(guest_name + " is near " + Function[next_location - 2])
+
 
             textToSpeech(text="Sorry, I can't get guest feature more.", gTTS_lang="en")
 
@@ -228,10 +253,10 @@ class CIC():
 
             time.sleep(1)
 
-            self.control.turn("left", 90)
+            self.control.turn("left", 180)
             
 
-            print(str(i) + "person" + "finish")
+            print(str(i) + "-person" + "finish")
 
         #(音声)以上で終了します。と喋る
         textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
