@@ -80,6 +80,8 @@ class CIC():
                     current_position += 1
                     if current_position == 4:
                         route == "down"
+
+                self.control.turn()
                         
             textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
             response = ["Yes", "No"]
