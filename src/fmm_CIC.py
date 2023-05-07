@@ -70,36 +70,27 @@ class CIC():
 
     def main(self):
         print("final")
-        while not discover_person:#人の有無を調べる
-            # if discover_person == True:#人間を見つけたら
-            #     textToSpeech("Welcome home!")
-            #     break
-
-            if route == "down":
-                self.control.move_position(current_position, current_position - 1)
-                current_position -= 1
-                print("a")
-                if current_position == 0:
-                    route == "up"
-
-            else:
-                self.control.move_position(current_position, current_position + 1)
-                current_position += 1
-                print("b")
-                if current_position == 4:
-                    route == "down"
-
+        textToSpeech("Hello, Family.", gTTS_lang="en")
         # textToSpeech("Hello, Family. Would you start detect suspicious person system? Please tell me Yes? or No?", gTTS_lang="en")
+        # time.sleep(1)
         # response = ["yes", "no"]
-        # res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+        # res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
         # audio_response = find_nearest_word(res, response)
 
-        # if audio_response == "No":
+        # if audio_response == "no":
         #     textToSpeech("I finish program.", gTTS_lang="en")
-        # #     return
+        #     return
+
+        # # response = ["yes", "no"]
+        # # res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
+        # audio_response = find_nearest_word(res, response)
+
+        # if audio_response == "yes":
+        #     textToSpeech("I finish program.", gTTS_lang="en")
+        #     return
         
-        # textToSpeech("OK. I start program.", gTTS_lang="en")
-        # textToSpeech("Please come closer", gTTS_lang="en")
+        textToSpeech("I start program.", gTTS_lang="en")
+        textToSpeech("Please come closer", gTTS_lang="en")
 
         age, sex, up_color, down_color, glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
         color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
@@ -115,7 +106,7 @@ class CIC():
         current_position = 4#現在地
         route = "down"#positionを時計回りを"up"、反時計回りを"down"としている
         
-        textToSpeech("I'll see you later.", gTTS_lang="en")
+        textToSpeech("I can get your feature. Thank you. I'll see you later.", gTTS_lang="en")
         time.sleep(3)
 
         while True:
@@ -124,25 +115,27 @@ class CIC():
 
             # person_count = self.person_count
 
-            discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
-            while not discover_person:#人の有無を調べる
-                # if discover_person == True:#人間を見つけたら
-                #     textToSpeech("Welcome home!")
-                #     break
+            print("I start serchingaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            while True:#人の有無を調べる
+                print("current_position"  + str(current_position))
 
                 if route == "down":
-                    self.control.move_position(current_position, current_position - 1)
+                    #@ self.control.move_position(current_position, current_position - 1)
                     current_position -= 1
-                    print("a")
+                    print("downbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
                     if current_position == 0:
-                        route == "up"
+                        route = "up"
 
                 else:
-                    self.control.move_position(current_position, current_position + 1)
+                    #@ self.control.move_position(current_position, current_position + 1)
                     current_position += 1
-                    print("b")
+                    print("upcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
                     if current_position == 4:
-                        route == "down"
+                        route = "down"
+                
+                discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
+                if discover_person == True:
+                    break
 
                 # self.control.turn("left", 90)
                 # discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
@@ -174,17 +167,22 @@ class CIC():
                     a_down_color = color_en[i] 
 
         
-            if age == a_age or sex == a_sex or a_up_color == up_color or a_down_color == down_color or a_glasstf == glasstf:
+            # if age == a_age or sex == a_sex or a_up_color == up_color or a_down_color == down_color or a_glasstf == glasstf:
+            if a_up_color == up_color or a_down_color == down_color:
+                textToSpeech("Welcome home!", gTTS_lang="en")
                 textToSpeech("Can I stop the program? Please tell me Yes? or No?", gTTS_lang="en")
                 response = ["yes", "no"]
                 res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
                 audio_response = find_nearest_word(res, response)
 
-                if audio_response == "Yes":
+                if audio_response == "yes":
+                    print("response : " + audio_response)
                     textToSpeech("I finish program.", gTTS_lang="en")
                     return
+                print("response : " + audio_response)
             else:
                 textToSpeech("Oh, no you are stranger I will call the police", gTTS_lang="en")
+                print("Oh, no! You are stranger I will call the police")
                 textToSpeech("I finish program.", gTTS_lang="en")
                 return
                         

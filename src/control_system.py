@@ -68,6 +68,9 @@ class ControlSystem():
         elif current_position == 4:
             self.move_odom_srv("None", 0, "right", 180)
             self.move_odom_srv("forward", DISTANCE_43, "None", 0)
+
+        return
+    
     def straight(self, direction, distance):
         rospy.wait_for_service("/move_odom")
         self.move_odom_srv(direction, distance, "None", 0)
