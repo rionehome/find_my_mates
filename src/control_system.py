@@ -47,18 +47,24 @@ class ControlSystem():
         # self.twist = Twist()
 
     def move_position(self, current_position, next_position):
+        angle180 = float(radians(180))
+        angle90 = float(radians(90))
         if current_position == 0:
-            self.move_odom_srv("None", 0, "right", -180)
+            self.move_odom_srv("None", 0, "right", angle180)
             self.move_odom_srv("forward", DISTANCE_01, "None", 0)
         elif current_position == 1:
             if next_position == 0:
+                self.move_odom_srv("None", 0, "left", angle90)
                 self.move_odom_srv("forward", DISTANCE_10, "None", 0)
             else:
+                self.move_odom_srv("None", 0, "right", angle90)
                 self.move_odom_srv("forward", DISTANCE_12, "None", 0)
         elif current_position == 2:
             if next_position == 1:
+                self.move_odom_srv("None", 0, "left", angle90)
                 self.move_odom_srv("forward", DISTANCE_21, "None", 0)
             else:
+                self.move_odom_srv("None", 0, "right", angle90)
                 self.move_odom_srv("forward", DISTANCE_23, "None", 0)
         elif current_position == 3:
             if next_position == 2:
@@ -66,7 +72,7 @@ class ControlSystem():
             else:
                 self.move_odom_srv("forward", DISTANCE_34, "None", 0)
         elif current_position == 4:
-            self.move_odom_srv("None", 0, "right", 180)
+            self.move_odom_srv("None", 0, "right", angle180)
             self.move_odom_srv("forward", DISTANCE_43, "None", 0)
 
         return

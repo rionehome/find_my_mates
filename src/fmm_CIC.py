@@ -115,26 +115,31 @@ class CIC():
 
             # person_count = self.person_count
 
-            print("I start serchingaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            i = 1
+
+            print("I start serching")
             while True:#人の有無を調べる
                 print("current_position"  + str(current_position))
 
                 if route == "down":
-                    #@ self.control.move_position(current_position, current_position - 1)
+                    self.control.move_position(current_position, current_position - 1)
                     current_position -= 1
-                    print("downbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+                    print("down")
                     if current_position == 0:
                         route = "up"
 
                 else:
-                    #@ self.control.move_position(current_position, current_position + 1)
+                    self.control.move_position(current_position, current_position + 1)
                     current_position += 1
-                    print("upcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
+                    print("up")
                     if current_position == 4:
                         route = "down"
+
+                if current_position == 3:
+                    i += 1
                 
                 discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
-                if discover_person == True:
+                if discover_person == True and current_position == 3 and i == 3:
                     break
 
                 # self.control.turn("left", 90)
