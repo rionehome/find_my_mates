@@ -24,8 +24,8 @@ from find_my_mates.msg import ImgData
 
 def main():
     #sock = UDP_recv("始まり")
-    sock = UDP_send("始まり", HOST_NAME = '127.0.0.10') #データを送る用のソケット
-    sock2 = UDP_recv("始まり", HOST_NAME = '127.0.0.11') #データが届いたかを確認するためのソケット
+    sock = UDP_send("始まり", HOST_NAME = '127.0.0.20') #データを送る用のソケット
+    sock2 = UDP_recv("始まり", HOST_NAME = '127.0.0.21') #データが届いたかを確認するためのソケット
     
 
     count = 0 #繰り返し回数を数える
@@ -138,12 +138,12 @@ def img_analysis_main(sock, sock2):
             #OKのサインが来るまで送らない
             #待ち状態に入ってから、OKを受取、データを発信する
             while True:
-                rcv_data2, sock2 = UDP_recv("繰り返し", sock=sock2, HOST_NAME='127.0.0.11')
+                rcv_data2, sock2 = UDP_recv("繰り返し", sock=sock2, HOST_NAME='127.0.0.21')
                 if rcv_data2 == "OK":
                     break
 
             #rcv_data, sock = UDP_recv("繰り返し", sock=sock) #眼鏡が届くまで待っている
-            sock = UDP_send("繰り返し", sock=sock, send_data=ftrs, HOST_NAME='127.0.0.10')
+            sock = UDP_send("繰り返し", sock=sock, send_data=ftrs, HOST_NAME='127.0.0.20')
             
             #print("眼鏡=" + str(rcv_data))
             #glasstf_list.append(rcv_data)

@@ -46,8 +46,8 @@ class CIC():
         self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
         self.state = "移動中"
 
-        self.sock = UDP_recv("始まり", HOST_NAME='127.0.0.10')
-        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.11')
+        self.sock = UDP_recv("始まり", HOST_NAME='127.0.0.20')
+        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.21')
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
@@ -139,7 +139,7 @@ class CIC():
                     i += 1
                 
                 discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2)
-                if discover_person == True and current_position == 3 and i == 3:
+                if discover_person == True and current_position == 3 and i == 4:
                     break
 
                 # self.control.turn("left", 90)

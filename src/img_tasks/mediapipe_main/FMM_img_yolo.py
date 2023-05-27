@@ -99,8 +99,8 @@ def img_analysis_sub(sock, sock2):
 
                 print(str(img_c) + ":")
 
-                sock2 = UDP_send("繰り返し", sock=sock2, send_data="OK", HOST_NAME='127.0.0.11') 
-                rcv_data, sock = UDP_recv("繰り返し", sock=sock, HOST_NAME='127.0.0.10') #他の特徴がimg_mdppから届くのを待つ
+                sock2 = UDP_send("繰り返し", sock=sock2, send_data="OK", HOST_NAME='127.0.0.21') 
+                rcv_data, sock = UDP_recv("繰り返し", sock=sock, HOST_NAME='127.0.0.20') #他の特徴がimg_mdppから届くのを待つ
 
                 rcv_ftr_list = rcv_data.split(",")
 

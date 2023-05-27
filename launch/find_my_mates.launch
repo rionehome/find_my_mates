@@ -11,7 +11,7 @@
   
   <!--image-->
   <!-- <node pkg="find_my_mates" name="raltimebio" type="realtime_BioS_old_cmpr.py" required="true" output="screen" /> -->
-  <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" /> 
   <node pkg="find_my_mates" name="move_odom" type="move_odom.py" required="true" output="screen" />
 
   <!--sound-->
