@@ -6,7 +6,7 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, String
-from find_my_mates.msg import LidarData, OdomData
+from find_my_mates.msg import LidarData, OdomData, Info
 from geometry_msgs.msg import Twist
 from math import sqrt
 
@@ -55,6 +55,11 @@ class CIC():
         self.person = Person() #FMM_person_detect_dd_ftrのクラスの実体化
 
         #sound
+
+    def info_data(self, msg):
+        self.age = msg.age
+        self.gender = msg.gender
+        self.up_color = msg.up_color
         
         
     def main(self):
@@ -135,21 +140,37 @@ class CIC():
             
 
             print("I finish to approach guest.")
-            time.sleep(1)
 
             # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            textToSpeech(text="Can I listen your name?", gTTS_lang="en")
+            # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
+
+            # while True:
+            textToSpeech(text="May I have your name?", gTTS_lang="en")
 
             #(音声)音声（名前）を取得する
-            res = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+            res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
 
             guest_name = find_nearest_word(res, Guest)
-            print(guest_name)
+            print(str(i) + "-person: " + guest_name)
+
+                # textToSpeech("Are your name is " + guest_name + "? Please tell me Yes or No.", gTTS_lang="en")
+
+                # check = ["no", "yes"]
+
+                # ans = recognize_speech(print_partial=True, use_break=3, lang='en-us')
+                # name_check = find_nearest_word(ans, check)
+                # print(name_check)
+                
+                # if name_check == "Yes" or name_check == "yes":
+                #     break
+                # else:
+                #     textToSpeech("Sorry, ")
+
 
             #(音声)名前を組み込んだ文章を作成する
             #(音声)今日は○○さん、みたいなことを言う
-            textToSpeech(text="Hello " + guest_name + "I'm happy to see you", gTTS_lang="en")
+            textToSpeech(text="Hello " + guest_name + "I'm glad to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
             # img_data = rospy.wait_for_message("/imgdata", ImgData)
@@ -159,7 +180,9 @@ class CIC():
             # distance = sqrt(x**2 + y**2)
             # self.control.return_position_from_guest(distance)
 
-            time.sleep(1)
+            self.control.straight("back", 0.3)
+
+            # time.sleep(1)
 
             self.control.straight("back", 0.3)
 
@@ -171,7 +194,7 @@ class CIC():
             #down_color = img_data.down_color_push
             #glasstf = img_data.glasstf_push
 
-            used_feature_n = 0
+            # used_feature_n = 0
 
             if is_features_usable(age, used_feature_list, used_feature_n):
                 used_feature_list.append("age")
@@ -193,34 +216,34 @@ class CIC():
                 used_feature_list.append("glasses")
                 used_feature_n += 1
             
-            first_feature = used_feature_list[-1]
-            second_feature = used_feature_list[-2]
+            # first_feature = used_feature_list[-1]
+            # second_feature = used_feature_list[-2]
 
 
-            i = first_feature
-            j = second_feature
+            # i = first_feature
+            # j = second_feature
 
-            if i == "age":
-                first_feature = age
-            elif i == "sex":
-                first_feature = sex
-            elif i == "up_color":
-                first_feature = up_color
-            elif i == "down_color":
-                first_feature = down_color
-            elif i == "glasses":
-                first_feature = glasstf
+            # if i == "age":
+            #     first_feature = age
+            # elif i == "sex":
+            #     first_feature = sex
+            # elif i == "up_color":
+            #     first_feature = up_color
+            # elif i == "down_color":
+            #     first_feature = down_color
+            # elif i == "glasses":
+            #     first_feature = glasstf
             
-            if j == "age":
-                second_feature = age
-            elif j == "sex":
-                second_feature = sex
-            elif j == "up_color":
-                second_feature = up_color
-            elif j == "down_color":
-                second_feature = down_color
-            elif j == "glasses":
-                second_feature = glasstf
+            # if j == "age":
+            #     second_feature = age
+            # elif j == "sex":
+            #     second_feature = sex
+            # elif j == "up_color":
+            #     second_feature = up_color
+            # elif j == "down_color":
+            #     second_feature = down_color
+            # elif j == "glasses":
+            #     second_feature = glasstf
 
             # first_feature １つめの特徴量
             # second_feature ２つめの特徴量
@@ -233,11 +256,12 @@ class CIC():
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
+
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
             textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
             print(guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature)
             #(音声)I will search next guest!と喋る
-            
+
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
@@ -245,7 +269,7 @@ class CIC():
             self.control.turn("left", 180)
             
 
-            print(str(i) + "person" + "finish")
+            print(str(i) + "-person" + "finish")
 
         #(音声)以上で終了します。と喋る
         textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
