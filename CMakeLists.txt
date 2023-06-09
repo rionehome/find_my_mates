@@ -16,10 +16,19 @@ add_service_files(
 
 add_message_files(
   FILES
-  ArmAction.msg
-  MoveAction.msg
+  Feature.msg
+  ImgData.msg
+  Info.msg
   LidarData.msg
+  OdomData.msg
   RealTime.msg
+)
+
+add_service_files(
+  FILES
+  Camera_msg.srv
+  MoveArm.srv
+  OdomMove.srv
 )
 
 generate_messages(
