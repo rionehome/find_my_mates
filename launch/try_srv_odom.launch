@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- <include file="$(find turtlebot_bringup)/launch/minimal.launch"/> -->
+  <node pkg="find_my_mates" name="move_odom" type="move_odom.py" required="true" output="screen" />
+  <node pkg="find_my_mates" name="test_main" type="try_test.py" required="true" output="screen" />
+</launch>
