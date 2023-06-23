@@ -1,10 +1,10 @@
 import socket
 
 #UDP通信の受信側の準備
-def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
+def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), HOST_NAME = '127.0.0.3'):
 
     if state == "始まり":
-        HOST_NAME = '127.0.0.2' 
+        #HOST_NAME = '127.0.0.3' 
         PORT = 8080
         #ipv4を使うので、AF_INET
         #udp通信を使いたいので、SOCK_DGRAM
@@ -27,9 +27,9 @@ def UDP_recv(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)):
 
 
 #UDP通信の送信側の準備
-def UDP_send(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), send_data = ''):
+def UDP_send(state, sock=socket.socket(socket.AF_INET, socket.SOCK_DGRAM), send_data = '', HOST_NAME = '127.0.0.3'):
 
-    HOST_NAME = '127.0.0.2' 
+    #HOST_NAME = '127.0.0.3' 
     PORT = 8080
 
     if state == "始まり":

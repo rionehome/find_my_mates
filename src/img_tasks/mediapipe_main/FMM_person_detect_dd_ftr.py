@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import torch
@@ -7,7 +7,11 @@ import time
 import os
 import rospy
 from std_msgs.msg import Bool, String
-import threading
+
+#from FMM_img_yolo import img_yolo_main
+from img_tasks.mediapipe_main.FMM_img_yolo import img_yolo_main
+#from UDP_module import UDP_send, UDP_recv
+#import threading
 
 """
   [‘person’, ‘bicycle’, ‘car’, ‘motorcycle’, ‘airplane’, ‘bus’, 
@@ -28,50 +32,50 @@ import threading
 class Person:
   def __init__(self):
     #self.state = "移動中"
-    self.state = "到着"
+    #self.state = "到着"
     self.state_sub = rospy.Subscriber('/state', String, self.pic_callback)
     self.check_exit_pub = rospy.Publisher("/person", Bool, queue_size=1)
 
   def pic_callback(self, msg):
     self.state = msg.pic_state
 
-  def main(self):
+  def main(self, state, sock, sock2):
 
     #self.state = "移動中"
-    self.state = "到着"
+    #self.state = "到着"
 
     # Model
     #model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path='yolov5s.pt', source='local')
+    MODEL_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/yolov5s.pt"
+    model = torch.hub.load('/home/ri-one/Github_Local_repo/yolov5', 'custom', path=MODEL_PATH, source='local') #大会用PC
+    # model = torch.hub.load('/home/ri-one/Desktop/github_local_repository/yolov5', 'custom', path='yolov5s.pt', source='local') #個人PC
 
     #--- 検出の設定 ---
     model.conf = 0.5 #--- 検出の下限値（<1）。設定しなければすべて検出
     model.classes = [0] #--- 0:person クラスだけ検出する。設定しなければすべて検出
+    print("")
     print(model.names) #--- （参考）クラスの一覧をコンソールに表示
 
     #--- カメラの設定 ---
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
     
     WEB_CAM_DEV = 4#self.cam_dev_dtc() #Webカメラのデバイス番号
-    WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
+    #WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
     web_camera = cv2.VideoCapture(WEB_CAM_DEV)
 
+    if state == "到着":
+      img_data = self.person_dtc_wrt(model, camera, web_camera, sock, sock2) #人の写真を切り抜く
+      #self.state = "移動中"
+      return img_data
 
-    
-    while(True):
-      """
-      self.stateを購読する
-      """
+    elif state == "移動中":
+      discover_person = self.person_exist(model, camera)
+      print("per_dtc_ftr:discover_person=" + str(discover_person))
+      return discover_person
 
 
-      if self.state == "到着":
-        self.person_dtc_wrt(model, camera, web_camera) #人の写真を切り抜く
-        self.state = "移動中"
-
-      elif self.state == "移動中":
-        self.person_exist(model, camera)
 
   #使用可能なカメラのデバイス番号を調べる。	
   def cam_dev_dtc(self, START_NUM=3, VIDEO_DEV_NUM=10):	
@@ -98,70 +102,88 @@ class Person:
 
 
   def person_exist(self, model, camera):
-    person_exit = False #存在しない。   
 
-    #--- 画像の取得 ---
-    #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
-    #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
-    ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+    count = 0
 
-    #--- 推定の検出結果を取得 ---
-    #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
-    results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
+    while True:
 
-    #--- 出力 ---
-    #--- 検出結果を画像に描画して表示 ---
-    #--- 各検出について
+      count += 1
 
-    person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-
-    
-    #検出した人がいないとき
-    if len(person_dtc_list) == 0:
-      #人が写っていない前提で初期化する
       person_exit = False #存在しない。
+      #print("FMM_per_dtc:OK")   
 
-
-    person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
-    
-    #検出した人がいないとき
-    if len(person_dtc_list) == 0:
-      #人が写っていない前提で初期化する
-      person_exit = False #存在しない。
-
-
-    box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
-
-
-    for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
-
-      box_w = box[2] - box[0] #バウンディングボックスの幅
-      box_w_list.append(box_w) #リストに矩形の幅を追加
-
-
-    #人が検出されており、
-    if len(box_w_list) != 0:
+      #--- 画像の取得 ---
+      #  imgs = 'https://ultralytics.com/images/bus.jpg'#--- webのイメージファイルを画像として取得
+      #  imgs = ["../pytorch_yolov3/data/dog.png"] #--- localのイメージファイルを画像として取得
+      ret, imgs = camera.read()              #--- 映像から１フレームを画像として取得
+      #print("imgs=" + str(imgs))
+      #cv2.imshow("imgs", imgs)
       
-      box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
-      #矩形の幅が150を超えているものがあれば
-      if box_w_max >= 150:
-        person_exit = True
+      #--- 推定の検出結果を取得 ---
+      #results = model(imgs) #--- サイズを指定しない場合は640ピクセルの画像にして処理
+      results = model(imgs, size=160) #--- 160ピクセルの画像にして処理
+      print("FMM_per_dtc:results=" + str(results))
+
+      #--- 出力 ---
+      #--- 検出結果を画像に描画して表示 ---
+      #--- 各検出について
+
+      person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+
+      
+      #検出した人がいないとき
+      if len(person_dtc_list) == 0:
+        #人が写っていない前提で初期化する
+        person_exit = False #存在しない。
 
 
-    print("person_exit=" + str(person_exit))
 
-    b = Bool()
-    b.data = person_exit
-    self.check_exit_pub.publish(b)
+      person_dtc_list = [] #人が複数人見つかったら、リストに追加する。(一番近い人がターゲットになる。)
+      
+      #検出した人がいないとき
+      if len(person_dtc_list) == 0:
+        #人が写っていない前提で初期化する
+        person_exit = False #存在しない。
+
+
+      box_w_list = [] #幅が一番大きい(一番距離が近い人)を追跡する。
+
+
+      for *box, conf, cls in results.xyxy[0]:  # xyxy, confidence, class
+
+        box_w = box[2] - box[0] #バウンディングボックスの幅
+        box_w_list.append(box_w) #リストに矩形の幅を追加
+
+
+      #人が検出されており、
+      if len(box_w_list) != 0:
+        
+        box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
+        #矩形の幅が150を超えているものがあれば
+        if box_w_max >= 100:
+          person_exit = True
+          break
+
+      elif count > 100:
+        break
+
+
+    #print("person_exit=" + str(person_exit))
+
+    #b = Bool()
+    #b.data = person_exit
+    #self.check_exit_pub.publish(b)
 
     """
     画像から メインへ 人がいるかどうか[person_exit]を出版する
     """
 
+    return person_exit
+
     
 
 
-  def person_dtc_wrt(self, model, camera, web_camera):
+  def person_dtc_wrt(self, model, camera, web_camera, sock, sock2):
 
 
     #person_exit = False #人が存在するか False:存在しない、True:存在する
@@ -170,7 +192,8 @@ class Person:
     p_img_c = 1
     f_img_c = 1
 
-    FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory"
+    FOLDER_PATH = "/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #大会用PC
+    #FOLDER_PATH = "/home/ri-one/fksg_catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/memory" #個人用PC
 
     #--------------------------------------------------------------
 
@@ -349,7 +372,8 @@ class Person:
 
       #print("w_img=" + str(w_img))
       if w_img is not None:
-        cv2.imshow("web_camere", w_img)
+        cv2.imshow("web_camerq", w_img)
+        cv2.moveWindow("web_camerq", 1000,60) # Window表示位置指定
 
       """
       ここでperson_existを出版する。
@@ -374,10 +398,18 @@ class Person:
       #--- 「q」キー操作があればwhileループを抜ける ---
       print("time_count=" + str(time_count))
 
-      #qキーが押され、
+      #qキーが押され、10枚の写真が撮影されたら
       if cv2.waitKey(1) & 0xFF == ord('q') or person_c > MAX_PERSON_C:
+
         cv2.destroyAllWindows()
         break
+    
+    age_push, sex_push, up_color_push, down_color_push, glasstf_push = img_yolo_main(sock, sock2)
+    #print("FMM_person")
+    #print("age_push, sex_push, up_color_push, down_color_push, glasstf_push")
+    #print("age_push=" + age_push)
+
+    return age_push, sex_push, up_color_push, down_color_push, glasstf_push
 
     #while(video.isOpened()):
 

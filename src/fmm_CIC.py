@@ -12,6 +12,8 @@ from math import sqrt
 
 #image
 from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import Person
+from img_tasks.mediapipe_main.UDP_module import UDP_recv, UDP_send
+
 from find_my_mates.msg import ImgData
 
 #sound
@@ -24,10 +26,9 @@ APPROACH_DIS = 0.9
 
 Function = ["Bin", "Long Table", "White Table", "Tall Table", "Drawer"]
 Guest = ["amelia", "angel", "ava", "charlie", "charlotte", "hunter", "max", "mia", "olivia", "parker", "sam", "jack", "noah","oliver", "thomas", "william"]
-CHECK = ["yes", "no"]
 
 def is_features_usable(feature, used_feature_list, used_feature_n):
-    if feature != "不明" and not feature in used_feature_list and used_feature_n < 2:
+    if feature != "unknown" and not feature in used_feature_list and used_feature_n < 2:
         return True
     return False
 
@@ -42,16 +43,16 @@ class CIC():
         self.first_feature2_num = 1
         self.second_feature1_num = 2
         self.second_feature2_num = 3
-        # self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
+        self.pic_pub = rospy.Publisher("/state", String, queue_size=1)
+        self.state = "移動中"
+
+        self.sock = UDP_recv("始まり", HOST_NAME='127.0.0.10')
+        self.sock2 = UDP_send("始まり", HOST_NAME='127.0.0.11')
 
         #image
         # self.img_str_pub = rospy.Publisher("/person", Bool, queue_size=1)
         # self.apr_guest_time = 0.0
-        self.person = Person
-        self.info_sub = rospy.Subscriber('/information', Info, self.info_data)
-        self.age = "no information"
-        self.gender = "no information"
-        self.up_color = "no information"
+        self.person = Person() #FMM_person_detect_dd_ftrのクラスの実体化
 
         #sound
 
@@ -63,7 +64,7 @@ class CIC():
         
     def main(self):
         state = String()
-        state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
+        # state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
 
         # position:移動するする場所の中継地
         # location:人がいる可能性のある場所
@@ -77,44 +78,70 @@ class CIC():
 
         print("start")
 
+        #
         for i in range(3):
             current_position, next_location = self.control.first_destination(next_location)
 
             #画像認識で人間が要るかを検知
-            discover_person = rospy.wait_for_message("/person", Bool)
+            print("aaa")
+            #discover_person = rospy.wait_for_message("/person", Bool)
+            discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
+            print("bbb")
 
+            #人がいない場合、別の家具へ移動する
             while not discover_person:
-                print("No person")
+                #print("No person")
                 current_position, next_location = self.control.move_to_destination(current_position, next_location)
 
                 time.sleep(1)
 
-                discover_person = rospy.wait_for_message("/person", Bool)
+                discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
+
+                print("discover_person=" + str(discover_person))
 
                 if next_location == 6:#後で使うから要る
                     break
 
-            print("There is person.")
 
+            #人がいる場合、写真を10枚撮影する
             textToSpeech(text="Hello!", gTTS_lang="en")
+
+            
 
             # odom_start_data = rospy.wait_for_message("/odom_data", OdomData)
 
-            # self.approach_guest()
+            age, sex, up_color, down_color, glasstf = self.person.main(state="到着", sock=self.sock, sock2=self.sock2) #特徴を抽出するための写真を10枚撮影する
+            color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
+            color_en = ["orange", "yellow", "light green", "green","aqua", "blue", "purple", "pink", "red", "black","gray", "white"]
 
             self.control.straight("front", 0.3)
+            
+            for i in range(len(color_jp)):
+                if up_color == color_jp[i]:
+                    up_color = color_en[i]
+
+            for i in range(len(color_jp)):
+                if down_color == color_jp[i]:
+                    down_color = color_en[i] 
+
+            
+
+            print("fmm_CIC")
+            print("age_push, sex_push, up_color_push, down_color_push, glasstf_push")
+            print("age_push=" + age)
+
+            #self.pic_pub.publish("到着")
+            print("person exist")
+            #img_data = rospy.wait_for_message("/imgdata", ImgData)
+            # self.approach_guest()
+            print("yes")
 
             # print("apr:" + str(self.apr_guest_time))
             
 
             print("I finish to approach guest.")
 
-            # img_imfo = rospy.wait_for_message("/information", Info)
-            if i == 0:
-                feature1 = self.age
-                feature2 = self.gender
-            elif i == 1:
-                feature = self.up_color
+            # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
             # odom_finish_data = rospy.wait_for_message("/odom_data", OdomData)
 
@@ -146,7 +173,7 @@ class CIC():
             textToSpeech(text="Hello " + guest_name + "I'm glad to see you", gTTS_lang="en")
 
             #画像で特徴量を取得する
-            #img_data = rospy.wait_for_message("/imgdata", ImgData)
+            # img_data = rospy.wait_for_message("/imgdata", ImgData)
 
             # x = odom_finish_data.x - odom_start_data.x
             # y = odom_finish_data.y - odom_start_data.y
@@ -157,35 +184,37 @@ class CIC():
 
             # time.sleep(1)
 
+            self.control.straight("back", 0.3)
+
             current_position = self.control.return_start_position(current_position, next_location)
             
-            # age = img_data.age_push
-            # sex = img_data.sex_push
-            # up_color = img_data.up_color_push
-            # down_color = img_data.down_color_push
-            # glasstf = img_data.glasstf_pushglasstf
+            #age = img_data.age_push
+            #sex = img_data.sex_push
+            #up_color = img_data.up_color_push
+            #down_color = img_data.down_color_push
+            #glasstf = img_data.glasstf_push
 
             # used_feature_n = 0
 
-            # if is_features_usable(age, used_feature_list, used_feature_n):
-            #     used_feature_list.push("age")
-            #     used_feature_n += 1
+            if is_features_usable(age, used_feature_list, used_feature_n):
+                used_feature_list.append("age")
+                used_feature_n += 1
             
-            # if is_features_usable(age, used_feature_list, used_feature_n):
-            #     used_feature_list.push("sex")
-            #     used_feature_n += 1
+            if is_features_usable(sex, used_feature_list, used_feature_n):
+                used_feature_list.append("sex")
+                used_feature_n += 1
             
-            # if is_features_usable(up_color, used_feature_list, used_feature_n):
-            #     used_feature_list.push("up_color")
-            #     used_feature_n += 1
+            if is_features_usable(up_color, used_feature_list, used_feature_n):
+                used_feature_list.append("up_color")
+                used_feature_n += 1
             
-            # if is_features_usable(down_color, used_feature_list, used_feature_n):
-            #     used_feature_list.push("down_color")
-            #     used_feature_n += 1
+            if is_features_usable(down_color, used_feature_list, used_feature_n):
+                used_feature_list.append("down_color")
+                used_feature_n += 1
             
-            # if is_features_usable(glasstf, used_feature_list, used_feature_n):
-            #     used_feature_list.push("glasses")
-            #     used_feature_n += 1
+            if is_features_usable(glasstf, used_feature_list, used_feature_n):
+                used_feature_list.append("glasses")
+                used_feature_n += 1
             
             # first_feature = used_feature_list[-1]
             # second_feature = used_feature_list[-2]
@@ -220,8 +249,8 @@ class CIC():
             # second_feature ２つめの特徴量
             # ここで煮るなり焼くなり二宮和也
 
-            # if len(used_feature_n) < 2:
-            #     print("Not enough features")
+            if used_feature_n < 2:
+                print("Not enough features")
 
             self.control.turn("right", 180)
 
@@ -229,26 +258,10 @@ class CIC():
 
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-
-            if i == 0:
-                # feature1 = self.age
-                # feature2 = self.gender
-                textToSpeech(text=guest_name + "is near " + Function[next_location - 2] + "and guest is" + feature1 + "and" + feature2, gTTS_lang="en")
+            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            print(guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature)
             #(音声)I will search next guest!と喋る
 
-            elif i == 1:
-                # feature = img_imfo.up_color
-                textToSpeech(text=guest_name + "is near " + Function[next_location - 2]+ "and guest is" + feature, gTTS_lang="en")
-
-            print(guest_name + " is near " + Function[next_location - 2])
-
-
-            textToSpeech(text="Sorry, I can't get guest feature more.", gTTS_lang="en")
-
-
-            time.sleep(1)
-
-            
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)

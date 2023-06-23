@@ -59,7 +59,7 @@ def get_sex_age(app, image):
 
             w_max_idx = w_list.index(max(w_list)) #幅の最大値の添字
 
-            gender = ["女", "男"]
+            gender = ["woman", "man"]
             year_field = (faces[w_max_idx]['age'] // 10) * 10 #年代を保持する 年齢を10で割ったときの商かける10 
 
 

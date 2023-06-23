@@ -496,7 +496,7 @@ def draw_landmarks(
             #cv.imwrite("down_right_colthes.jpg", r_rect_img) #右下のズボンの画像
             #v.imwrite("down_left_colthes.jpg", l_rect_img) #右下のズボンの画像
 
-            color_list = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"] #色の名前のリスト
+            color_list = ["orange", "yellow", "light green", "green", "aqua", "blue", "purple", "pink", "red", "black", "gray", "white"] #色の名前のリスト
             color_dic_down = {} #色名と割合を辞書で対応つける 色の画素の数を保持する
 
             color_dic_down = get_colors(rl_con_rect_img, color_dic_down, color_list)
