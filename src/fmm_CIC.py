@@ -73,22 +73,6 @@ class CIC():
         # apr_guest_time = 0.0#人間に近づく為にかかった時間
         textToSpeech("I start program.", gTTS_lang="en")
 
-
-
-
-        textToSpeech(text="May I have your name?", gTTS_lang="en")
-
-        #(音声)音声（名前）を取得する
-        res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
-
-        textToSpeech(text="Hello " + res + "I'm glad to see you", gTTS_lang="en")
-        textToSpeech(text="I finish program.", gTTS_lang="en")
-        time.sleep(4)
-        return 0
-
-
-
-
         feature_list = ["age", "gender", "glasses", "up_color", "down_color", "height"]
         used_feature_list = []
 
