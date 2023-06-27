@@ -81,7 +81,7 @@ def get_sex_age(app, image):
 def main_use():
     app = get_sex_age_set()
 
-    for i in range(15):
+    for i in range(10):
         print(str(i+1) + "番目")
         image = cv2.imread("memory/person" + str(i+1) + ".png")
         age, sex = get_sex_age(app, image)
