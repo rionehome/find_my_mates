@@ -18,6 +18,7 @@ add_message_files(
   FILES
   Feature.msg
   LidarData.msg
+  OdomData.msg
   RealTime.msg
 )
 
@@ -25,6 +26,7 @@ add_service_files(
   FILES
   Camera_msg.srv
   MoveArm.srv
+  OdomMove.srv
 )
 
 generate_messages(
