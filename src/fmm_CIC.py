@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 #control
@@ -6,7 +6,7 @@ import rospy
 from control_system import ControlSystem
 import time
 from std_msgs.msg import Bool, String
-from find_my_mates.msg import LidarData, OdomData, Info
+from find_my_mates.msg import LidarData, OdomData #, Info
 from geometry_msgs.msg import Twist
 from math import sqrt
 

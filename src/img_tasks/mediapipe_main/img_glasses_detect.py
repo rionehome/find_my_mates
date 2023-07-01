@@ -5,7 +5,7 @@ import numpy as np
 
 #初期化
 def get_glasses_tf_set():
-    YOLO_PATH = '/home/ri-one/Github_Local_repo/yolov5' #大会用PC
+    YOLO_PATH = '/home/ri-one/yolov5' #大会用PC
     #YOLO_PATH = '/home/ri-one/Desktop/github_local_repository/yolov5' #個人用PC
 
     MODEL_PATH = '/home/ri-one/catkin_ws/src/find_my_mates/src/img_tasks/mediapipe_main/19sbest_glasses.pt' #大会用PC
