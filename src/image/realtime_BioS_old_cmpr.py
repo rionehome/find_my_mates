@@ -10,6 +10,7 @@ import numpy as np
 import cv2
 from insightface.app import FaceAnalysis
 import torch
+<<<<<<< HEAD:src/image/realtime_BioS_old_cmpr.py
 <<<<<<< HEAD:src/image_system/realtime_BioS_old_cmpr.py
 import image_system.detect_color_realtime as detect_color_realtime
 from scipy import stats
@@ -22,6 +23,13 @@ import rospy
 from std_msgs.msg import String, Bool
 from find_my_mates.msg import Info
 >>>>>>> 2ed98d2207a178a1266a0ae59b9010757a0e2510:src/image/realtime_BioS_old_cmpr.py
+=======
+import detect_color_realtime as detect_color_realtime
+from scipy import stats
+import rospy
+from std_msgs.msg import String, Bool
+from find_my_mates.msg import Info
+>>>>>>> main:src/realtime_BioS_old_cmpr.py
 import time
 import os
 import sys
@@ -49,12 +57,15 @@ class RtBioSOldComp():
     
     def make_ftr_sentence(gst_vlu, s_vlu, name, year_field, cloth_clr):
 
+<<<<<<< HEAD:src/image/realtime_BioS_old_cmpr.py
 <<<<<<< HEAD:src/image_system/realtime_BioS_old_cmpr.py
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
         time.sleep(10)
     
 =======
+=======
+>>>>>>> main:src/realtime_BioS_old_cmpr.py
             S = ""
 
             #1のときに男性
@@ -84,7 +95,10 @@ class RtBioSOldComp():
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
         time.sleep(10)
+<<<<<<< HEAD:src/image/realtime_BioS_old_cmpr.py
 >>>>>>> 2ed98d2207a178a1266a0ae59b9010757a0e2510:src/image/realtime_BioS_old_cmpr.py
+=======
+>>>>>>> main:src/realtime_BioS_old_cmpr.py
 
         #ゲストの特徴を報告する文章を作る関数
         #引数 ゲストの番号(int)、ゲストの性別番号(int)、ゲストの名前(str)、ゲストの年齢(int)、ゲストの服の色(str)
