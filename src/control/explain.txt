@@ -1,0 +1,23 @@
+-------------------------------------------------------------------
+|                                                           ----  |         
+|     (OP)    (Turtle)                                 (P1) |--|  |         
+|                                                           ----  |             
+|                                                                 |         
+|                                                                 |         
+|                         ---------                               |         
+|                         |       |                               |         
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|                         |       |                               |           
+|--------------------------------------------            ---------|
+
+OP = Operater
+Turtle = Turtlebot's start point
+P = Person(There are five point, but there are three point on a real thing.)
+Other block = Furniture
