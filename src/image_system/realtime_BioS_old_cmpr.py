@@ -35,6 +35,11 @@ class RtBioSOldComp():
         制御への出版者を作成する (ターゲットが未発見、発見、または報告状態において、その人に接近し距離を調節するため)
         """
         rospy.init_node("raltimebio")
+        self.per_pub = rospy.Publisher("/person", Bool, queue_size=1)
+        self.bool = bool
+        self.feature_pub = rospy.Publisher("/information", Info, queue_size=1)
+    
+    def make_ftr_sentence(gst_vlu, s_vlu, name, year_field, cloth_clr):
 
     def main(self, front_person):
         rtbioscmp = RtBioSOldComp()
@@ -49,19 +54,25 @@ class RtBioSOldComp():
 
             #1のときに男性
             if s_vlu:
-                S = "男"
+                S = "man"
             #0のときに女性
             else:
-                S = "女"
+                S = "woman"
 
 
             if year_field == 0:
-                year_fld_str = "10代未満"
+                year_fld_str = "under teens"
 
             elif year_field >= 10:
-                year_fld_str = str(year_field) + "代"
+                year_fld_str = str(year_field) + "years old"
 
             sentence = str(gst_vlu) + "番目のゲストである" + name + "は、" + year_fld_str + "の" + S + "性で" +"服の色は" + cloth_clr + "色です"
+
+            # i = Info()
+            # i.age = year_fld_str
+            # i.gender = S
+            # i.up_color = cloth_clr
+            # self.feature_pub.publish(i)
 
             return sentence
 
@@ -176,9 +187,13 @@ class RtBioSOldComp():
             #カメラの起動中は顔を検出し、特徴抽出する
             if len(faces) == 0:
                 print("この位置の方向に人はいない")
-                break
+                self.bool = True
+                self.per_pub.publish(self.bool)
+                # break#仮
 
             else: #顔が写っていたとき
+                self.bool = False
+                self.per_pub.publish(self.bool)
                         
                 #0番目のみ対象が画面に映る顔の添字 
 
