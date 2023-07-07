@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 import torch
@@ -59,7 +59,7 @@ class Person:
     #--- カメラの設定 ---
     PC_CAM_DEV = 0 #PC内蔵カメラのデバイス番号
     
-    WEB_CAM_DEV = 4#self.cam_dev_dtc() #Webカメラのデバイス番号
+    WEB_CAM_DEV = 2#self.cam_dev_dtc() #Webカメラのデバイス番号
     #WEB_CAM_DEV = self.cam_dev_dtc(START_NUM=3, VIDEO_DEV_NUM=10)
 
     camera = cv2.VideoCapture(PC_CAM_DEV)      #内蔵カメラを取得
@@ -251,6 +251,7 @@ class Person:
 
     #10枚まで撮影を続ける
     while True:
+      print("OK")
     
 
       #--- 画像の取得 ---
@@ -315,6 +316,8 @@ class Person:
       #人が検出されており、
       if len(box_w_list) != 0:
         
+        print("L319 person detected")
+        
         box_w_max = max(box_w_list) #最大となる矩形の幅を取得する
         box_w_max_idx = box_w_list.index(box_w_max) #最大となる矩形の添字を取得する
         box_cx = box_cx_list[box_w_max_idx] #その添字番目の矩形の中心のx座標を取得する
@@ -323,6 +326,8 @@ class Person:
 
         #幅が350のバウンディングボックスを対象にする。
         if box_w_max >= 150:    
+          
+          print("L330 box")
 
           box = results.xyxy[0][box_w_max_idx] #最大のバウンディングボックスを取得する
 
@@ -345,6 +350,7 @@ class Person:
 
             time_count += 1
 
+          print("L353")
 
             #--- 枠描画
           cv2.rectangle(
@@ -354,6 +360,8 @@ class Person:
               color=cc,
               thickness=2,
               )
+          
+          print("L364")
 
           #--- 文字枠と文字列描画
           #yoloの中よりも自分で描画した方が非常に高速
@@ -362,6 +370,8 @@ class Person:
 
           #追いかけるマーカーを描画
           cv2.circle(imgs, (int((box[0]+box[2])/2), int((box[1]+box[3])/2)), 15, (255, 255, 255), thickness=-1)
+          
+          print("L374")
 
 
           #print("追跡する矩形の添字番号=" + str(box_w_max_idx))
@@ -369,17 +379,19 @@ class Person:
 
       #--- 描画した画像を表示
       cv2.imshow("camera",imgs)
+      
+      print("w_img=" + str(w_img))
 
       #print("w_img=" + str(w_img))
       if w_img is not None:
         cv2.imshow("web_camerq", w_img)
         cv2.moveWindow("web_camerq", 1000,60) # Window表示位置指定
 
-      """
-      ここでperson_existを出版する。
-      True:立ち止まって撮影する
-      False:なにもしない
-      """
+        """
+        ここでperson_existを出版する。
+        True:立ち止まって撮影する
+        False:なにもしない
+        """
 
         #for i in range(len(results.xyxy)):
         #    print(results.pandas().xyxy[i])
@@ -400,9 +412,12 @@ class Person:
 
       #qキーが押され、10枚の写真が撮影されたら
       if cv2.waitKey(1) & 0xFF == ord('q') or person_c > MAX_PERSON_C:
-
-        cv2.destroyAllWindows()
         break
+        
+    camera.release()
+    cv2.destroyAllWindows()
+      
+        
     
     age_push, sex_push, up_color_push, down_color_push, glasstf_push = img_yolo_main(sock, sock2)
     #print("FMM_person")

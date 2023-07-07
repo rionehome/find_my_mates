@@ -3,12 +3,24 @@
 <launch>
   <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
 
+  <!--navigationを行うために、必要なlaunchファイルを立ち上げる。-->
+  <include file="$(find tb2_mypkg)/launch/turtlebot_rplidar.launch"/>
+  <include file="$(find tb2_mypkg)/launch/turtlebot_emcl.launch"/>
+
+
+
+  <arg name="map_file" default="$(find find_my_mates)/map/exhibition_bordaux_alina2.yaml.yaml"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+
   <!--control-->
   <node pkg="find_my_mates" name="cic" type="fmm_CIC.py" required="true" output="screen" />
   <node pkg="find_my_mates" name="move_odom" type="move_odom.py" required="true" output="screen" />
   
   <!--image-->
-  <!-- <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" /> -->
+  <node pkg="find_my_mates" name="img_mdpp" type="FMM_img_mdpp.py" required="true" output="screen" /> 
 
   <!--sound-->
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#32!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 #control
@@ -20,6 +20,12 @@ from find_my_mates.msg import ImgData
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
 from speech_and_NLP.src.speechToText import recognize_speech #音声認識
 from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
+
+import speech_recognition as sr
+
+#navigation
+from point_to_point import PointToPoint
+import numpy as np
 
 APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
@@ -55,14 +61,40 @@ class CIC():
         self.person = Person() #FMM_person_detect_dd_ftrのクラスの実体化
 
         #sound
+        
+        #navigation
+        self.point_moving = PointToPoint()
+    
 
     def info_data(self, msg):
         self.age = msg.age
         self.gender = msg.gender
         self.up_color = msg.up_color
         
+     #時間制御の関数
+    def time_control(self, move_time, linear_x=0, angular_z=0):
+        start_time = time.time() #開始時刻
+        
+        twist = Twist()
+        
+        twist.linear.x = linear_x
+        twist.angular.z = angular_z
+        
+        while True:
+            
+            end_time = time.time() #終了時刻
+            #print(end_time - start_time)
+            
+            self.velocity_pub.publish(twist)
+            
+            if end_time - start_time > move_time:
+                break
+        
         
     def main(self):
+        
+        time.sleep(20)
+        
         state = String()
         # state.data = "到着"#この情報をpublishすることで、写真を撮る関数を実行する
 
@@ -77,17 +109,64 @@ class CIC():
         used_feature_list = []
 
         print("start")
+        
+        direction_list = [[1.59050, -3.7762, np.pi*3/4],
+                          [1.59050, -3.7762, np.pi*5/4],
+                          [1.59050, -3.7762, np.pi*7/4],
+                          [1.59050, -3.7762, np.pi*1/4]]
+        
+        home_weapon_list = ["table", "cabinet", "kitchen", "television"]
+        home_weapon_idx = 0
+        
 
         #
         for i in range(3):
-            current_position, next_location = self.control.first_destination(next_location)
+            #current_position, next_location = self.control.first_destination(next_location)
+            
+            #time.sleep(2)
+            #self.point_moving.send_goal([0.73566, -0.45079, 0])
+            
+            
+            time.sleep(5)
+            self.point_moving.send_goal([2.32376, -1.56895, np.pi/2])
+      
+            time.sleep(10)
+            self.control.straight("back", 0.3)
+            
+            time.sleep(5)
+            self.point_moving.send_goal([1.59050, -3.7762, np.pi/2])
+            
+            
+            
+            discover_person = False
+            count = 0
+            
+            #ゲストがいるときに終了する。
+            while not discover_person and count < 4:
+
+                time.sleep(10)
+                self.point_moving.send_goal(direction_list[count])
+                
+                discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
+                home_weapon_idx = count
+                
+                
+                count += 1
+            
+            
+
+            
+
 
             #画像認識で人間が要るかを検知
+            """
             print("aaa")
             #discover_person = rospy.wait_for_message("/person", Bool)
             discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
             print("bbb")
-
+            
+            
+            
             #人がいない場合、別の家具へ移動する
             while not discover_person:
                 #print("No person")
@@ -101,7 +180,20 @@ class CIC():
 
                 if next_location == 6:#後で使うから要る
                     break
+            """
+            discover_person = False
+            
+            #人がいない場合、別の家具へ移動する
+            while not discover_person:
+                #print("No person")
+            
 
+                time.sleep(1)
+                discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
+
+                print("discover_person=" + str(discover_person))
+
+            
 
             #人がいる場合、写真を10枚撮影する
             textToSpeech(text="Hello!", gTTS_lang="en")
@@ -114,7 +206,7 @@ class CIC():
             color_jp = ["橙", "黄", "黄緑", "緑", "水", "青", "紫", "桃", "赤", "黒", "灰", "白"]
             color_en = ["orange", "yellow", "light green", "green","aqua", "blue", "purple", "pink", "red", "black","gray", "white"]
 
-            self.control.straight("front", 0.3)
+            self.control.straight("back", 0.3)
             
             for i in range(len(color_jp)):
                 if up_color == color_jp[i]:
@@ -150,6 +242,9 @@ class CIC():
 
             #(音声)音声（名前）を取得する
             res = recognize_speech(print_partial=True, use_break=1, lang='en-us')
+            
+            #res = self.listing_recognition()
+            #print(res)
 
             guest_name = find_nearest_word(res, Guest)
             print(str(i) + "-person: " + guest_name)
@@ -180,13 +275,13 @@ class CIC():
             # distance = sqrt(x**2 + y**2)
             # self.control.return_position_from_guest(distance)
 
-            self.control.straight("back", 0.3)
+            #self.control.straight("back", 0.3)
 
             # time.sleep(1)
 
-            self.control.straight("back", 0.3)
+            #self.control.straight("back", 0.3)
 
-            current_position = self.control.return_start_position(current_position, next_location)
+            #current_position = self.control.return_start_position(current_position, next_location)
             
             #age = img_data.age_push
             #sex = img_data.sex_push
@@ -195,6 +290,23 @@ class CIC():
             #glasstf = img_data.glasstf_push
 
             # used_feature_n = 0
+
+            """
+            OPのもとへ帰る
+            """
+            
+            """
+            self.point_moving.send_goal([2.24511, -2.41411, np.pi * 3/2]) #マスターの部屋の通路
+            
+            self.control.straight("back", 0.3)
+            
+            self.point_moving.send_goal([2.32376, -1.56895, np.pi/2]) #ゲストの部屋の通路
+            
+
+            self.point_moving.send_goal([0.9070, -0.1540, np.pi * 3 /2]) #master 前
+            """    
+            used_feature_lis = []
+            used_feature_n = 0
 
             if is_features_usable(age, used_feature_list, used_feature_n):
                 used_feature_list.append("age")
@@ -216,34 +328,34 @@ class CIC():
                 used_feature_list.append("glasses")
                 used_feature_n += 1
             
-            # first_feature = used_feature_list[-1]
-            # second_feature = used_feature_list[-2]
+            #first_feature = used_feature_list[-1]
+            #second_feature = used_feature_list[-2]
 
 
-            # i = first_feature
-            # j = second_feature
+            i = used_feature_list[-1]
+            j = used_feature_list[-2]
 
-            # if i == "age":
-            #     first_feature = age
-            # elif i == "sex":
-            #     first_feature = sex
-            # elif i == "up_color":
-            #     first_feature = up_color
-            # elif i == "down_color":
-            #     first_feature = down_color
-            # elif i == "glasses":
-            #     first_feature = glasstf
-            
-            # if j == "age":
-            #     second_feature = age
-            # elif j == "sex":
-            #     second_feature = sex
-            # elif j == "up_color":
-            #     second_feature = up_color
-            # elif j == "down_color":
-            #     second_feature = down_color
-            # elif j == "glasses":
-            #     second_feature = glasstf
+            if i == "age":
+                first_feature = age
+            elif i == "sex":
+                first_feature = sex
+            elif i == "up_color":
+                first_feature = up_color
+            elif i == "down_color":
+                first_feature = down_color
+            elif i == "glasses":
+                first_feature = glasstf
+        
+            if j == "age":
+                second_feature = age
+            elif j == "sex":
+                second_feature = sex
+            elif j == "up_color":
+                second_feature = up_color
+            elif j == "down_color":
+                second_feature = down_color
+            elif j == "glasses":
+                second_feature = glasstf
 
             # first_feature １つめの特徴量
             # second_feature ２つめの特徴量
@@ -252,27 +364,81 @@ class CIC():
             if used_feature_n < 2:
                 print("Not enough features")
 
-            self.control.turn("right", 180)
+            #self.control.turn("right", 180)
+            
+            
 
             textToSpeech(text="Hi, operator", gTTS_lang="en")
 
 
             #(音声)"○○"さんは、"家具名"の場所に居て、"特徴量" で、"特徴量"でした（特徴は二つのみ）
-            textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
-            print(guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature)
+            #textToSpeech(text=guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            #print(guest_name + "is near by" + Function[next_location - 2] + "and guest is" + first_feature + "and" + second_feature)
+            
+            textToSpeech(text=guest_name + "is near by" + home_weapon_list[home_weapon_idx] + "and guest is" + first_feature + "and" + second_feature, gTTS_lang="en")
+            print(guest_name + "is near by" + home_weapon_list[home_weapon_idx] + "and guest is" + first_feature + "and" + second_feature)
+            
             #(音声)I will search next guest!と喋る
 
             textToSpeech(text="I will search next guest!", gTTS_lang="en")
 
             time.sleep(1)
 
-            self.control.turn("left", 180)
+            #self.control.turn("left", 180)
             
 
             print(str(i) + "-person" + "finish")
 
         #(音声)以上で終了します。と喋る
         textToSpeech("I'll finish serch guest. Thank you", gTTS_lang="en")
+    
+    
+    def listing_recognition(self):
+
+        # Define the microphone as the audio source
+        microphone = sr.Microphone()
+
+        # Create a recognizer object
+        recognizer = sr.Recognizer()
+
+        # Set the language for speech recognition
+        language = 'en-US'  # Update with the desired language code
+
+        spoken_text = []
+
+        # Function to process the audio data
+        def process_audio():
+            text = ""
+
+            with microphone as source:
+                print("Listening...")
+                audio = recognizer.listen(source)
+
+            try:
+                # Perform speech recognition
+                text = recognizer.recognize_google(audio, language=language)
+                print("Recognized:", text)
+            except sr.UnknownValueError:
+                print("Could not understand audio")
+            except sr.RequestError as e:
+                print("Error:", str(e))
+
+            return text
+
+        # Continuously listen for audio input and process it
+        with microphone as source:
+            recognizer.adjust_for_ambient_noise(source)  # Adjust for ambient noise
+
+        try:
+            text = process_audio()
+            spoken_text.append(text)
+        except KeyboardInterrupt:
+            print("Interrupted")
+            
+        
+        return spoken_text
+
+
 
     def approach_guest(self):
         print(1)
