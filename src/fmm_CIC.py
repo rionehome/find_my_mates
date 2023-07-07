@@ -9,6 +9,7 @@ from std_msgs.msg import Bool, String
 from find_my_mates.msg import LidarData, OdomData #, Info
 from geometry_msgs.msg import Twist
 from math import sqrt
+import numpy as np
 
 #image
 from img_tasks.mediapipe_main.FMM_person_detect_dd_ftr import Person
@@ -20,6 +21,7 @@ from find_my_mates.msg import ImgData
 from speech_and_NLP.src.textToSpeech import textToSpeech #発話
 from speech_and_NLP.src.speechToText import recognize_speech #音声認識
 from speech_and_NLP.src.tools.speech_to_text.findNearestWord import find_nearest_word #文章の中に単語を検索する
+
 
 APPROACH_SPEED = 0.08
 APPROACH_DIS = 0.9
@@ -80,18 +82,20 @@ class CIC():
 
         #
         for i in range(3):
-            current_position, next_location = self.control.first_destination(next_location)
-
+            # current_position, next_location = self.control.first_destination(next_location)
+            self.control.send_goal(next_location, current_position)
+            current_position = next_location
             #画像認識で人間が要るかを検知
-            print("aaa")
             #discover_person = rospy.wait_for_message("/person", Bool)
             discover_person = self.person.main(state="移動中", sock=self.sock, sock2=self.sock2) #人の有無を調べる
-            print("bbb")
 
-            #人がいない場合、別の家具へ移動する
+            #人がいない場合、別の家具へ移動するee
             while not discover_person:
+                next_location += 1
                 #print("No person")
-                current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                # current_position, next_location = self.control.move_to_destination(current_position, next_location)
+                self.control.send_goal(next_location, current_position)
+                current_position = next_location
 
                 time.sleep(1)
 
@@ -99,7 +103,7 @@ class CIC():
 
                 print("discover_person=" + str(discover_person))
 
-                if next_location == 6:#後で使うから要る
+                if next_location == 4:#後で使うから要る
                     break
 
 
@@ -180,13 +184,15 @@ class CIC():
             # distance = sqrt(x**2 + y**2)
             # self.control.return_position_from_guest(distance)
 
-            self.control.straight("back", 0.3)
+            # self.control.straight("back", 0.3)
 
             # time.sleep(1)
 
-            self.control.straight("back", 0.3)
+            # self.control.straight("back", 0.3)
 
-            current_position = self.control.return_start_position(current_position, next_location)
+            # current_position = self.control.return_start_position(current_position, next_location)
+            self.control(1)
+            current_position = 1
             
             #age = img_data.age_push
             #sex = img_data.sex_push
